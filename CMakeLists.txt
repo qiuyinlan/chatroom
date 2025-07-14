@@ -2,10 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(MessengerRebuild CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-add_executable(server_rebuild main.cc)
 
 #加上这个可以直接#include "User.h"而不用#include "../utils/User.h"
 include_directories(
@@ -20,7 +16,6 @@ add_executable(
         server/LoginHandler.cc
         server/Transaction.cc
         server/Redis.cc
-        server/ThreadPool.cc
         server/group_chat.cc
         utils/User.cc
         utils/TCP.cc

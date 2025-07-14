@@ -69,3 +69,25 @@ When contributing, please adhere to the existing code style and follow the estab
 ## License
 
 This Chatroom application is licensed under the [MIT License](LICENSE). You are free to modify and distribute the application as per the license terms.
+
+## 2024年6月 项目结构与线程池模块更新
+
+### 主要变更
+- 原有的 `server/ThreadPool.cc`、`server/ThreadPool.hpp`、`server/ThreadPool.tpp` 已全部被删除。
+- 线程池相关的所有实现现已整合到 `server/MyThreadPool.hpp`，包括模板与非模板代码。
+- 项目中所有线程池相关的引用均已切换为 `#include "MyThreadPool.hpp"`。
+- CMakeLists.txt 已移除对 `server/ThreadPool.cc` 的编译引用。
+
+### 文件说明
+- `server/MyThreadPool.hpp`：线程池完整实现，支持动态扩容/收缩、任务泛型添加，详见文件内注释。
+- 其它原有 ThreadPool 相关文件（ThreadPool.cc、ThreadPool.hpp、ThreadPool.tpp）已废弃并删除。
+
+### 已完成的开发
+- 线程池功能整合与替换。
+- 相关引用与构建配置同步更新。
+
+### 进行中的开发
+- 线程池功能后续优化与性能测试。
+
+### 未完成的开发
+- 线程池与业务模块的深度集成测试。
