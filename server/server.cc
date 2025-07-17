@@ -8,9 +8,11 @@
 #include <iostream>
 #include <cstring>
 #include <csignal>
-#include "MyThreadPool.hpp"
+#include "ThreadPool.hpp"
 #include "proto.h"
 #include "Redis.h"
+#include <curl/curl.h>
+#include <string>
 /*通过将模板函数的声明和定义放在同一个头文件中，并将其包含到需要使用模板函数的源文件中
  * 可以确保编译器在实例化模板函数时能够正确找到模板函数的定义*/
 using namespace std;
@@ -47,7 +49,7 @@ int main(int argc, char *argv[]) {
     char str[INET_ADDRSTRLEN];
     string msg;
     //bug 这里在线程池里打断点的话，直接导致客户端无法连接
-    ThreadPool pool(20, 100);
+    ThreadPool pool(16);
     int listenfd = Socket();
     int opt = 1;
     setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (void *) &opt, sizeof(opt));
@@ -108,24 +110,51 @@ int main(int argc, char *argv[]) {
                 //recvMsg()中的read_n写的有问题，之前是因为注释掉了ret=0时的cout输出，不然会出现大量"断开连接"提示
                 recvMsg(fd, msg);
                 if (msg == LOGIN) {
-                    //bind里不能使用ep[i].data.fd
-                    //pool.addTask(std::bind(serverLogin, epfd, fd));
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
-                    //addTask中的forward没加std::这里会有警告
-                    pool.addTask(serverLogin, epfd, fd);
+                    pool.addTask([=](){ serverLogin(epfd, fd); });
                 } else if (msg == REGISTER) {
-                    //使用lambda表达式
-                    //如果线程池添加任务时是function<void()>,调用时会报错
-                    //pool.addTask([epfd, fd] { return serverRegister(epfd, fd); });
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
-                    //ThreadPool中的addTask是模板函数，简单的分文件编写会遇到问题
-                    pool.addTask(serverRegister, epfd, fd);
+                    pool.addTask([=](){ serverRegister(epfd, fd); });
                 } else if (msg == NOTIFY) {
                     //bug 直接吐血，实时通知的逻辑应该加在这里
                     notify(fd);
+                } else if (msg == REQUEST_CODE) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ handleRequestCode(fd); });
+                } else if (msg == REGISTER_WITH_CODE) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ serverRegisterWithCode(epfd, fd); });
+                } else if (msg == REQUEST_RESET_CODE) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ handleResetCode(fd); });
+                } else if (msg == RESET_PASSWORD_WITH_CODE) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ resetPasswordWithCode(epfd, fd); });
                 }
             }
         }
     }
+}
+
+const string REQUEST_CODE = "20"; // 请求验证码
+const string REGISTER_WITH_CODE = "21"; // 验证码注册
+const string REQUEST_RESET_CODE = "22"; // 找回密码请求验证码
+const string RESET_PASSWORD_WITH_CODE = "23"; // 验证码重置密码
+
+void handleRequestCode(int fd); // 注册验证码
+void serverRegisterWithCode(int epfd, int fd); // 验证码注册
+void handleResetCode(int fd); // 找回密码验证码
+void resetPasswordWithCode(int epfd, int fd); // 验证码重置密码
+
+void notify(int fd) {
+    // Implementation of notify function
+}
+
+void serverLogin(int epfd, int fd) {
+    // Implementation of serverLogin function
+}
+
+void serverRegister(int epfd, int fd) {
+    // Implementation of serverRegister function
 }
 

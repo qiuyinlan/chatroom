@@ -11,6 +11,9 @@
 #include <iostream>
 #include <map>
 #include <unistd.h>
+#include <curl/curl.h>
+#include <string>
+#include <json/json.h>
 
 using namespace std;
 
@@ -253,4 +256,159 @@ void notify(int fd) {
             freeReplyObject(arr[i]);
         }
     }
+}
+
+std::string generateCode() {
+    std::string code;
+    for (int i = 0; i < 6; ++i)
+        code += '0' + rand() % 10;
+    return code;
+}
+
+bool sendMail(const std::string& to_email, const std::string& code, bool is_find) {
+    CURL *curl;
+    CURLcode res = CURLE_OK;
+    curl = curl_easy_init();
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, "smtps://smtp.qq.com:465");
+        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+        curl_easy_setopt(curl, CURLOPT_USERNAME, "你的发件邮箱@qq.com");
+        curl_easy_setopt(curl, CURLOPT_PASSWORD, "你的授权码");
+        curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "你的发件邮箱@qq.com");
+
+        struct curl_slist *recipients = NULL;
+        recipients = curl_slist_append(recipients, to_email.c_str());
+        curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+
+        std::string subject = "Subject: 验证码\r\n";
+        std::string body = is_find ? "找回密码验证码：" : "注册验证码：";
+        body += code + "\r\n";
+        std::string data = subject + "\r\n" + body;
+
+        curl_easy_setopt(curl, CURLOPT_READFUNCTION, NULL);
+        curl_easy_setopt(curl, CURLOPT_READDATA, &data);
+        curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+        res = curl_easy_perform(curl);
+
+        curl_slist_free_all(recipients);
+        curl_easy_cleanup(curl);
+
+        return res == CURLE_OK;
+    }
+    return false;
+}
+
+void handleRequestCode(int fd) {
+    // 1. 接收邮箱
+    string email;
+    recvMsg(fd, email);
+    // 2. 生成验证码
+    string code = generateCode();
+    // 3. 存到Redis，5分钟有效
+    Redis redis;
+    redis.connect();
+    redis.hset("verify_code", email, code);
+    // 4. 发邮件
+    bool ok = sendMail(email, code, false);
+    // 5. 通知客户端
+    if (ok) {
+        sendMsg(fd, "验证码已发送，请查收邮箱");
+    } else {
+        sendMsg(fd, "验证码发送失败，请稍后重试");
+    }
+}
+
+void serverRegisterWithCode(int epfd, int fd) {
+    struct epoll_event temp;
+    temp.data.fd = fd;
+    temp.events = EPOLLIN;
+    string json;
+    recvMsg(fd, json);
+    Json::Value root;
+    Json::Reader reader;
+    reader.parse(json, root);
+    string email = root["email"].asString();
+    string code = root["code"].asString();
+    string username = root["username"].asString();
+    string password = root["password"].asString();
+    Redis redis;
+    redis.connect();
+    string real_code = redis.hget("verify_code", email);
+    if (real_code != code) {
+        sendMsg(fd, "验证码错误");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    // 检查是否已注册
+    if (redis.sismember("all_uid", email)) {
+        sendMsg(fd, "该邮箱已注册");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    // 注册用户
+    User user;
+    user.setUID(email);
+    user.setUsername(username);
+    user.setPassword(password);
+    redis.hset("user_info", email, user.to_json());
+    redis.sadd("all_uid", email);
+    sendMsg(fd, "注册成功");
+    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+}
+
+void handleResetCode(int fd) {
+    // 1. 接收邮箱
+    string email;
+    recvMsg(fd, email);
+    // 2. 生成验证码
+    string code = generateCode();
+    // 3. 存到Redis，5分钟有效
+    Redis redis;
+    redis.connect();
+    redis.hset("reset_code", email, code);
+    // 4. 发邮件
+    bool ok = sendMail(email, code, true);
+    // 5. 通知客户端
+    if (ok) {
+        sendMsg(fd, "验证码已发送，请查收邮箱");
+    } else {
+        sendMsg(fd, "验证码发送失败，请稍后重试");
+    }
+}
+
+void resetPasswordWithCode(int epfd, int fd) {
+    struct epoll_event temp;
+    temp.data.fd = fd;
+    temp.events = EPOLLIN;
+    string json;
+    recvMsg(fd, json);
+    Json::Value root;
+    Json::Reader reader;
+    reader.parse(json, root);
+    string email = root["email"].asString();
+    string code = root["code"].asString();
+    string password = root["password"].asString();
+    Redis redis;
+    redis.connect();
+    string real_code = redis.hget("reset_code", email);
+    if (real_code != code) {
+        sendMsg(fd, "验证码错误");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    // 检查用户是否存在
+    if (!redis.sismember("all_uid", email)) {
+        sendMsg(fd, "该邮箱未注册");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    // 修改密码
+    string user_info = redis.hget("user_info", email);
+    User user;
+    user.json_parse(user_info);
+    user.setPassword(password);
+    redis.hset("user_info", email, user.to_json());
+    sendMsg(fd, "密码重置成功");
+    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }

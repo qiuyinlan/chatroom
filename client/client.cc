@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
             cout << "输入为空！" << endl;
             continue;
         }
-        if (option != "0" && option != "1" && option != "2") {
+        if (option != "0" && option != "1" && option != "2" && option != "3") {
             cout << "没有这个选项！" << endl;
             continue;
         }
@@ -57,10 +57,7 @@ int main(int argc, char *argv[]) {
             cout << "退出成功" << endl;
             break;
         }
-        //下面这段逻辑在用户直接输入回车时，会提示用户重新输入，但cin>>option则没有提示
         char *end_ptr;
-        //也可以使用atoi这个函数
-        //int opt= atoi(option.c_str());
         int opt = (int) strtol(option.c_str(), &end_ptr, 10);
         if (opt == 0 || option.find(' ') != std::string::npos) {
             std::cout << "输入格式错误 请重新输入" << std::endl;
@@ -93,13 +90,17 @@ int main(int argc, char *argv[]) {
             continue;
         }
         if (opt == 2) {
-            client_register(fd);
+            email_register(fd);
+            continue;
+        }
+        if (opt == 3) {
+            email_reset_password(fd);
+            continue;
         }
     }
 }
 
 void start_UI() {
-    cout << "[1]登录               [2]注册" << endl;
-    cout << "[0]退出" << endl;
+    cout << "[1]登录    [2]邮箱注册    [3]邮箱找回密码    [0]退出" << endl;
     cout << "请输入你的选择" << endl;
 }

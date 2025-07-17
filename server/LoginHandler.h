@@ -16,4 +16,10 @@ void serverOperation(int fd, User &user);
 
 void notify(int fd);
 
+void handleRequestCode(int fd);
+void serverRegisterWithCode(int epfd, int fd);
+void handleResetCode(int fd);
+void resetPasswordWithCode(int epfd, int fd);
+bool sendMail(const std::string& to_email, const std::string& code, bool is_find);
+
 #endif  // CHATROOM_LOGINHANDLER_H
