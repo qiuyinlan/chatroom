@@ -272,9 +272,9 @@ bool sendMail(const std::string& to_email, const std::string& code, bool is_find
     if (curl) {
         curl_easy_setopt(curl, CURLOPT_URL, "smtps://smtp.qq.com:465");
         curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
-        curl_easy_setopt(curl, CURLOPT_USERNAME, "你的发件邮箱@qq.com");
-        curl_easy_setopt(curl, CURLOPT_PASSWORD, "你的授权码");
-        curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "你的发件邮箱@qq.com");
+        curl_easy_setopt(curl, CURLOPT_USERNAME, "2978500991@qq.com");
+        curl_easy_setopt(curl, CURLOPT_PASSWORD, "glezafhnfcpxdhcd");
+        curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "2978500991@qq.com");
 
         struct curl_slist *recipients = NULL;
         recipients = curl_slist_append(recipients, to_email.c_str());
