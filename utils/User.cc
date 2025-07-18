@@ -3,10 +3,11 @@
 //
 #include <random>
 #include <iostream>
-#include <jsoncpp/json/json.h>
+#include <nlohmann/json.hpp>
 #include "User.h"
 
 using namespace std;
+using json = nlohmann::json;
 
 //现将get_time封装到User类中，作为User的一部分使用，更具整体性
 string User::get_time() {
@@ -83,7 +84,7 @@ void User::setIsOnline(bool online) {
 }
 
 string User::to_json() {
-    Json::Value root;
+    json root;
 //        root.append(UID);
 //        root.append(passwd);
 //        root.append(username);
@@ -94,26 +95,23 @@ string User::to_json() {
     root["username"] = username;
     root["passwd"] = passwd;
     root["phone_number"] = phone_number;
-    Json::FastWriter writer;
-    return writer.write(root);
+    return root.dump();
 }
 
 //bug 参数里不能加&
-void User::json_parse(const string &json) {
-    Json::Value root;
-    Json::Reader reader;
-    reader.parse(json, root);
+void User::json_parse(const string &json_str) {
+    json root = json::parse(json_str);
 //        int i=0;
 //        UID=root[i++].asString();
 //        passwd=root[i++].asString();
 //        username=root[i++].asString();
 //        my_time=root[i++].asString();
 //        phone_number=root[i++].asString();
-    my_time = root["my_time"].asString();
-    UID = root["UID"].asString();
-    username = root["username"].asString();
-    passwd = root["passwd"].asString();
-    phone_number = root["phone_number"].asString();
+    my_time = root["my_time"].get<string>();
+    UID = root["UID"].get<string>();
+    username = root["username"].get<string>();
+    passwd = root["passwd"].get<string>();
+    phone_number = root["phone_number"].get<string>();
 }
 
 const string &User::getPhoneNumber() const {

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(MessengerRebuild CXX)
 
+# 添加 nlohmann/json 依赖
+find_package(nlohmann_json 3.2.0 REQUIRED)
 
 #加上这个可以直接#include "User.h"而不用#include "../utils/User.h"
 include_directories(
@@ -48,16 +50,16 @@ add_executable(
 
 target_link_libraries(
         server.out
-        jsoncpp
+        nlohmann_json::nlohmann_json
         hiredis
 )
 
 target_link_libraries(
         client.out
-        jsoncpp
+        nlohmann_json::nlohmann_json
 )
 
 target_link_libraries(
         test.out
-        jsoncpp
+        nlohmann_json::nlohmann_json
 )

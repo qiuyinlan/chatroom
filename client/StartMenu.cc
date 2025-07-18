@@ -10,9 +10,10 @@
 #include "User.h"
 #include <termios.h>
 #include <unistd.h>
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 using namespace std;
+using json = nlohmann::json;
 
 bool isNumber(const string &input) {
     for (char c: input) {
@@ -333,15 +334,14 @@ int email_register(int fd) {
         return 0;
     }
     // 组装JSON
-    Json::Value root;
+    json root;
     root["email"] = email;
     root["code"] = code;
     root["username"] = username;
     root["password"] = password;
-    Json::FastWriter writer;
-    string json = writer.write(root);
+    string json_str = root.dump();
     sendMsg(fd, REGISTER_WITH_CODE);
-    sendMsg(fd, json);
+    sendMsg(fd, json_str);
     recvMsg(fd, server_reply);
     cout << server_reply << endl;
     return server_reply == "注册成功";
@@ -378,14 +378,13 @@ int email_reset_password(int fd) {
         return 0;
     }
     // 组装JSON
-    Json::Value root;
+    json root;
     root["email"] = email;
     root["code"] = code;
     root["password"] = password;
-    Json::FastWriter writer;
-    string json = writer.write(root);
+    string json_str = root.dump();
     sendMsg(fd, RESET_PASSWORD_WITH_CODE);
-    sendMsg(fd, json);
+    sendMsg(fd, json_str);
     recvMsg(fd, server_reply);
     cout << server_reply << endl;
     return server_reply == "密码重置成功";

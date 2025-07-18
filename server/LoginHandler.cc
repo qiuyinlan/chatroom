@@ -13,9 +13,10 @@
 #include <unistd.h>
 #include <curl/curl.h>
 #include <string>
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 using namespace std;
+using json = nlohmann::json;
 
 void serverLogin(int epfd, int fd) {
     struct epoll_event temp;
@@ -323,15 +324,13 @@ void serverRegisterWithCode(int epfd, int fd) {
     struct epoll_event temp;
     temp.data.fd = fd;
     temp.events = EPOLLIN;
-    string json;
-    recvMsg(fd, json);
-    Json::Value root;
-    Json::Reader reader;
-    reader.parse(json, root);
-    string email = root["email"].asString();
-    string code = root["code"].asString();
-    string username = root["username"].asString();
-    string password = root["password"].asString();
+    string json_str;
+    recvMsg(fd, json_str);
+    json root = json::parse(json_str);
+    string email = root["email"].get<string>();
+    string code = root["code"].get<string>();
+    string username = root["username"].get<string>();
+    string password = root["password"].get<string>();
     Redis redis;
     redis.connect();
     string real_code = redis.hget("verify_code", email);
@@ -381,14 +380,12 @@ void resetPasswordWithCode(int epfd, int fd) {
     struct epoll_event temp;
     temp.data.fd = fd;
     temp.events = EPOLLIN;
-    string json;
-    recvMsg(fd, json);
-    Json::Value root;
-    Json::Reader reader;
-    reader.parse(json, root);
-    string email = root["email"].asString();
-    string code = root["code"].asString();
-    string password = root["password"].asString();
+    string json_str;
+    recvMsg(fd, json_str);
+    json root = json::parse(json_str);
+    string email = root["email"].get<string>();
+    string code = root["code"].get<string>();
+    string password = root["password"].get<string>();
     Redis redis;
     redis.connect();
     string real_code = redis.hget("reset_code", email);

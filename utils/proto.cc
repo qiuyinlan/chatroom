@@ -2,11 +2,12 @@
 // Created by shawn on 23-8-7.
 //
 #include "proto.h"
-#include <jsoncpp/json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <utility>
 //数据传输操作上方空一行以突出逻辑
 using namespace std;
+using json = nlohmann::json;
 
 LoginRequest::LoginRequest() = default;
 
@@ -30,21 +31,18 @@ void LoginRequest::setPasswd(const std::string &password) {
 }
 
 string LoginRequest::to_json() {
-    Json::Value root;
+    json root;
     //bug 序列化和反序列化方式不不一致，一种是数组，一种是对象键值对
     //root.append(UID);
     root["UID"] = UID;
     root["passwd"] = passwd;
-    Json::FastWriter writer;
-    return writer.write(root);
+    return root.dump();
 }
 
-void LoginRequest::json_parse(const string &json) {
-    Json::Reader reader;
-    Json::Value root;
-    reader.parse(json, root);
-    UID = root["UID"].asString();
-    passwd = root["passwd"].asString();
+void LoginRequest::json_parse(const string &json_str) {
+    json root = json::parse(json_str);
+    UID = root["UID"].get<string>();
+    passwd = root["passwd"].get<string>();
 }
 
 
@@ -123,25 +121,22 @@ string Message::to_json() {
     //bug 消息时间time没有初始化
     //变量名time与get_time中的time函数冲突，现改名为timeStamp
     timeStamp = get_time();
-    Json::Value root;
+    json root;
     root["timeStamp"] = timeStamp;
     root["username"] = username;
     root["UID_from"] = UID_from;
     root["UID_to"] = UID_to;
     root["content"] = content;
     root["group_name"] = group_name;
-    Json::FastWriter writer;
-    return writer.write(root);
+    return root.dump();
 }
 
-void Message::json_parse(const string &json) {
-    Json::Value root;
-    Json::Reader reader;
-    reader.parse(json, root);
-    timeStamp = root["timeStamp"].asString();
-    username = root["username"].asString();
-    UID_from = root["UID_from"].asString();
-    UID_to = root["UID_to"].asString();
-    content = root["content"].asString();
-    group_name = root["group_name"].asString();
+void Message::json_parse(const string &json_str) {
+    json root = json::parse(json_str);
+    timeStamp = root["timeStamp"].get<string>();
+    username = root["username"].get<string>();
+    UID_from = root["UID_from"].get<string>();
+    UID_to = root["UID_to"].get<string>();
+    content = root["content"].get<string>();
+    group_name = root["group_name"].get<string>();
 }
