@@ -347,6 +347,30 @@ server/Redis.cc.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.out.dir/build.make CMakeFiles/server.out.dir/server/Redis.cc.s
 .PHONY : server/Redis.cc.s
 
+server/Threadpool.o: server/Threadpool.cpp.o
+.PHONY : server/Threadpool.o
+
+# target to build an object file
+server/Threadpool.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.out.dir/build.make CMakeFiles/server.out.dir/server/Threadpool.cpp.o
+.PHONY : server/Threadpool.cpp.o
+
+server/Threadpool.i: server/Threadpool.cpp.i
+.PHONY : server/Threadpool.i
+
+# target to preprocess a source file
+server/Threadpool.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.out.dir/build.make CMakeFiles/server.out.dir/server/Threadpool.cpp.i
+.PHONY : server/Threadpool.cpp.i
+
+server/Threadpool.s: server/Threadpool.cpp.s
+.PHONY : server/Threadpool.s
+
+# target to generate assembly for a file
+server/Threadpool.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.out.dir/build.make CMakeFiles/server.out.dir/server/Threadpool.cpp.s
+.PHONY : server/Threadpool.cpp.s
+
 server/Transaction.o: server/Transaction.cc.o
 .PHONY : server/Transaction.o
 
@@ -619,6 +643,9 @@ help:
 	@echo "... server/Redis.o"
 	@echo "... server/Redis.i"
 	@echo "... server/Redis.s"
+	@echo "... server/Threadpool.o"
+	@echo "... server/Threadpool.i"
+	@echo "... server/Threadpool.s"
 	@echo "... server/Transaction.o"
 	@echo "... server/Transaction.i"
 	@echo "... server/Transaction.s"

@@ -1,41 +1,48 @@
-//
-// Created by shawn on 23-8-7.
-//
 #include "Redis.h"
 #include <iostream>
 
 using namespace std;
 
-//server的所有代码的核心都落在数据库的操作上，使用数据库的数据，入库
 Redis::Redis() : context(nullptr), reply(nullptr) {}
-
-//smbug 之前没写析构函数，我真是nm艹了，怎么想的到是redis的问题，redis一直在开文件描述符，导致服务器和客户端都崩了
 Redis::~Redis() {
     redisFree(context);
     context = nullptr;
     reply = nullptr;
 }
 
-void Redis::connect() {
-    context = redisConnect("127.0.0.1", 6379);
-    if (context == nullptr || context->err) {
-        if (context->err)
-            cout << context->errstr << endl;
-        else
-            cout << "can't allocate redis context" << endl;
+bool Redis::connect() {
+    context = redisConnect("127.0.0.1", 6379); // 尝试连接 Redis 服务器
+
+    if (context == nullptr || context->err) { // 检查连接是否成功
+        if (context->err) {
+            cout << "Redis connection error: " << context->errstr << endl;
+        } else {
+            cout << "Redis connection error: can't allocate redis context (null context)" << endl;
+        }
+        // 如果连接失败，打印错误信息后，立即返回 false
+        return false; // <--- 关键的修改点，确保返回 false
+    } else {
+        // 如果连接成功，打印成功信息（可选）
+        cout << "Redis connected successfully!" << endl;
+        // 然后返回 true
+        return true; // <--- 连接成功时返回 true
     }
 }
 
-void Redis::del(const string &key) {
-    string command = "del " + key;
+bool Redis::del(const std::string &key) {
+    std::string command = "del " + key;
     reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
+    bool success = reply != nullptr && reply->type != REDIS_REPLY_ERROR;
     freeReplyObject(reply);
+    return success;
 }
 
-void Redis::sadd(const string &key, const string &value) {
-    string command = "SADD " + key + " " + value;
+bool Redis::sadd(const std::string &key, const std::string &value) {
+    std::string command = "SADD " + key + " " + value;
     reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
+    bool success = reply != nullptr && reply->type != REDIS_REPLY_ERROR;
     freeReplyObject(reply);
+    return success;
 }
 
 bool Redis::sismember(const string &key, const string &value) {
@@ -75,18 +82,20 @@ string Redis::hget(const string &key, const string &field) {
     return get_info;
 }
 
-void Redis::hset(const string &key, const string &field, const string &value) {
+bool Redis::hset(const string &key, const string &field, const string &value) {
     string command = "HSET " + key + " " + field + " " + value;
     reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
+    bool success = reply != nullptr && reply->type != REDIS_REPLY_ERROR;
     freeReplyObject(reply);
+    return success;
 }
 
-void Redis::hdel(const string &key, const string &field) {
-    //我nm真是艹了 key和field之间没有加空格
-    //bug2 并且nm写成了HEDL
+bool Redis::hdel(const string &key, const string &field) {
     string command = "HDEL " + key + " " + field;
     reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
+    bool success = reply != nullptr && reply->type != REDIS_REPLY_ERROR;
     freeReplyObject(reply);
+    return success;
 }
 
 bool Redis::hexists(const string &key, const string &field) {

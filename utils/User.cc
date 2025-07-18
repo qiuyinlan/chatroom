@@ -67,10 +67,6 @@ string User::getMyTime() const {
     return username;
 }
 
-void User::setPhoneNumber(string number) {
-    phone_number = std::move(number);
-}
-
 [[nodiscard]] string User::getPassword() const {
     return passwd;
 }
@@ -85,35 +81,17 @@ void User::setIsOnline(bool online) {
 
 string User::to_json() {
     json root;
-//        root.append(UID);
-//        root.append(passwd);
-//        root.append(username);
-//        root.append(my_time);
-//        root.append(phone_number);
     root["my_time"] = my_time;
     root["UID"] = UID;
     root["username"] = username;
     root["passwd"] = passwd;
-    root["phone_number"] = phone_number;
     return root.dump();
 }
 
-//bug 参数里不能加&
 void User::json_parse(const string &json_str) {
     json root = json::parse(json_str);
-//        int i=0;
-//        UID=root[i++].asString();
-//        passwd=root[i++].asString();
-//        username=root[i++].asString();
-//        my_time=root[i++].asString();
-//        phone_number=root[i++].asString();
     my_time = root["my_time"].get<string>();
     UID = root["UID"].get<string>();
     username = root["username"].get<string>();
     passwd = root["passwd"].get<string>();
-    phone_number = root["phone_number"].get<string>();
-}
-
-const string &User::getPhoneNumber() const {
-    return phone_number;
 }

@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
 #include "LoginHandler.h"
 #include "Transaction.h"
 #include <functional>
@@ -45,13 +42,6 @@ void serverLogin(int epfd, int fd) {
     if (passwd != user.getPassword()) {
         //密码错误
         sendMsg(fd, "-2");
-        string isFindPasswd;
-
-        recvMsg(fd, isFindPasswd);
-        if (isFindPasswd == "Confirm") {
-            //这是在用户UID正确的情况下，不需要用户再输入UID找回密码
-            findPassword(fd, UID);
-        }
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
@@ -70,31 +60,7 @@ void serverLogin(int epfd, int fd) {
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
 
-void findPassword(int fd, const string &UID) {
-    Redis redis;
-    redis.connect();
-    string phoneNumber;
-    User user;
 
-    string passwd;
-    while (true) {
-        recvMsg(fd, phoneNumber);
-        string user_info = redis.hget("user_info", UID);
-        user.json_parse(user_info);
-        if (phoneNumber != user.getPhoneNumber()) {
-            sendMsg(fd, "Failed");
-            continue;
-        }
-        break;
-    }
-
-    sendMsg(fd, "Success");
-
-    recvMsg(fd, passwd);
-    user.setPassword(passwd);
-    redis.hset("user_info", UID, user.to_json());
-    sendMsg(fd, "Success");
-}
 
 void serverRegister(int epfd, int fd) {
     struct epoll_event temp;
@@ -266,41 +232,81 @@ std::string generateCode() {
     return code;
 }
 
+#include <iostream>
+#include <string>
+#include <curl/curl.h>
+
+// 定义上传状态结构体
+struct upload_status {
+    size_t bytes_read;
+    const std::string* payload;
+};
+
+// 自定义 payload_source 回调函数
+static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp) {
+    struct upload_status *upload_ctx = (struct upload_status *)userp;
+    const std::string& payload = *(upload_ctx->payload);
+    size_t left = payload.size() - upload_ctx->bytes_read;
+    size_t len = size * nmemb;
+    if (len > left) {
+        len = left;
+    }
+    if (len) {
+        memcpy(ptr, payload.data() + upload_ctx->bytes_read, len);
+        upload_ctx->bytes_read += len;
+    }
+    return len;
+}
+
 bool sendMail(const std::string& to_email, const std::string& code, bool is_find) {
     CURL *curl;
     CURLcode res = CURLE_OK;
     curl = curl_easy_init();
+    
     if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, "smtps://smtp.qq.com:465");
+        curl_easy_setopt(curl, CURLOPT_URL, "smtps://smtp.163.com:465");
         curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
-        curl_easy_setopt(curl, CURLOPT_USERNAME, "2978500991@qq.com");
-        curl_easy_setopt(curl, CURLOPT_PASSWORD, "glezafhnfcpxdhcd");
-        curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "2978500991@qq.com");
-
-        struct curl_slist *recipients = NULL;
+        curl_easy_setopt(curl, CURLOPT_USERNAME, "17750601137@163.com");
+        curl_easy_setopt(curl, CURLOPT_PASSWORD, "GAWKe3AaL7bEV64e");
+        curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "17750601137@163.com");
+        struct curl_slist *recipients = nullptr;
         recipients = curl_slist_append(recipients, to_email.c_str());
         curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
+        // 构建更详细的邮件内容
+        std::string from = "From: 17750601137@163.com\r\n";
+        std::string to = "To: " + to_email + "\r\n";
         std::string subject = "Subject: 验证码\r\n";
-        std::string body = is_find ? "找回密码验证码：" : "注册验证码：";
-        body += code + "\r\n";
-        std::string data = subject + "\r\n" + body;
+        std::string mimeVersion = "MIME-Version: 1.0\r\n";
+        std::string contentType = "Content-Type: text/plain; charset=utf-8\r\n";
+        std::string body = "您好，\r\n\r\n您的验证码是：" + code + "\r\n请在 5 分钟内使用此验证码完成验证。\r\n\r\n感谢您的使用！";
 
-        curl_easy_setopt(curl, CURLOPT_READFUNCTION, NULL);
-        curl_easy_setopt(curl, CURLOPT_READDATA, &data);
+        std::string full_mail_payload = from + to + subject + mimeVersion + contentType + "\r\n" + body;
+
+        upload_status up_status = { 0, &full_mail_payload };
+        curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+        curl_easy_setopt(curl, CURLOPT_READDATA, &up_status);
         curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+        curl_easy_setopt(curl, CURLOPT_INFILESIZE, (long)full_mail_payload.length());
+        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // 启用详细模式
 
         res = curl_easy_perform(curl);
+        if (res != CURLE_OK) {
+            std::cerr << "[sendMail] curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+        } else {
+            std::cout << "[sendMail] 邮件发送成功: " << to_email << std::endl;
+        }
 
         curl_slist_free_all(recipients);
         curl_easy_cleanup(curl);
 
         return res == CURLE_OK;
     }
+    std::cerr << "[sendMail] curl_easy_init() failed!" << std::endl;
     return false;
 }
 
-void handleRequestCode(int fd) {
+void handleRequestCode(int epfd, int fd) {
     // 1. 接收邮箱
     string email;
     recvMsg(fd, email);
@@ -318,45 +324,13 @@ void handleRequestCode(int fd) {
     } else {
         sendMsg(fd, "验证码发送失败，请稍后重试");
     }
-}
-
-void serverRegisterWithCode(int epfd, int fd) {
     struct epoll_event temp;
     temp.data.fd = fd;
     temp.events = EPOLLIN;
-    string json_str;
-    recvMsg(fd, json_str);
-    json root = json::parse(json_str);
-    string email = root["email"].get<string>();
-    string code = root["code"].get<string>();
-    string username = root["username"].get<string>();
-    string password = root["password"].get<string>();
-    Redis redis;
-    redis.connect();
-    string real_code = redis.hget("verify_code", email);
-    if (real_code != code) {
-        sendMsg(fd, "验证码错误");
-        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
-        return;
-    }
-    // 检查是否已注册
-    if (redis.sismember("all_uid", email)) {
-        sendMsg(fd, "该邮箱已注册");
-        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
-        return;
-    }
-    // 注册用户
-    User user;
-    user.setUID(email);
-    user.setUsername(username);
-    user.setPassword(password);
-    redis.hset("user_info", email, user.to_json());
-    redis.sadd("all_uid", email);
-    sendMsg(fd, "注册成功");
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
 
-void handleResetCode(int fd) {
+void handleResetCode(int epfd, int fd) {
     // 1. 接收邮箱
     string email;
     recvMsg(fd, email);
@@ -374,6 +348,110 @@ void handleResetCode(int fd) {
     } else {
         sendMsg(fd, "验证码发送失败，请稍后重试");
     }
+    struct epoll_event temp;
+    temp.data.fd = fd;
+    temp.events = EPOLLIN;
+    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+}
+
+void serverRegisterWithCode(int epfd, int fd) {
+    struct epoll_event temp;
+    temp.data.fd = fd;
+    temp.events = EPOLLIN;
+    string json_str;
+
+    std::cout << "[LOG] [serverRegisterWithCode] 等待接收客户端注册 JSON..." << std::endl;
+    int ret = recvMsg(fd, json_str);
+    std::cout << "[LOG] [serverRegisterWithCode] recvMsg 返回: " << ret << ", 收到内容: " << json_str << std::endl;
+    if (ret <= 0) {
+        cout << "[serverRegisterWithCode] 接收注册信息失败，客户端可能已断开连接" << endl;
+        sendMsg(fd, "接收注册信息失败");
+        std::cout << "[LOG] [serverRegisterWithCode] return: 接收注册信息失败" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    cout << "[serverRegisterWithCode] Received JSON: " << json_str << endl;
+
+    json root;
+    try {
+        root = json::parse(json_str);
+    } catch (const json::exception& e) {
+        cout << "[serverRegisterWithCode] JSON 解析失败: " << e.what() << endl;
+        sendMsg(fd, "JSON 格式错误");
+        std::cout << "[LOG] [serverRegisterWithCode] return: JSON 格式错误" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+
+    string email = root["email"].get<string>();
+    string code = root["code"].get<string>();
+    string username = root["username"].get<string>();
+    string password = root["password"].get<string>();
+
+    cout << "[serverRegisterWithCode] Email: " << email << ", Username: " << username << endl;
+
+    Redis redis;
+    std::cout << "[LOG] [serverRegisterWithCode] 尝试连接Redis..." << std::endl;
+    if (!redis.connect()) {
+        cout << "[serverRegisterWithCode] Redis 连接失败" << endl;
+        sendMsg(fd, "服务器内部错误");
+        std::cout << "[LOG] [serverRegisterWithCode] return: Redis 连接失败" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+
+    // 验证验证码
+    string real_code = redis.hget("verify_code", email);
+    cout << "[LOG] [serverRegisterWithCode] 数据库验证码: " << real_code << ", 用户输入验证码: " << code << std::endl;
+    if (real_code != code) {
+        sendMsg(fd, "验证码错误");
+        cout << "[serverRegisterWithCode] 验证码错误: " << real_code << " != " << code << endl;
+        std::cout << "[LOG] [serverRegisterWithCode] return: 验证码错误" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+
+    // 检查邮箱是否已注册
+    std::cout << "[LOG] [serverRegisterWithCode] 检查邮箱是否已注册..." << std::endl;
+    if (redis.sismember("all_uid", email)) {
+        sendMsg(fd, "该邮箱已注册");
+        cout << "[serverRegisterWithCode] 邮箱已注册: " << email << endl;
+        std::cout << "[LOG] [serverRegisterWithCode] return: 邮箱已注册" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+
+    // 注册用户
+    User user;
+    user.setUID(email);
+    user.setUsername(username);
+    user.setPassword(password);
+
+    string user_json = user.to_json();
+    cout << "[serverRegisterWithCode] user.to_json(): " << user_json << endl;
+
+    std::cout << "[LOG] [serverRegisterWithCode] 写入 user_info..." << std::endl;
+    if (!redis.hset("user_info", email, user_json)) {
+        cout << "[serverRegisterWithCode] 写入 Redis 失败: user_info" << endl;
+        sendMsg(fd, "服务器内部错误");
+        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 user_info 失败" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    std::cout << "[LOG] [serverRegisterWithCode] 写入 all_uid..." << std::endl;
+    if (!redis.sadd("all_uid", email)) {
+        cout << "[serverRegisterWithCode] 写入 Redis 失败: all_uid" << endl;
+        sendMsg(fd, "服务器内部错误");
+        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 all_uid 失败" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+
+    sendMsg(fd, "注册成功");
+    cout << "[serverRegisterWithCode] 注册成功: " << email << endl;
+    std::cout << "[LOG] [serverRegisterWithCode] 注册成功，流程结束" << std::endl;
+
+    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
 
 void resetPasswordWithCode(int epfd, int fd) {

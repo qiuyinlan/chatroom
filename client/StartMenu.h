@@ -16,10 +16,6 @@ void get_password(std::string &password);
 
 int login(int fd, User &user);
 
-void client_register(int fd);
-
-void findPassword(int fd);
-
 int email_register(int fd);
 int email_reset_password(int fd);
 

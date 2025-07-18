@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/test.out.dir/utils/User.cc.o CMakeFiles/test.out.dir/utils/Group.cc.o CMakeFiles/test.out.dir/server/test.cc.o -o test.out  -ljsoncpp 
+/usr/bin/c++ CMakeFiles/test.out.dir/utils/User.cc.o CMakeFiles/test.out.dir/utils/Group.cc.o CMakeFiles/test.out.dir/server/test.cc.o -o test.out 

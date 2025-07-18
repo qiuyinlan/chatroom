@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/server.out.dir/server/LoginHandler.cc.o.d"
   "CMakeFiles/server.out.dir/server/Redis.cc.o"
   "CMakeFiles/server.out.dir/server/Redis.cc.o.d"
+  "CMakeFiles/server.out.dir/server/Threadpool.cpp.o"
+  "CMakeFiles/server.out.dir/server/Threadpool.cpp.o.d"
   "CMakeFiles/server.out.dir/server/Transaction.cc.o"
   "CMakeFiles/server.out.dir/server/Transaction.cc.o.d"
   "CMakeFiles/server.out.dir/server/group_chat.cc.o"

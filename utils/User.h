@@ -27,8 +27,6 @@ public:
 
     [[nodiscard]] string getUsername() const;
 
-    void setPhoneNumber(string number);
-
     [[nodiscard]] string getPassword() const;
 
     void setIsOnline(bool online);
@@ -40,11 +38,8 @@ public:
     //bug 参数里不能加&
     void json_parse(const string &json);
 
-    [[nodiscard]] const string &getPhoneNumber() const;
-
 private:
     string UID;    //由注册时间关联，10位
-    string phone_number;      //手机号，用于密码找回
     string username; //用户名
     string passwd; //密码
     string my_time;  //该用户创建时间

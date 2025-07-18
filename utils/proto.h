@@ -3,7 +3,6 @@
 //
 #ifndef CHATROOM_PROTO_H
 #define CHATROOM_PROTO_H
-
 #include <string>
 
 using std::string;
@@ -123,5 +122,11 @@ struct Response {
     int status;
     string prompt;
 };
+
+// 邮箱验证码相关协议
+inline const std::string REQUEST_CODE = "20"; // 请求验证码
+inline const std::string REGISTER_WITH_CODE = "21"; // 验证码注册
+inline const std::string REQUEST_RESET_CODE = "22"; // 找回密码请求验证码
+inline const std::string RESET_PASSWORD_WITH_CODE = "23"; // 验证码重置密码
 
 #endif //CHATROOM_PROTO_H

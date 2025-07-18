@@ -17,6 +17,12 @@
  * 可以确保编译器在实例化模板函数时能够正确找到模板函数的定义*/
 using namespace std;
 
+void serverLogin(int epfd, int fd);
+void serverRegister(int epfd, int fd);
+void notify(int fd);
+
+
+
 void signalHandler(int signum) {
     cout << "signum: " << signum << endl;
 }
@@ -120,13 +126,13 @@ int main(int argc, char *argv[]) {
                     notify(fd);
                 } else if (msg == REQUEST_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
-                    pool.addTask([=](){ handleRequestCode(fd); });
+                    pool.addTask([=](){ handleRequestCode(epfd, fd); });
                 } else if (msg == REGISTER_WITH_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ serverRegisterWithCode(epfd, fd); });
                 } else if (msg == REQUEST_RESET_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
-                    pool.addTask([=](){ handleResetCode(fd); });
+                    pool.addTask([=](){ handleResetCode(epfd, fd); });
                 } else if (msg == RESET_PASSWORD_WITH_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ resetPasswordWithCode(epfd, fd); });
@@ -136,25 +142,8 @@ int main(int argc, char *argv[]) {
     }
 }
 
-const string REQUEST_CODE = "20"; // 请求验证码
-const string REGISTER_WITH_CODE = "21"; // 验证码注册
-const string REQUEST_RESET_CODE = "22"; // 找回密码请求验证码
-const string RESET_PASSWORD_WITH_CODE = "23"; // 验证码重置密码
 
-void handleRequestCode(int fd); // 注册验证码
+void handleRequestCode(int epfd, int fd); // 注册验证码
 void serverRegisterWithCode(int epfd, int fd); // 验证码注册
-void handleResetCode(int fd); // 找回密码验证码
+void handleResetCode(int epfd, int fd); // 找回密码验证码
 void resetPasswordWithCode(int epfd, int fd); // 验证码重置密码
-
-void notify(int fd) {
-    // Implementation of notify function
-}
-
-void serverLogin(int epfd, int fd) {
-    // Implementation of serverLogin function
-}
-
-void serverRegister(int epfd, int fd) {
-    // Implementation of serverRegister function
-}
-

@@ -101,6 +101,6 @@ int main(int argc, char *argv[]) {
 }
 
 void start_UI() {
-    cout << "[1]登录    [2]邮箱注册    [3]邮箱找回密码    [0]退出" << endl;
+    cout << "[1]登录    [2]邮箱注册    [3]重置/找回密码    [0]退出" << endl;
     cout << "请输入你的选择" << endl;
 }

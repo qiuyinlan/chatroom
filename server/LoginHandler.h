@@ -8,17 +8,15 @@
 
 void serverLogin(int epfd, int fd);
 
-void findPassword(int fd, const string &UID);
-
 void serverRegister(int epfd, int fd);
 
 void serverOperation(int fd, User &user);
 
 void notify(int fd);
 
-void handleRequestCode(int fd);
+void handleRequestCode(int epfd, int fd);
 void serverRegisterWithCode(int epfd, int fd);
-void handleResetCode(int fd);
+void handleResetCode(int epfd, int fd);
 void resetPasswordWithCode(int epfd, int fd);
 bool sendMail(const std::string& to_email, const std::string& code, bool is_find);
 

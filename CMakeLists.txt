@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 
 project(MessengerRebuild CXX)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # 添加 nlohmann/json 依赖
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
@@ -19,6 +22,7 @@ add_executable(
         server/Transaction.cc
         server/Redis.cc
         server/group_chat.cc
+        server/Threadpool.cpp
         utils/User.cc
         utils/TCP.cc
         utils/IO.cc
@@ -49,7 +53,7 @@ add_executable(
 )
 
 target_link_libraries(
-        server.out
+        server.out PRIVATE curl
         nlohmann_json::nlohmann_json
         hiredis
 )

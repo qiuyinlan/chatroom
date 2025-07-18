@@ -2,7 +2,7 @@
 // Created by shawn on 23-8-13.
 //
 
-#include <jsoncpp/json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <utility>
 #include <random>
@@ -10,7 +10,6 @@
 #include "Group.h"
 
 using namespace std;
-using namespace Json;
 
 Group::Group(string groupName, string UID) : groupName(std::move(groupName)), UID(std::move(UID)) {
     random_device rd;
@@ -29,25 +28,22 @@ Group::Group(string groupName, string UID) : groupName(std::move(groupName)), UI
 }
 
 std::string Group::to_json() {
-    Value root;
+    nlohmann::json root;
     root["groupName"] = groupName;
     root["UID"] = UID;
     root["groupUID"] = groupUID;
     root["members"] = members;
     root["admins"] = admins;
-    FastWriter writer;
-    return writer.write(root);
+    return root.dump();
 }
 
 void Group::json_parse(const std::string &json) {
-    Value root;
-    Reader reader;
-    reader.parse(json, root);
-    groupName = root["groupName"].asString();
-    UID = root["UID"].asString();
-    groupUID = root["groupUID"].asString();
-    members = root["members"].asString();
-    admins = root["admins"].asString();
+    nlohmann::json root = nlohmann::json::parse(json);
+    groupName = root["groupName"].get<std::string>();
+    UID = root["UID"].get<std::string>();
+    groupUID = root["groupUID"].get<std::string>();
+    members = root["members"].get<std::string>();
+    admins = root["admins"].get<std::string>();
 }
 
 const string &Group::getGroupName() const {

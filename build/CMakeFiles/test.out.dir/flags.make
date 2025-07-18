@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/xuzichun/messengertest/server -I/home/xuzichun/messengertest/client -I/home/xuzichun/messengertest/utils
 
-CXX_FLAGS = 
+CXX_FLAGS = -std=gnu++17
 
