@@ -11,7 +11,7 @@
 using namespace std;
 
 //实时通知
-void announce(string UID) {
+void announce(string email) {
     int announce_fd = Socket();
     //直接连服务器，不断给服务器发送实时通知处理请求
     Connect(announce_fd, IP, PORT);
@@ -22,7 +22,7 @@ void announce(string UID) {
 
         sendMsg(announce_fd, NOTIFY);
 
-        sendMsg(announce_fd, UID);
+        sendMsg(announce_fd, email);
 
         recvMsg(announce_fd, buf);
         if (buf == REQUEST_NOTIFICATION) {
@@ -90,7 +90,7 @@ bool isNumericString(const std::string &str) {
 
 //现在开的线程全部不使用引用
 //私聊群聊，接收对方发送的消息
-void chatReceived(int fd, string UID) {
+void chatReceived(int fd, string email) {
     Message message;
     string json_msg;
     while (true) {
@@ -102,7 +102,7 @@ void chatReceived(int fd, string UID) {
         message.json_parse(json_msg);
         //私发
         if (message.getGroupName() == "1") {
-            if (message.getUidFrom() == UID) {
+            if (message.getEmailFrom() == email) {
                 cout << message.getUsername() << ": " << message.getContent() << endl;
             } else {
                 cout << "\t\t\t\t\t\t\t\t" << RED << "收到一条来自" << message.getUsername() << "的一条消息" << RESET
@@ -112,7 +112,7 @@ void chatReceived(int fd, string UID) {
             continue;
         }
         //群发
-        if (message.getUidFrom() == UID) {
+        if (message.getEmailFrom() == email) {
             cout << message.getUsername() << ": " << message.getContent() << endl;
         } else {
             cout << "\033[1m\033[31m"

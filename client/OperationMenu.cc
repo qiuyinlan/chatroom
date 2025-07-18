@@ -12,7 +12,7 @@
 using namespace std;
 
 void clientOperation(int fd, User &user) {
-    string my_uid = user.getUID();
+    string my_email = user.getEmail();
     User _friend;
     string friend_num;
     //接收好友个数
@@ -29,12 +29,12 @@ void clientOperation(int fd, User &user) {
         recvMsg(fd, friend_info);
         _friend.json_parse(friend_info);
         //前面填UID代表是谁的好友列表
-        my_friends.emplace_back(my_uid, _friend);
+        my_friends.emplace_back(my_email, _friend);
     }
     Telegram telegram(fd, user);
     //bug 使用ref就不用bind了
     //bug 找了一下午就是这个线程的问题,现在改为不引用&
-    thread work(announce, user.getUID());
+    thread work(announce, user.getEmail());
     work.detach();
     //成员函数指针初始化 std::function 对象
     map<int, std::function<void(vector<pair<string, User>> &)>> FunctionOption = {

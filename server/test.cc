@@ -58,8 +58,8 @@ using namespace std;
 //编译时没有加上User.cc导致链接错误
 int main() {
     //User user;
-    //string time=user.getUID();
+    //string time=user.getEmail();
     cout << (int) NULL << endl;
     Group group("1", "2");
-    cout << "UID: " << group.getGroupUid() << endl;
+    cout << "Email: " << group.getGroupEmail() << endl;
 }

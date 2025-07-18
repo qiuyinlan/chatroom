@@ -7,9 +7,9 @@
 
 #include "User.h"
 
-void announce(string UID);
+void announce(string email);
 
-void chatReceived(int fd, string UID);
+void chatReceived(int fd, string email);
 
 bool isNumericString(const std::string &str);
 

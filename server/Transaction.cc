@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
 #include "Transaction.h"
 #include "Redis.h"
 #include "../utils/IO.h"
@@ -22,10 +19,10 @@ void synchronize(int fd, User &user) {
     Redis redis;
     redis.connect();
     string friend_info;
-    int num = redis.scard(user.getUID());
+    int num = redis.scard(user.getEmail());
     //向客户端发送好友数量
     sendMsg(fd, to_string(num));
-    redisReply **arr = redis.smembers(user.getUID());
+    redisReply **arr = redis.smembers(user.getEmail());
     for (int i = 0; i < num; i++) {
         friend_info = redis.hget("user_info", arr[i]->str);
 
@@ -37,7 +34,7 @@ void synchronize(int fd, User &user) {
 void start_chat(int fd, User &user) {
     Redis redis;
     redis.connect();
-    redis.sadd("is_chat", user.getUID());
+    redis.sadd("is_chat", user.getEmail());
     string records_index;
     //接收历史记录索引
     recvMsg(fd, records_index);
@@ -58,10 +55,10 @@ void start_chat(int fd, User &user) {
         sendMsg(fd, arr[i]->str);
         freeReplyObject(arr[i]);
     }
-    string friend_uid;
-    //接收客户端发送的想要聊天的好友的UID，判断是否拉黑的逻辑
-    recvMsg(fd, friend_uid);
-    if (redis.sismember("blocked" + friend_uid, user.getUID())) {
+    string friend_email;
+    //接收客户端发送的想要聊天的好友的email，判断是否拉黑的逻辑
+    recvMsg(fd, friend_email);
+    if (redis.sismember("blocked" + friend_email, user.getEmail())) {
         sendMsg(fd, "-1");
         return;
     }
@@ -72,43 +69,43 @@ void start_chat(int fd, User &user) {
         if (msg == EXIT || ret == 0) {
             //给线程发消息
             sendMsg(fd, EXIT);
-            redis.srem("is_chat", user.getUID());
+            redis.srem("is_chat", user.getEmail());
             //用户异常退出直接删除在线列表
             if (ret == 0) {
-                redis.hdel("is_online", user.getUID());
+                redis.hdel("is_online", user.getEmail());
             }
             return;
         }
         Message message;
         message.json_parse(msg);
-        string UID = message.getUidTo();
-//        if (redis.sismember("blocked" + UID, user.getUID())) {
+        string email = message.getEmailTo();
+//        if (redis.sismember("blocked" + email, user.getEmail())) {
 //            continue;
 //        }
         //对方不在线
-        if (!redis.hexists("is_online", UID)) {
-            redis.hset("chat", UID, message.getUsername());
-            string me = message.getUidFrom() + message.getUidTo();
-            string her = message.getUidTo() + message.getUidFrom();
+        if (!redis.hexists("is_online", email)) {
+            redis.hset("chat", email, message.getUsername());
+            string me = message.getEmailFrom() + message.getEmailTo();
+            string her = message.getEmailTo() + message.getEmailFrom();
             redis.lpush(me, msg);
             redis.lpush(her, msg);
             continue;
         }
         //对方不在聊天
-        if (!redis.sismember("is_chat", UID)) {
-            redis.hset("chat", UID, message.getUsername());
-            string me = message.getUidFrom() + message.getUidTo();
-            string her = message.getUidTo() + message.getUidFrom();
+        if (!redis.sismember("is_chat", email)) {
+            redis.hset("chat", email, message.getUsername());
+            string me = message.getEmailFrom() + message.getEmailTo();
+            string her = message.getEmailTo() + message.getEmailFrom();
             redis.lpush(me, msg);
             redis.lpush(her, msg);
             continue;
         }
-        string _fd = redis.hget("is_online", UID);
+        string _fd = redis.hget("is_online", email);
         int her_fd = stoi(_fd);
         //cout<<"fd: "<<fd<<endl;
         sendMsg(her_fd, msg);
-        string me = message.getUidFrom() + message.getUidTo();
-        string her = message.getUidTo() + message.getUidFrom();
+        string me = message.getEmailFrom() + message.getEmailTo();
+        string her = message.getEmailTo() + message.getEmailFrom();
         redis.lpush(me, msg);
         redis.lpush(her, msg);
     }
@@ -117,10 +114,10 @@ void start_chat(int fd, User &user) {
 void history(int fd, User &user) {
     Redis redis;
     redis.connect();
-    string UID;
-    //接收客户端发送的好友UID查找历史记录
-    recvMsg(fd, UID);
-    string temp = UID + user.getUID();
+    string email;
+    //接收客户端发送的好友email查找历史记录
+    recvMsg(fd, email);
+    string temp = email + user.getEmail();
     cout << temp << endl;
     int num = redis.llen(temp);
     //发送历史记录数量
@@ -141,11 +138,11 @@ void list_friend(int fd, User &user) {
 
     recvMsg(fd, temp);
     int num = stoi(temp);
-    string friend_uid;
+    string friend_email;
     for (int i = 0; i < num; ++i) {
-        //接收客户端发送的UID来查询好友是否在线的信息
-        recvMsg(fd, friend_uid);
-        if (redis.hexists("is_online", friend_uid)) {
+        //接收客户端发送的email来查询好友是否在线的信息
+        recvMsg(fd, friend_email);
+        if (redis.hexists("is_online", friend_email)) {
             //在线发送"1"
             sendMsg(fd, "1");
         } else
@@ -157,30 +154,32 @@ void list_friend(int fd, User &user) {
 void add_friend(int fd, User &user) {
     Redis redis;
     redis.connect();
-    string UID;
-
-    recvMsg(fd, UID);
-    if (!redis.hexists("user_info", UID)) {
+    string friend_username;
+    recvMsg(fd, friend_username);
+    // 通过用户名查 email
+    string email = redis.hget("username_to_email", friend_username);
+    if (email.empty()) {
+        sendMsg(fd, "-1"); // 用户不存在
+        return;
+    }
+    if (!redis.hexists("user_info", email)) {
         sendMsg(fd, "-1");
         return;
-        //判断是否在我的好友列表里
-    } else if (redis.sismember(user.getUID(), UID)) {
+    } else if (redis.sismember(user.getEmail(), email)) {
         sendMsg(fd, "-2");
         return;
-    } else if (UID == user.getUID()) {
-        //判断添加的是不是自己
+    } else if (email == user.getEmail()) {
         sendMsg(fd, "-3");
         return;
     }
     //要添加的好友存在
     sendMsg(fd, "1");
     //加到实时通知缓冲区中
-    redis.sadd("add_friend", UID);
+    redis.sadd("add_friend", email);
     //加到对方的好友申请的缓冲区中
-    redis.sadd(UID + "add_friend", user.getUID());
+    redis.sadd(email + "add_friend", user.getEmail());
     string user_info;
-    user_info = redis.hget("user_info", UID);
-
+    user_info = redis.hget("user_info", email);
     sendMsg(fd, user_info);
 }
 
@@ -188,13 +187,13 @@ void findRequest(int fd, User &user) {
     Redis redis;
     redis.connect();
     //只是一个好友申请缓冲区
-    int num = redis.scard(user.getUID() + "add_friend");
+    int num = redis.scard(user.getEmail() + "add_friend");
     //发送缓冲区申请数量
     sendMsg(fd, to_string(num));
     if (num == 0) {
         return;
     }
-    redisReply **arr = redis.smembers(user.getUID() + "add_friend");
+    redisReply **arr = redis.smembers(user.getEmail() + "add_friend");
     string request_info;
     User friendRequest;
     for (int i = 0; i < num; i++) {
@@ -206,16 +205,16 @@ void findRequest(int fd, User &user) {
 
         recvMsg(fd, reply);
         if (reply == "REFUSED") {
-            redis.srem(user.getUID() + "add_friend", arr[i]->str);
+            redis.srem(user.getEmail() + "add_friend", arr[i]->str);
             return;
         }
         //这里才是真正的好友列表
         //将对方加到我的好友列表中
-        redis.sadd(user.getUID(), arr[i]->str);
+        redis.sadd(user.getEmail(), arr[i]->str);
         //将我加到对方的好友列表中
-        redis.sadd(arr[i]->str, user.getUID());
+        redis.sadd(arr[i]->str, user.getEmail());
         //将好友申请从缓冲区删除
-        redis.srem(user.getUID() + "add_friend", arr[i]->str);
+        redis.srem(user.getEmail() + "add_friend", arr[i]->str);
 
         sendMsg(fd, request_info);
         freeReplyObject(arr[i]);
@@ -225,43 +224,43 @@ void findRequest(int fd, User &user) {
 void del_friend(int fd, User &user) {
     Redis redis;
     redis.connect();
-    string UID;
+    string email;
 
-    recvMsg(fd, UID);
+    recvMsg(fd, email);
     //从我的好友列表删除对方
-    redis.srem(user.getUID(), UID);
+    redis.srem(user.getEmail(), email);
     //在对方的好友列表删除我
-    redis.srem(UID, user.getUID());
+    redis.srem(email, user.getEmail());
     //删除历史记录
-    redis.ltrim(user.getUID() + UID);
-    redis.ltrim(UID + user.getUID());
+    redis.ltrim(user.getEmail() + email);
+    redis.ltrim(email + user.getEmail());
     //删除黑名单屏蔽
-    redis.srem("blocked" + user.getUID(), UID);
-    redis.srem("blocked" + UID, user.getUID());
+    redis.srem("blocked" + user.getEmail(), email);
+    redis.srem("blocked" + email, user.getEmail());
     //缓冲区，用来通知对面被我删除
-    redis.sadd(UID + "del", user.getUsername());
+    redis.sadd(email + "del", user.getUsername());
 }
 
 void blockedLists(int fd, User &user) {
     Redis redis;
     redis.connect();
     User blocked;
-    string blocked_uid;
-    //接收客户端发送的要屏蔽用户的UID
-    recvMsg(fd, blocked_uid);
-    redis.sadd("blocked" + user.getUID(), blocked_uid);
+    string blocked_email;
+    //接收客户端发送的要屏蔽用户的email
+    recvMsg(fd, blocked_email);
+    redis.sadd("blocked" + user.getEmail(), blocked_email);
 }
 
 void unblocked(int fd, User &user) {
     Redis redis;
     redis.connect();
-    int num = redis.scard("blocked" + user.getUID());
+    int num = redis.scard("blocked" + user.getEmail());
     //发送屏蔽名单数量
     sendMsg(fd, to_string(num));
     if (num == 0) {
         return;
     }
-    redisReply **arr = redis.smembers("blocked" + user.getUID());
+    redisReply **arr = redis.smembers("blocked" + user.getEmail());
     string blocked_info;
     for (int i = 0; i < num; ++i) {
         blocked_info = redis.hget("user_info", arr[i]->str);
@@ -270,9 +269,9 @@ void unblocked(int fd, User &user) {
         freeReplyObject(arr[i]);
     }
     //接收解除屏蔽的信息
-    string UID;
-    recvMsg(fd, UID);
-    redis.srem("blocked" + user.getUID(), UID);
+    string email;
+    recvMsg(fd, email);
+    redis.srem("blocked" + user.getEmail(), email);
 }
 
 void group(int fd, User &user) {
@@ -297,7 +296,7 @@ void group(int fd, User &user) {
 
         ret = recvMsg(fd, choice);
         if (ret == 0) {
-            redis.hdel("is_online", user.getUID());
+            redis.hdel("is_online", user.getEmail());
         }
         if (choice == BACK) {
             break;
@@ -318,7 +317,7 @@ void send_file(int fd, User &user) {
     User _friend;
     int ret = recvMsg(fd, friend_info);
     if (ret == 0) {
-        redis.hdel("is_online", user.getUID());
+        redis.hdel("is_online", user.getEmail());
     }
     if (friend_info == BACK) {
         return;
@@ -328,14 +327,14 @@ void send_file(int fd, User &user) {
 
     ret = recvMsg(fd, filePath);
     if (ret == 0) {
-        redis.hdel("is_online", user.getUID());
+        redis.hdel("is_online", user.getEmail());
     }
 
     recvMsg(fd, fileName);
     cout << "传输文件名: " << fileName << endl;
     filePath = "./fileBuffer/" + fileName;
     //最后一个groupName填了文件名，接收的时候会显示
-    Message message(user.getUsername(), user.getUID(), _friend.getUID(), fileName);
+    Message message(user.getUsername(), user.getEmail(), _friend.getEmail(), fileName);
     message.setContent(filePath);
     if (!filesystem::exists("./fileBuffer")) {
         filesystem::create_directories("./fileBuffer");
@@ -367,8 +366,8 @@ void send_file(int fd, User &user) {
         ofs.write(buf, n);
     }
     //文件发送实时通知缓冲区
-    redis.sadd("file" + _friend.getUID(), user.getUsername());
-    redis.sadd("recv" + _friend.getUID(), message.to_json());
+    redis.sadd("file" + _friend.getEmail(), user.getUsername());
+    redis.sadd("recv" + _friend.getEmail(), message.to_json());
     ofs.close();
 }
 
@@ -376,7 +375,7 @@ void receive_file(int fd, User &user) {
     Redis redis;
     redis.connect();
     char buf[BUFSIZ];
-    int num = redis.scard("recv" + user.getUID());
+    int num = redis.scard("recv" + user.getEmail());
 
     sendMsg(fd, to_string(num));
     Message message;
@@ -386,7 +385,7 @@ void receive_file(int fd, User &user) {
         return;
     }
 
-    redisReply **arr = redis.smembers("recv" + user.getUID());
+    redisReply **arr = redis.smembers("recv" + user.getEmail());
     for (int i = 0; i < num; i++) {
 
         sendMsg(fd, arr[i]->str);
@@ -402,11 +401,11 @@ void receive_file(int fd, User &user) {
 
         int _ret = recvMsg(fd, reply);
         if (_ret == 0) {
-            redis.hdel("is_online", user.getUID());
+            redis.hdel("is_online", user.getEmail());
         }
         if (reply == "NO") {
             cout << "拒接接收文件" << endl;
-            redis.srem("recv" + user.getUID(), arr[i]->str);
+            redis.srem("recv" + user.getEmail(), arr[i]->str);
             freeReplyObject(arr[i]);
             continue;
         }
@@ -428,7 +427,7 @@ void receive_file(int fd, User &user) {
                 size += ret;
             }
         }
-        redis.srem("recv" + user.getUID(), arr[i]->str);
+        redis.srem("recv" + user.getEmail(), arr[i]->str);
         close(fp);
         freeReplyObject(arr[i]);
     }

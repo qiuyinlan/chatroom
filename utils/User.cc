@@ -37,18 +37,18 @@ User::User() : is_online(false) {
     //cout<<"timer: "<<to_string(timer)<<endl;
     string timeStamp = to_string(timer).substr(8, 2);
     //cout<<"timeStamp: "<<timeStamp<<endl;
-    UID = to_string(random_num).append(timeStamp);
+    email = to_string(random_num).append(timeStamp);
     my_time = get_time();
     password = "";
     username = "";
 }
 
-void User::setUID(string uid) {
-    UID = std::move(uid);
+void User::setEmail(string email) {
+    this->email = std::move(email);
 }
 
-[[nodiscard]] string User::getUID() const {
-    return UID;
+[[nodiscard]] string User::getEmail() const {
+    return email;
 }
 
 void User::setPassword(string password) {
@@ -82,7 +82,7 @@ void User::setIsOnline(bool online) {
 string User::to_json() {
     json root;
     root["my_time"] = my_time;
-    root["UID"] = UID;
+    root["email"] = email;
     root["username"] = username;
     root["password"] = password;
     return root.dump();
@@ -91,7 +91,7 @@ string User::to_json() {
 void User::json_parse(const string &json_str) {
     json root = json::parse(json_str);
     my_time = root["my_time"].get<string>();
-    UID = root["UID"].get<string>();
+    email = root["email"].get<string>();
     username = root["username"].get<string>();
     password = root["password"].get<string>();
 }

@@ -50,12 +50,12 @@ class LoginRequest {
 public:
     LoginRequest();
 
-    //LoginRequest(const std::string &uid, const std::string &passwd) : UID(uid), passwd(passwd) {}
-    LoginRequest(string uid, string passwd);
+    //LoginRequest(const std::string &email, const std::string &passwd) : email(email), passwd(passwd) {}
+    LoginRequest(string email, string passwd);
 
-    [[nodiscard]] const string &getUID() const;
+    [[nodiscard]] const string &getEmail() const;
 
-    void setUid(const string &uid);
+    void setEmail(const string &email);
 
     [[nodiscard]] const string &getPassword() const;
 
@@ -66,7 +66,7 @@ public:
     void json_parse(const string &json);
 
 private:
-    string UID;
+    string email;
     string password;
 };
 
@@ -74,19 +74,19 @@ struct Message {
 public:
     Message();
 
-    Message(string username, string UID_from, string UID_to, string groupName = "1");
+    Message(string username, string email_from, string email_to, string groupName = "1");
 
     [[nodiscard]] string getUsername() const;
 
     void setUsername(const string &name);
 
-    [[nodiscard]] const string &getUidFrom() const;
+    [[nodiscard]] const string &getEmailFrom() const;
 
-    void setUidFrom(const string &uidFrom);
+    void setEmailFrom(const string &emailFrom);
 
-    [[nodiscard]] const string &getUidTo() const;
+    [[nodiscard]] const string &getEmailTo() const;
 
-    void setUidTo(const string &uidTo);
+    void setEmailTo(const string &emailTo);
 
     [[nodiscard]] string getContent() const;
 
@@ -109,8 +109,8 @@ public:
 private:
     string timeStamp;
     string username;
-    string UID_from;
-    string UID_to;
+    string email_from;
+    string email_to;
     //实际聊天内容
     string content;
     string group_name;

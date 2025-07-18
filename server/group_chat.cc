@@ -9,9 +9,9 @@
 using namespace std;
 
 GroupChat::GroupChat(int fd, const User &user) : fd(fd), user(user) {
-    joined = "joined" + user.getUID();
-    created = "created" + user.getUID();
-    managed = "managed" + user.getUID();
+    joined = "joined" + user.getEmail();
+    created = "created" + user.getEmail();
+    managed = "managed" + user.getEmail();
 }
 
 void GroupChat::sync() {
@@ -58,14 +58,14 @@ void GroupChat::sync() {
 void GroupChat::startChat() {
     Redis redis;
     redis.connect();
-    redis.sadd("group_chat", user.getUID());
+    redis.sadd("group_chat", user.getEmail());
     string group_info;
     redisReply **arr;
 
     recvMsg(fd, group_info);
     Group group;
     group.json_parse(group_info);
-    int num = redis.llen(group.getGroupUid() + "history");
+    int num = redis.llen(group.getGroupEmail() + "history");
     if (num < 5) {
 
         sendMsg(fd, to_string(num));
@@ -75,7 +75,7 @@ void GroupChat::startChat() {
         sendMsg(fd, to_string(num));
     }
     if (num != 0) {
-        arr = redis.lrange(group.getGroupUid() + "history", "0", to_string(num - 1));
+        arr = redis.lrange(group.getGroupEmail() + "history", "0", to_string(num - 1));
     }
     for (int i = num - 1; i >= 0; i--) {
 
@@ -88,9 +88,9 @@ void GroupChat::startChat() {
         int ret = recvMsg(fd, msg);
         if (msg == EXIT || ret == 0) {
             sendMsg(fd, EXIT);
-            redis.srem("group_chat", user.getUID());
+            redis.srem("group_chat", user.getEmail());
             if (ret == 0) {
-                redis.hdel("is_online", user.getUID());
+                redis.hdel("is_online", user.getEmail());
             }
             return;
         }
@@ -100,27 +100,27 @@ void GroupChat::startChat() {
             return;
         }
 
-        redis.lpush(group.getGroupUid() + "history", msg);
-        message.setUidTo(group.getGroupUid());
+        redis.lpush(group.getGroupEmail() + "history", msg);
+        message.setEmailTo(group.getGroupEmail());
         arr = redis.smembers(group.getMembers());
-        string UIDto;
+        string emailto;
         for (int i = 0; i < len; i++) {
-            UIDto = arr[i]->str;
-            if (UIDto == user.getUID()) {
+            emailto = arr[i]->str;
+            if (emailto == user.getEmail()) {
                 freeReplyObject(arr[i]);
                 continue;
             }
-            if (!redis.hexists("is_online", UIDto)) {
-                redis.hset("chat", UIDto, group.getGroupName());
+            if (!redis.hexists("is_online", emailto)) {
+                redis.hset("chat", emailto, group.getGroupName());
                 freeReplyObject(arr[i]);
                 continue;
             }
-            if (!redis.sismember("group_chat", UIDto)) {
-                redis.hset("chat", UIDto, group.getGroupName());
+            if (!redis.sismember("group_chat", emailto)) {
+                redis.hset("chat", emailto, group.getGroupName());
                 freeReplyObject(arr[i]);
                 continue;
             }
-            string s_fd = redis.hget("is_online", UIDto);
+            string s_fd = redis.hget("is_online", emailto);
             int _fd = stoi(s_fd);
             sendMsg(_fd, msg);
             freeReplyObject(arr[i]);
@@ -137,35 +137,35 @@ void GroupChat::createGroup() {
     recvMsg(fd, group_info);
     Group group;
     group.json_parse(group_info);
-    redis.hset("group_info", group.getGroupUid(), group_info);
-    redis.sadd(joined, group.getGroupUid());
-    redis.sadd(managed, group.getGroupUid());
-    redis.sadd(created, group.getGroupUid());
-    redis.sadd(group.getMembers(), user.getUID());
-    redis.sadd(group.getAdmins(), user.getUID());
+    redis.hset("group_info", group.getGroupEmail(), group_info);
+    redis.sadd(joined, group.getGroupEmail());
+    redis.sadd(managed, group.getGroupEmail());
+    redis.sadd(created, group.getGroupEmail());
+    redis.sadd(group.getMembers(), user.getEmail());
+    redis.sadd(group.getAdmins(), user.getEmail());
 }
 
 void GroupChat::joinGroup() {
     Redis redis;
     redis.connect();
-    string groupUid;
-    //接收客户端发送的群聊UID
-    recvMsg(fd, groupUid);
-    if (!redis.hexists("group_info", groupUid)) {
+    string groupEmail;
+    //接收客户端发送的群聊email
+    recvMsg(fd, groupEmail);
+    if (!redis.hexists("group_info", groupEmail)) {
         sendMsg(fd, "-1");
         return;
     }
-    string json = redis.hget("group_info", groupUid);
+    string json = redis.hget("group_info", groupEmail);
     Group group;
     group.json_parse(json);
     //已经加入该群
-    if (redis.sismember(joined, groupUid)) {
+    if (redis.sismember(joined, groupEmail)) {
         sendMsg(fd, "-2");
         return;
     }
 
     sendMsg(fd, "1");
-    redis.sadd("if_add" + groupUid, user.getUID());
+    redis.sadd("if_add" + groupEmail, user.getEmail());
     //群聊实时通知
     int num = redis.scard(group.getAdmins());
     redisReply **arr = redis.smembers(group.getAdmins());
@@ -177,10 +177,10 @@ void GroupChat::joinGroup() {
 void GroupChat::groupHistory() const {
     Redis redis;
     redis.connect();
-    string group_uid;
+    string group_email;
 
-    recvMsg(fd, group_uid);
-    string group_history = group_uid + "history";
+    recvMsg(fd, group_email);
+    string group_history = group_email + "history";
     int num = redis.llen(group_history);
 
     sendMsg(fd, to_string(num));
@@ -206,7 +206,7 @@ void GroupChat::managedGroup() const {
 
         ret = recvMsg(fd, choice);
         if (ret == 0) {
-            redis.hdel("is_online", user.getUID());
+            redis.hdel("is_online", user.getEmail());
         }
         if (choice == BACK) {
             break;
@@ -222,13 +222,13 @@ void GroupChat::managedGroup() const {
 void GroupChat::approve(Group &group) const {
     Redis redis;
     redis.connect();
-    int num = redis.scard("if_add" + group.getGroupUid());
+    int num = redis.scard("if_add" + group.getGroupEmail());
 
     sendMsg(fd, to_string(num));
     if (num == 0) {
         return;
     }
-    redisReply **arr = redis.smembers("if_add" + group.getGroupUid());
+    redisReply **arr = redis.smembers("if_add" + group.getGroupEmail());
     string info;
     string choice;
     User member;
@@ -240,16 +240,16 @@ void GroupChat::approve(Group &group) const {
 
         int ret = recvMsg(fd, choice);
         if (ret == 0) {
-            redis.hdel("is_online", user.getUID());
+            redis.hdel("is_online", user.getEmail());
         }
         if (choice == "n") {
             //删除缓冲区
-            redis.srem("if_add" + group.getGroupUid(), member.getUID());
+            redis.srem("if_add" + group.getGroupEmail(), member.getEmail());
         } else {
-            redis.sadd("joined" + member.getUID(), group.getGroupUid());
-            redis.sadd(group.getMembers(), member.getUID());
+            redis.sadd("joined" + member.getEmail(), group.getGroupEmail());
+            redis.sadd(group.getMembers(), member.getEmail());
             //删除缓冲区
-            redis.srem("if_add" + group.getGroupUid(), member.getUID());
+            redis.srem("if_add" + group.getGroupEmail(), member.getEmail());
         }
         freeReplyObject(arr[i]);
     }
@@ -278,12 +278,12 @@ void GroupChat::remove(Group &group) const {
     }
     member.json_parse(remove_info);
     GroupChat groupChat(0, member);
-    redis.srem(groupChat.joined, group.getGroupUid());
-    redis.srem(groupChat.managed, group.getGroupUid());
-    redis.srem(group.getMembers(), member.getUID());
-    redis.srem(group.getAdmins(), member.getUID());
+    redis.srem(groupChat.joined, group.getGroupEmail());
+    redis.srem(groupChat.managed, group.getGroupEmail());
+    redis.srem(group.getMembers(), member.getEmail());
+    redis.srem(group.getAdmins(), member.getEmail());
 
-    redis.sadd(member.getUID() + "del", group.getGroupName());
+    redis.sadd(member.getEmail() + "del", group.getGroupName());
 }
 
 void GroupChat::managedCreatedGroup() const {
@@ -299,7 +299,7 @@ void GroupChat::managedCreatedGroup() const {
 
         int ret = recvMsg(fd, choice);
         if (ret == 0) {
-            redis.hdel("is_online", user.getUID());
+            redis.hdel("is_online", user.getEmail());
         }
         if (choice == "0") {
             break;
@@ -332,19 +332,19 @@ void GroupChat::appointAdmin(Group &group) const {
 
     int ret = recvMsg(fd, member_choose);
     if (ret == 0) {
-        redis.hdel("is_online", user.getUID());
+        redis.hdel("is_online", user.getEmail());
     }
     User member;
     member.json_parse(member_choose);
     //选择的已经是管理员了
-    if (redis.sismember(group.getAdmins(), member.getUID())) {
+    if (redis.sismember(group.getAdmins(), member.getEmail())) {
         sendMsg(fd, "-1");
         return;
     }
-    redis.sadd(group.getAdmins(), member.getUID());
-    redis.sadd("managed" + member.getUID(), group.getGroupUid());
+    redis.sadd(group.getAdmins(), member.getEmail());
+    redis.sadd("managed" + member.getEmail(), group.getGroupEmail());
     //加入缓冲区
-    redis.sadd("have_managed" + member.getUID(), group.getGroupName());
+    redis.sadd("have_managed" + member.getEmail(), group.getGroupName());
     sendMsg(fd, "1");
 }
 
@@ -366,10 +366,10 @@ void GroupChat::revokeAdmin(Group &group) const {
 
     recvMsg(fd, admin_info);
     admin.json_parse(admin_info);
-    redis.srem(group.getAdmins(), admin.getUID());
-    redis.srem("managed" + admin.getUID(), group.getGroupUid());
+    redis.srem(group.getAdmins(), admin.getEmail());
+    redis.srem("managed" + admin.getEmail(), group.getGroupEmail());
     //缓冲区
-    redis.srem("revoked" + admin.getUID(), group.getGroupName());
+    redis.srem("revoked" + admin.getEmail(), group.getGroupName());
 }
 
 void GroupChat::deleteGroup(Group &group) {
@@ -377,17 +377,17 @@ void GroupChat::deleteGroup(Group &group) {
     redis.connect();
     int num = redis.scard(group.getMembers());
     redisReply **arr = redis.smembers(group.getMembers());
-    string UID;
+    string email;
     for (int i = 0; i < num; i++) {
-        UID = arr[i]->str;
-        redis.srem("joined" + UID, group.getGroupUid());
-        redis.srem("created" + UID, group.getGroupUid());
-        redis.srem("managed" + UID, group.getGroupUid());
+        email = arr[i]->str;
+        redis.srem("joined" + email, group.getGroupEmail());
+        redis.srem("created" + email, group.getGroupEmail());
+        redis.srem("managed" + email, group.getGroupEmail());
         freeReplyObject(arr[i]);
     }
     redis.del(group.getMembers());
     redis.del(group.getAdmins());
-    redis.del(group.getGroupUid() + "history");
+    redis.del(group.getGroupEmail() + "history");
 }
 
 void GroupChat::showMembers() const {
@@ -421,8 +421,8 @@ void GroupChat::quit() {
 
     recvMsg(fd, group_info);
     group.json_parse(group_info);
-    redis.srem("joined" + user.getUID(), group.getGroupUid());
-    redis.srem("managed" + user.getUID(), group.getGroupUid());
-    redis.srem(group.getMembers(), user.getUID());
-    redis.srem(group.getAdmins(), user.getUID());
+    redis.srem("joined" + user.getEmail(), group.getGroupEmail());
+    redis.srem("managed" + user.getEmail(), group.getGroupEmail());
+    redis.srem(group.getMembers(), user.getEmail());
+    redis.srem(group.getAdmins(), user.getEmail());
 }

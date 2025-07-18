@@ -18,9 +18,9 @@
 using namespace std;
 
 GroupChat::GroupChat(int fd, const User &user) : fd(fd), user(user) {
-    joined = "joined" + user.getUID();
-    created = "created" + user.getUID();
-    managed = "managed" + user.getUID();
+    joined = "joined" + user.getEmail();
+    created = "created" + user.getEmail();
+    managed = "managed" + user.getEmail();
 }
 
 void GroupChat::sync(vector<Group> &createdGroup, vector<Group> &managedGroup, vector<Group> &joinedGroup) const {
@@ -111,10 +111,10 @@ void GroupChat::startChat(vector<Group> &joinedGroup) {
         cout << history_message.getUsername() << ": " << history_message.getContent() << endl;
     }
     cout << YELLOW << "-----------------------以上为历史消息-----------------------" << RESET << endl;
-    Message message(user.getUsername(), user.getUID(), joinedGroup[which].getGroupUid());
+    Message message(user.getUsername(), user.getEmail(), joinedGroup[which].getGroupEmail());
     message.setGroupName(joinedGroup[which].getGroupName());
     //开线程接收群成员消息
-    thread work(chatReceived, fd, joinedGroup[which].getGroupUid());
+    thread work(chatReceived, fd, joinedGroup[which].getGroupEmail());
     work.detach();
     string m;
     while (true) {
@@ -152,10 +152,10 @@ void GroupChat::createGroup() {
         }
         break;
     }
-    Group group(groupName, user.getUID());
+    Group group(groupName, user.getEmail());
 
     sendMsg(fd, group.to_json());
-    cout << "创建成功，该群的群号为：" << group.getGroupUid() << endl;
+    cout << "创建成功，该群的群号为：" << group.getGroupEmail() << endl;
     string temp;
     cout << "按任意键返回" << endl;
     getline(cin, temp);
@@ -167,24 +167,22 @@ void GroupChat::createGroup() {
 
 void GroupChat::joinGroup() const {
     sendMsg(fd, "3");
-    string group_uid;
+    string group_email;
     while (true) {
-        cout << "输入你要加入的群聊UID" << endl;
-        getline(cin, group_uid);
+        cout << "输入你要加入的群聊邮箱" << endl;
+        getline(cin, group_email);
         if (cin.eof()) {
             cout << "文件读到结尾" << endl;
             return;
         }
-        if (group_uid.find(' ') != string::npos) {
-            cout << "群聊UID没有空格" << endl;
+        if (group_email.find(' ') != string::npos) {
+            cout << "群聊邮箱不能有空格" << endl;
             continue;
         }
         break;
     }
-
-    sendMsg(fd, group_uid);
+    sendMsg(fd, group_email);
     string response;
-
     recvMsg(fd, response);
     if (response == "-1") {
         cout << "该群不存在" << endl;
@@ -234,7 +232,7 @@ void GroupChat::groupHistory(const std::vector<Group> &joinedGroup) {
     sendMsg(fd, "4");
     which--;
 
-    sendMsg(fd, joinedGroup[which].getGroupUid());
+    sendMsg(fd, joinedGroup[which].getGroupEmail());
     Message message;
     string nums;
 
@@ -381,7 +379,7 @@ void GroupChat::remove(Group &group) const {
         recvMsg(fd, buf);
         member.json_parse(buf);
         arr.push_back(member);
-        if (member.getUID() == group.getOwnerUid()) {
+        if (member.getEmail() == group.getOwnerEmail()) {
             cout << i + 1 << "." << member.getUsername() << "(群主)" << endl;
         } else {
             cout << i + 1 << "." << member.getUsername() << endl;
@@ -404,7 +402,7 @@ void GroupChat::remove(Group &group) const {
             return;
         }
         who--;
-        if (arr[who].getUID() == group.getOwnerUid()) {
+        if (arr[who].getEmail() == group.getOwnerEmail()) {
             cout << "该用户是群主，你不能踢！" << endl;
             continue;
         }
@@ -502,7 +500,7 @@ void GroupChat::appointAdmin(Group &createdGroup) const {
         recvMsg(fd, member_info);
         member.json_parse(member_info);
         arr.push_back(member);
-        if (member.getUID() == createdGroup.getOwnerUid()) {
+        if (member.getEmail() == createdGroup.getOwnerEmail()) {
             cout << i + 1 << ". " << member.getUsername() << "群主" << endl;
         } else {
             cout << i + 1 << ". " << member.getUsername() << endl;
@@ -521,7 +519,7 @@ void GroupChat::appointAdmin(Group &createdGroup) const {
         }
         cin.ignore(INT32_MAX, '\n');
         who--;
-        if (arr[who].getUID() == createdGroup.getOwnerUid()) {
+        if (arr[who].getEmail() == createdGroup.getOwnerEmail()) {
             cout << "该用户为群主" << endl;
             continue;
         }
@@ -559,7 +557,7 @@ void GroupChat::revokeAdmin(Group &createdGroup) const {
         recvMsg(fd, admin_info);
         admin.json_parse(admin_info);
         arr.push_back(admin);
-        if (admin.getUID() == createdGroup.getOwnerUid()) {
+        if (admin.getEmail() == createdGroup.getOwnerEmail()) {
             cout << i + 1 << admin.getUsername() << "群主" << endl;
         } else {
             cout << i + 1 << admin.getUsername() << endl;
@@ -578,7 +576,7 @@ void GroupChat::revokeAdmin(Group &createdGroup) const {
         }
         cin.ignore(INT32_MAX, '\n');
         who--;
-        if (arr[who].getUID() == createdGroup.getOwnerUid()) {
+        if (arr[who].getEmail() == createdGroup.getOwnerEmail()) {
             cout << "不能取消群主的管理权限" << endl;
             continue;
         }
@@ -662,7 +660,7 @@ void GroupChat::quit(vector<Group> &joinedGroup) {
     cout << user.getUsername() << endl;
     cout << "-------------------------------------------" << endl;
     for (int i = 0; i < joinedGroup.size(); i++) {
-        if (joinedGroup[i].getOwnerUid() == user.getUID()) {
+        if (joinedGroup[i].getOwnerEmail() == user.getEmail()) {
             cout << i + 1 << ". " << joinedGroup[i].getGroupName() << "(您是群主)" << endl;
         } else {
             cout << i + 1 << ". " << joinedGroup[i].getGroupName() << endl;
@@ -683,7 +681,7 @@ void GroupChat::quit(vector<Group> &joinedGroup) {
         }
         cin.ignore(INT32_MAX, '\n');
         which--;
-        if (joinedGroup[which].getOwnerUid() == user.getUID()) {
+        if (joinedGroup[which].getOwnerEmail() == user.getEmail()) {
             cout << "您是该群群主，不能退出" << endl;
             continue;
         }
@@ -717,7 +715,7 @@ void GroupChat::showJoinedGroup(const std::vector<Group> &joinedGroup) {
     cout << user.getUsername() << "加入的群聊" << endl;
     cout << "------------------------------------" << endl;
     for (int i = 0; i < joinedGroup.size(); ++i) {
-        cout << i + 1 << ". " << joinedGroup[i].getGroupName() << "(" << joinedGroup[i].getGroupUid() << ")" << endl;
+        cout << i + 1 << ". " << joinedGroup[i].getGroupName() << "(" << joinedGroup[i].getGroupEmail() << ")" << endl;
     }
     cout << "------------------------------------" << endl;
     cout << "按任意键返回" << endl;
@@ -744,7 +742,7 @@ void GroupChat::showManagedGroup(vector<Group> &managedGroup) {
     cout << user.getUsername() << "管理的群" << endl;
     cout << "----------------------------------" << endl;
     for (int i = 0; i < managedGroup.size(); ++i) {
-        cout << i + 1 << ". " << managedGroup[i].getGroupName() << "(" << managedGroup[i].getGroupUid() << ")" << endl;
+        cout << i + 1 << ". " << managedGroup[i].getGroupName() << "(" << managedGroup[i].getGroupEmail() << ")" << endl;
     }
     cout << "----------------------------------" << endl;
     cout << "按任意键退出" << endl;
@@ -770,7 +768,7 @@ void GroupChat::showCreatedGroup(std::vector<Group> &createdGroup) {
     cout << user.getUsername() << "创建的群" << endl;
     cout << "----------------------------------" << endl;
     for (int i = 0; i < createdGroup.size(); ++i) {
-        cout << i + 1 << ". " << createdGroup[i].getGroupName() << "(" << createdGroup[i].getGroupUid() << ")" << endl;
+        cout << i + 1 << ". " << createdGroup[i].getGroupName() << "(" << createdGroup[i].getGroupEmail() << ")" << endl;
     }
     cout << "----------------------------------" << endl;
     cout << "按任意键退出" << endl;

@@ -15,9 +15,9 @@ public:
 
     static string get_time();
 
-    void setUID(string uid);
+    void setEmail(string email);
 
-    [[nodiscard]] string getUID() const;
+    [[nodiscard]] string getEmail() const;
 
     void setPassword(string password);
 
@@ -39,7 +39,7 @@ public:
     void json_parse(const string &json);
 
 private:
-    string UID;    //由注册时间关联，10位
+    string email;    //邮箱，唯一主键
     string username; //用户名
     string password; //密码
     string my_time;  //该用户创建时间

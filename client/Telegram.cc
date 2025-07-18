@@ -38,7 +38,7 @@ void Telegram::sync(vector<pair<string, User>> &my_friends) {
         //循环接收好友信息
         recvMsg(fd, friend_info);
         _friend.json_parse(friend_info);
-        my_friends.emplace_back(user.getUID(), _friend);
+        my_friends.emplace_back(user.getEmail(), _friend);
     }
     system("clear");
     cout << "同步成功" << endl;
@@ -57,7 +57,7 @@ void Telegram::startChat(vector<pair<string, User>> &my_friends) {
     }
     cout << "-------------------------------------" << endl;
     for (int i = 0; i < my_friends.size(); i++) {
-        cout << i + 1 << ". " << my_friends[i].second.getUsername() << " " << my_friends[i].second.getUID() << endl;
+        cout << i + 1 << ". " << my_friends[i].second.getUsername() << " " << my_friends[i].second.getEmail() << endl;
     }
     cout << "-------------------------------------" << endl;
     int who;
@@ -78,7 +78,7 @@ void Telegram::startChat(vector<pair<string, User>> &my_friends) {
     //bug who必须要减1,不然只有一个好友的话，会导致数组索引越界
     who--;
     cout << "你好，我是" << my_friends[who].second.getUsername() << "快来与我聊天吧！" << endl;
-    string records_index = user.getUID() + my_friends[who].second.getUID();
+    string records_index = user.getEmail() + my_friends[who].second.getEmail();
     //向服务器发送历史聊天记录索引
     sendMsg(fd, records_index);
     Message history;
@@ -96,10 +96,10 @@ void Telegram::startChat(vector<pair<string, User>> &my_friends) {
         cout << history.getUsername() << "  :  " << history.getContent() << endl;
     }
     cout << YELLOW << "-------------------以上为历史消息-------------------" << RESET << endl;
-    Message message(user.getUsername(), user.getUID(), my_friends[who].second.getUID());
-    string friend_UID = my_friends[who].second.getUID();
+    Message message(user.getUsername(), user.getEmail(), my_friends[who].second.getEmail());
+    string friend_email = my_friends[who].second.getEmail();
 
-    sendMsg(fd, friend_UID);
+    sendMsg(fd, friend_email);
     string isBlocked;
 
     recvMsg(fd, isBlocked);
@@ -114,7 +114,7 @@ void Telegram::startChat(vector<pair<string, User>> &my_friends) {
         }
     }
     //开线程接收私聊好友对方的消息
-    thread work(chatReceived, fd, friend_UID);
+    thread work(chatReceived, fd, friend_email);
     work.detach();
     string msg, json;
     while (true) {
@@ -167,9 +167,9 @@ void Telegram::findHistory(vector<pair<string, User>> &my_friends) const {
         cin.ignore(INT32_MAX, '\n');
     }
     cin.ignore(INT32_MAX, '\n');
-    //发送想要查看的历史记录的好友的UID
+    //发送想要查看的历史记录的好友的email
     who--;
-    sendMsg(fd, my_friends[who].second.getUID());
+    sendMsg(fd, my_friends[who].second.getEmail());
     string nums;
     //接收服务器发来的历史记录数量
     recvMsg(fd, nums);
@@ -213,8 +213,8 @@ void Telegram::listFriends(vector<pair<string, User>> &my_friends) {
     //发送好友数量
     sendMsg(fd, to_string(my_friends.size()));
     for (int i = 0; i < my_friends.size(); ++i) {
-        //循环发送好友的UID来查询信息
-        sendMsg(fd, my_friends[i].second.getUID());
+        //循环发送好友的email来查询信息
+        sendMsg(fd, my_friends[i].second.getEmail());
         //接收好友是否在线的信息
         recvMsg(fd, is_online);
         if (is_online == "1") {
@@ -235,20 +235,20 @@ void Telegram::listFriends(vector<pair<string, User>> &my_friends) {
 
 void Telegram::addFriend(vector<pair<string, User>> &) const {
     sendMsg(fd, ADD_FRIEND);
-    string UID;
+    string email;
     while (true) {
-        cout << "请输入你要添加好友的UID" << endl;
-        getline(cin, UID);
+        cout << "请输入你要添加好友的email" << endl;
+        getline(cin, email);
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
             return;
         }
-        if (UID.find(' ') != string::npos) {
+        if (email.find(' ') != string::npos) {
             cout << "帐号录入不允许出现空格" << endl;
             continue;
         }
 
-        sendMsg(fd, UID);
+        sendMsg(fd, email);
         string temp;
         //接收服务器发来的信号判断是否可以添加
         recvMsg(fd, temp);
@@ -364,10 +364,10 @@ void Telegram::delFriend(vector<pair<string, User>> &my_friends) {
         cin.ignore(INT32_MAX, '\n');
         //向服务器发送删除好友的信号
         sendMsg(fd, DEL_FRIEND);
-        //发送删除好友的UID
+        //发送删除好友的email
         who--;
 
-        sendMsg(fd, my_friends[who].second.getUID());
+        sendMsg(fd, my_friends[who].second.getEmail());
     }
 }
 
@@ -404,7 +404,7 @@ void Telegram::blockedLists(vector<pair<string, User>> &my_friends) const {
     sendMsg(fd, BLOCKED_LISTS);
     who--;
 
-    sendMsg(fd, my_friends[who].second.getUID());
+    sendMsg(fd, my_friends[who].second.getEmail());
     cout << "您已成功屏蔽" << my_friends[who].second.getUsername() << ", 按任意键退出" << endl;
     getline(cin, temp);
     if (cin.eof()) {
@@ -453,10 +453,10 @@ void Telegram::unblocked(vector<pair<string, User>> &my_friends) const {
         cin.ignore(INT32_MAX, '\n');
     }
     cin.ignore(INT32_MAX, '\n');
-    //向服务器发送解除屏蔽的UID
+    //向服务器发送解除屏蔽的email
     who--;
 
-    sendMsg(fd, blocked_users[who].getUID());
+    sendMsg(fd, blocked_users[who].getEmail());
     cout << "您已经成功解除了对" << blocked_users[who].getUsername() << "的屏蔽，请按任意键退出" << endl;
     getline(cin, blocked_info);
     if (cin.eof()) {
@@ -715,7 +715,7 @@ void Telegram::groupMenu() {
 
 void Telegram::viewProfile(vector<std::pair<string, User>> &my_friends) const {
     cout << "您的用户创建时间为: " << user.getMyTime() << endl;
-    cout << "您的UID为: " << user.getUID() << endl;
+    cout << "您的email为: " << user.getEmail() << endl;
     cout << "您的用户名是: " << user.getUsername() << endl;
     cout << "按任意键退出" << endl;
     string temp;

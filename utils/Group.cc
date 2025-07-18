@@ -11,59 +11,29 @@
 
 using namespace std;
 
-Group::Group(string groupName, string UID) : groupName(std::move(groupName)), UID(std::move(UID)) {
-    random_device rd;
-    mt19937 eng(rd());
-    uniform_int_distribution<> dist(10, 99);
-    int random_num = dist(eng);
-
-    time_t timer;
-    time(&timer);
-    //cout<<"timer: "<<timer<<endl;
-    string timeStamp = to_string(timer).substr(8, 2);
-    //cout<<"timeStamp: "<<timeStamp<<endl;
-    groupUID = to_string(random_num).append(timeStamp);
-    admins = groupUID + "admin";
-    members = groupUID + "member";
+Group::Group(string groupName, string email) : groupName(std::move(groupName)), email(std::move(email)) {
+    // 群聊唯一标识为email
 }
 
 std::string Group::to_json() {
     nlohmann::json root;
     root["groupName"] = groupName;
-    root["UID"] = UID;
-    root["groupUID"] = groupUID;
-    root["members"] = members;
-    root["admins"] = admins;
+    root["email"] = email;
     return root.dump();
 }
 
 void Group::json_parse(const std::string &json) {
     nlohmann::json root = nlohmann::json::parse(json);
     groupName = root["groupName"].get<std::string>();
-    UID = root["UID"].get<std::string>();
-    groupUID = root["groupUID"].get<std::string>();
-    members = root["members"].get<std::string>();
-    admins = root["admins"].get<std::string>();
+    email = root["email"].get<std::string>();
 }
 
 const string &Group::getGroupName() const {
     return groupName;
 }
 
-const string &Group::getGroupUid() const {
-    return groupUID;
-}
-
-const string &Group::getMembers() const {
-    return members;
-}
-
-const string &Group::getAdmins() const {
-    return admins;
-}
-
-const std::string &Group::getOwnerUid() const {
-    return UID;
+const std::string &Group::getEmail() const {
+    return email;
 }
 
 
