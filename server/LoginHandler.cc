@@ -23,13 +23,13 @@ void serverLogin(int epfd, int fd) {
     Redis redis;
     redis.connect();
     string request;
-    //接收用户发送的UID和密码
+    //接收用户发送的邮箱和密码
     recvMsg(fd, request);
     LoginRequest loginRequest;
     loginRequest.json_parse(request);
-    //得到用户发送的UID和密码
+    //得到用户发送的邮箱和密码
     string UID = loginRequest.getUID();
-    string passwd = loginRequest.getPasswd();
+    string password = loginRequest.getPassword();
     if (!redis.sismember("all_uid", UID)) {
         //账号不存在
         sendMsg(fd, "-1");
@@ -39,7 +39,7 @@ void serverLogin(int epfd, int fd) {
     //bug User类序列化后的json数据，中的时间带了空格，导致redis认为参数过多
     string user_info = redis.hget("user_info", UID);
     user.json_parse(user_info);
-    if (passwd != user.getPassword()) {
+    if (password != user.getPassword()) {
         //密码错误
         sendMsg(fd, "-2");
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
@@ -57,32 +57,6 @@ void serverLogin(int epfd, int fd) {
     //发送从数据库获取的用户信息
     sendMsg(fd, user_info);
     serverOperation(fd, user);
-    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
-}
-
-
-
-void serverRegister(int epfd, int fd) {
-    struct epoll_event temp;
-    temp.data.fd = fd;
-    temp.events = EPOLLIN;
-    string user_info;
-    //bug recvMsg中的read_n问题，没有设置遇到EWOULDBLOCK继续读，导致user_info读到的为空
-    //接收用户注册时发送的帐号密码
-    recvMsg(fd, user_info);
-    //cout << "user_info:" << user_info << endl;
-    User user;
-    user.json_parse(user_info);
-    string UID = user.getUID();
-    //构造函数对成员变量初始化才没有警告
-    Redis redis;
-    //bug：数据库连接问题,redis-server没有启动
-    redis.connect();
-    //bug： 数据库添加失败,json数据带有空格
-    redis.hset("user_info", UID, user_info);
-    redis.sadd("all_uid", UID);
-
-    sendMsg(fd, UID);
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
 
@@ -485,5 +459,55 @@ void resetPasswordWithCode(int epfd, int fd) {
     user.setPassword(password);
     redis.hset("user_info", email, user.to_json());
     sendMsg(fd, "密码重置成功");
+    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+}
+
+void findPasswordWithCode(int epfd, int fd) {
+    struct epoll_event temp;
+    temp.data.fd = fd;
+    temp.events = EPOLLIN;
+    string json_str;
+    recvMsg(fd, json_str);
+    nlohmann::json root;
+    try {
+        root = nlohmann::json::parse(json_str);
+    } catch (const nlohmann::json::exception& e) {
+        sendMsg(fd, "JSON 格式错误");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    string email = root["email"].get<string>();
+    string code = root["code"].get<string>();
+    Redis redis;
+    redis.connect();
+    string real_code = redis.hget("reset_code", email);
+    if (real_code != code) {
+        sendMsg(fd, "验证码错误");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    // 检查用户是否存在
+    if (!redis.sismember("all_uid", email)) {
+        sendMsg(fd, "该邮箱未注册");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    // 查找原密码
+    string user_info = redis.hget("user_info", email);
+    nlohmann::json user_json;
+    try {
+        user_json = nlohmann::json::parse(user_info);
+    } catch (const nlohmann::json::exception& e) {
+        sendMsg(fd, "用户信息损坏");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    if (!user_json.contains("password")) {
+        sendMsg(fd, "未找到密码信息");
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    string password = user_json["password"].get<string>();
+    sendMsg(fd, "您的密码是: " + password);
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }

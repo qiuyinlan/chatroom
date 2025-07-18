@@ -9,7 +9,6 @@ using std::string;
 //maybe 消息不能重复
 //type
 const string LOGIN = "1";
-const string REGISTER = "2";
 const string NOTIFY = "3";
 //客户端子线程进行实时通知，私聊，群聊
 //transaction
@@ -58,9 +57,9 @@ public:
 
     void setUid(const string &uid);
 
-    [[nodiscard]] const string &getPasswd() const;
+    [[nodiscard]] const string &getPassword() const;
 
-    void setPasswd(const string &password);
+    void setPassword(const string &password);
 
     string to_json();
 
@@ -68,7 +67,7 @@ public:
 
 private:
     string UID;
-    string passwd;
+    string password;
 };
 
 struct Message {
@@ -128,5 +127,6 @@ inline const std::string REQUEST_CODE = "20"; // 请求验证码
 inline const std::string REGISTER_WITH_CODE = "21"; // 验证码注册
 inline const std::string REQUEST_RESET_CODE = "22"; // 找回密码请求验证码
 inline const std::string RESET_PASSWORD_WITH_CODE = "23"; // 验证码重置密码
+inline const std::string FIND_PASSWORD_WITH_CODE = "24"; // 邮箱+验证码找回密码
 
 #endif //CHATROOM_PROTO_H

@@ -12,7 +12,7 @@ using json = nlohmann::json;
 LoginRequest::LoginRequest() = default;
 
 //LoginRequest(const std::string &uid, const std::string &passwd) : UID(uid), passwd(passwd) {}
-LoginRequest::LoginRequest(std::string uid, std::string passwd) : UID(std::move(uid)), passwd(std::move(passwd)) {}
+LoginRequest::LoginRequest(std::string uid, std::string password) : UID(std::move(uid)), password(std::move(password)) {}
 
 [[nodiscard]] const string &LoginRequest::getUID() const {
     return UID;
@@ -22,12 +22,12 @@ void LoginRequest::setUid(const std::string &uid) {
     UID = uid;
 }
 
-[[nodiscard]] const string &LoginRequest::getPasswd() const {
-    return passwd;
+[[nodiscard]] const string &LoginRequest::getPassword() const {
+    return password;
 }
 
-void LoginRequest::setPasswd(const std::string &password) {
-    passwd = password;
+void LoginRequest::setPassword(const std::string &password) {
+    this->password = password;
 }
 
 string LoginRequest::to_json() {
@@ -35,14 +35,14 @@ string LoginRequest::to_json() {
     //bug 序列化和反序列化方式不不一致，一种是数组，一种是对象键值对
     //root.append(UID);
     root["UID"] = UID;
-    root["passwd"] = passwd;
+    root["password"] = password;
     return root.dump();
 }
 
 void LoginRequest::json_parse(const string &json_str) {
     json root = json::parse(json_str);
     UID = root["UID"].get<string>();
-    passwd = root["passwd"].get<string>();
+    password = root["password"].get<string>();
 }
 
 

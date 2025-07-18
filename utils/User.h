@@ -41,7 +41,7 @@ public:
 private:
     string UID;    //由注册时间关联，10位
     string username; //用户名
-    string passwd; //密码
+    string password; //密码
     string my_time;  //该用户创建时间
     bool is_online;//是否咋在线;false代表不在线，非0代表在fd
 };

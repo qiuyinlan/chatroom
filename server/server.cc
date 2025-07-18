@@ -113,16 +113,11 @@ int main(int argc, char *argv[]) {
                 }
 
             } else {
-                //recvMsg()中的read_n写的有问题，之前是因为注释掉了ret=0时的cout输出，不然会出现大量"断开连接"提示
                 recvMsg(fd, msg);
                 if (msg == LOGIN) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ serverLogin(epfd, fd); });
-                } else if (msg == REGISTER) {
-                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
-                    pool.addTask([=](){ serverRegister(epfd, fd); });
                 } else if (msg == NOTIFY) {
-                    //bug 直接吐血，实时通知的逻辑应该加在这里
                     notify(fd);
                 } else if (msg == REQUEST_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
@@ -136,6 +131,9 @@ int main(int argc, char *argv[]) {
                 } else if (msg == RESET_PASSWORD_WITH_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ resetPasswordWithCode(epfd, fd); });
+                } else if (msg == FIND_PASSWORD_WITH_CODE) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ findPasswordWithCode(epfd, fd); });
                 }
             }
         }

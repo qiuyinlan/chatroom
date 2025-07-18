@@ -249,3 +249,46 @@ int email_reset_password(int fd) {
     cout << server_reply << endl;
     return server_reply == "密码重置成功";
 }
+
+int email_find_password(int fd) {
+    string email, code, server_reply;
+    
+   
+    while (true) {
+        cout << "请输入您的邮箱: ";
+        getline(cin, email);
+        if (email.empty()) {
+            cout << "邮箱不能为空！" << endl;
+            continue;
+        }
+        break;
+    }
+    // 获取验证码
+    cout << "按回车获取验证码..." << endl;
+    cin.ignore(INT32_MAX, '\n');
+    sendMsg(fd, REQUEST_RESET_CODE); // 复用请求验证码的协议
+    sendMsg(fd, email);
+    recvMsg(fd, server_reply);
+    cout << server_reply << endl;
+    if (server_reply.find("失败") != string::npos) return 0;
+    // 循环输入验证码，不能为空
+    while (true) {
+        cout << "请输入收到的验证码: ";
+        getline(cin, code);
+        if (code.empty()) {
+            cout << "验证码不能为空！" << endl;
+            continue;
+        }
+        break;
+    }
+    // 组装JSON
+    json root;
+    root["email"] = email;
+    root["code"] = code;
+    string json_str = root.dump();
+    sendMsg(fd, FIND_PASSWORD_WITH_CODE); // 需要在协议中定义 FIND_PASSWORD_WITH_CODE
+    sendMsg(fd, json_str);
+    recvMsg(fd, server_reply);
+    cout << server_reply << endl;
+    return server_reply == "找回密码成功";
+}

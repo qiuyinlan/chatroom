@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
 #include "OperationMenu.h"
 #include "Telegram.h"
 #include "Notifications.h"
@@ -54,11 +51,7 @@ void clientOperation(int fd, User &user) {
             {11, bind(&Telegram::receiveFile, telegram, placeholders::_1)},
             {12, bind(&Telegram::viewProfile, telegram, placeholders::_1)}
     };
-//    char *end_ptr;
-//    int opt_int = (int) strtol(opt.c_str(), &end_ptr, 10);
-//    if (*end_ptr != '\0' || opt.find(' ') != std::string::npos) {
-//        std::cout << "选项格式错误 请重新输入" << std::endl;
-//    }
+
     while (true) {
         operationMenu();
         string option;
@@ -102,7 +95,7 @@ void clientOperation(int fd, User &user) {
 void operationMenu() {
     cout << "[1]开始聊天                  [2]历史记录" << endl;
     cout << "[3]查看好友                  [4]添加好友" << endl;
-    cout << "[5]查看添加好友请求           [6]删除好友" << endl;
+    cout << "[5]查看添加好友请求          [6]删除好友" << endl;
     cout << "[7]屏蔽好友                  [8]解除屏蔽" << endl;
     cout << "[9]群聊                      [10]发送文件" << endl;
     cout << "[11]接收文件                 [12]查看我的个人信息" << endl;
