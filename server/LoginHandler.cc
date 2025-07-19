@@ -11,6 +11,8 @@
 #include <curl/curl.h>
 #include <string>
 #include <nlohmann/json.hpp>
+#include <random>
+#include <ctime>
 
 using namespace std;
 using json = nlohmann::json;
@@ -28,20 +30,19 @@ void serverLogin(int epfd, int fd) {
     LoginRequest loginRequest;
     loginRequest.json_parse(request);
     //得到用户发送的邮箱和密码
-    string UID = loginRequest.getUID();
+    string email = loginRequest.getUID();
     string password = loginRequest.getPassword();
-    if (!redis.sismember("all_uid", UID)) {
-        //账号不存在
-        sendMsg(fd, "-1");
+
+    if (!redis.hexists("email_to_uid", email)) {
+        sendMsg(fd, "-1"); // 账号不存在
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-    //bug User类序列化后的json数据，中的时间带了空格，导致redis认为参数过多
+    string UID = redis.hget("email_to_uid", email);
     string user_info = redis.hget("user_info", UID);
     user.json_parse(user_info);
     if (password != user.getPassword()) {
-        //密码错误
-        sendMsg(fd, "-2");
+        sendMsg(fd, "-2"); // 密码错误
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
@@ -200,10 +201,17 @@ void notify(int fd) {
 }
 
 std::string generateCode() {
-    std::string code;
-    for (int i = 0; i < 6; ++i)
-        code += '0' + rand() % 10;
-    return code;
+    // 取当前时间戳的后两位
+    time_t timer;
+    time(&timer);
+    std::string timeStamp = std::to_string(timer).substr(std::to_string(timer).size() - 2, 2);
+    // 生成2位随机数
+    std::random_device rd;
+    std::mt19937 eng(rd());
+    std::uniform_int_distribution<> dist(10, 99);
+    int random_num = dist(eng);
+    // 拼接成4位验证码
+    return timeStamp + std::to_string(random_num);
 }
 
 #include <iostream>
@@ -385,6 +393,51 @@ void serverRegisterWithCode(int epfd, int fd) {
         return;
     }
 
+    // 检查邮箱和用户名唯一性
+    if (redis.hexists("email_to_uid", email)) {
+        sendMsg(fd, "该邮箱已注册");
+        return;
+    }
+    if (redis.hexists("username_to_uid", username)) {
+        sendMsg(fd, "该用户名已注册");
+        return;
+    }
+
+    // 生成UID并创建User对象
+    User user;
+    user.setEmail(email);
+    user.setUsername(username);
+    user.setPassword(password);
+    // UID自动生成
+
+    string user_info = user.to_json();
+    cout << "[serverRegisterWithCode] user.to_json(): " << user_info << endl;
+
+    std::cout << "[LOG] [serverRegisterWithCode] 写入 user_info..." << std::endl;
+    if (!redis.hset("user_info", user.getUID(), user_info)) {
+        cout << "[serverRegisterWithCode] 写入 Redis 失败: user_info" << endl;
+        sendMsg(fd, "服务器内部错误");
+        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 user_info 失败" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    std::cout << "[LOG] [serverRegisterWithCode] 写入 email_to_uid..." << std::endl;
+    if (!redis.hset("email_to_uid", email, user.getUID())) {
+        cout << "[serverRegisterWithCode] 写入 Redis 失败: email_to_uid" << endl;
+        sendMsg(fd, "服务器内部错误");
+        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 email_to_uid 失败" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+    std::cout << "[LOG] [serverRegisterWithCode] 写入 username_to_uid..." << std::endl;
+    if (!redis.hset("username_to_uid", username, user.getUID())) {
+        cout << "[serverRegisterWithCode] 写入 Redis 失败: username_to_uid" << endl;
+        sendMsg(fd, "服务器内部错误");
+        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 username_to_uid 失败" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+
     // 检查邮箱是否已注册
     std::cout << "[LOG] [serverRegisterWithCode] 检查邮箱是否已注册..." << std::endl;
     if (redis.sismember("all_uid", email)) {
@@ -396,16 +449,11 @@ void serverRegisterWithCode(int epfd, int fd) {
     }
 
     // 注册用户
-    User user;
-    user.setUID(email);
-    user.setUsername(username);
-    user.setPassword(password);
-
-    string user_json = user.to_json();
-    cout << "[serverRegisterWithCode] user.to_json(): " << user_json << endl;
+    user_info = user.to_json();
+    cout << "[serverRegisterWithCode] user.to_json(): " << user_info << endl;
 
     std::cout << "[LOG] [serverRegisterWithCode] 写入 user_info..." << std::endl;
-    if (!redis.hset("user_info", email, user_json)) {
+    if (!redis.hset("user_info", user.getUID(), user_info)) {
         cout << "[serverRegisterWithCode] 写入 Redis 失败: user_info" << endl;
         sendMsg(fd, "服务器内部错误");
         std::cout << "[LOG] [serverRegisterWithCode] return: 写入 user_info 失败" << std::endl;
@@ -413,7 +461,7 @@ void serverRegisterWithCode(int epfd, int fd) {
         return;
     }
     std::cout << "[LOG] [serverRegisterWithCode] 写入 all_uid..." << std::endl;
-    if (!redis.sadd("all_uid", email)) {
+    if (!redis.sadd("all_uid", user.getUID())) {
         cout << "[serverRegisterWithCode] 写入 Redis 失败: all_uid" << endl;
         sendMsg(fd, "服务器内部错误");
         std::cout << "[LOG] [serverRegisterWithCode] return: 写入 all_uid 失败" << std::endl;
@@ -447,17 +495,17 @@ void resetPasswordWithCode(int epfd, int fd) {
         return;
     }
     // 检查用户是否存在
-    if (!redis.sismember("all_uid", email)) {
+    if (!redis.hexists("email_to_uid", email)) {
         sendMsg(fd, "该邮箱未注册");
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-    // 修改密码
-    string user_info = redis.hget("user_info", email);
+    string UID = redis.hget("email_to_uid", email);
+    string user_info = redis.hget("user_info", UID);
     User user;
     user.json_parse(user_info);
     user.setPassword(password);
-    redis.hset("user_info", email, user.to_json());
+    redis.hset("user_info", UID, user.to_json());
     sendMsg(fd, "密码重置成功");
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
@@ -487,13 +535,13 @@ void findPasswordWithCode(int epfd, int fd) {
         return;
     }
     // 检查用户是否存在
-    if (!redis.sismember("all_uid", email)) {
+    if (!redis.hexists("email_to_uid", email)) {
         sendMsg(fd, "该邮箱未注册");
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-    // 查找原密码
-    string user_info = redis.hget("user_info", email);
+    string UID = redis.hget("email_to_uid", email);
+    string user_info = redis.hget("user_info", UID);
     nlohmann::json user_json;
     try {
         user_json = nlohmann::json::parse(user_info);
@@ -511,3 +559,4 @@ void findPasswordWithCode(int epfd, int fd) {
     sendMsg(fd, "您的密码是: " + password);
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
+

@@ -22,9 +22,7 @@ bool Redis::connect() {
         // 如果连接失败，打印错误信息后，立即返回 false
         return false; // <--- 关键的修改点，确保返回 false
     } else {
-        // 如果连接成功，打印成功信息（可选）
-        cout << "Redis connected successfully!" << endl;
-        // 然后返回 true
+        
         return true; // <--- 连接成功时返回 true
     }
 }

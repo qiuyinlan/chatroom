@@ -157,30 +157,29 @@ void list_friend(int fd, User &user) {
 void add_friend(int fd, User &user) {
     Redis redis;
     redis.connect();
-    string UID;
+    string username;
 
-    recvMsg(fd, UID);
+    recvMsg(fd, username);
+    // 只允许通过用户名查找
+    if (!redis.hexists("username_to_uid", username)) {
+        sendMsg(fd, "-1"); // 用户不存在
+        return;
+    }
+    string UID = redis.hget("username_to_uid", username);
     if (!redis.hexists("user_info", UID)) {
         sendMsg(fd, "-1");
         return;
-        //判断是否在我的好友列表里
     } else if (redis.sismember(user.getUID(), UID)) {
         sendMsg(fd, "-2");
         return;
     } else if (UID == user.getUID()) {
-        //判断添加的是不是自己
         sendMsg(fd, "-3");
         return;
     }
-    //要添加的好友存在
     sendMsg(fd, "1");
-    //加到实时通知缓冲区中
     redis.sadd("add_friend", UID);
-    //加到对方的好友申请的缓冲区中
     redis.sadd(UID + "add_friend", user.getUID());
-    string user_info;
-    user_info = redis.hget("user_info", UID);
-
+    string user_info = redis.hget("user_info", UID);
     sendMsg(fd, user_info);
 }
 

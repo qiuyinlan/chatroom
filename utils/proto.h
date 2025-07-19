@@ -66,7 +66,7 @@ public:
     void json_parse(const string &json);
 
 private:
-    string UID;
+    string UID;    // 实际存储邮箱，用于登录时查找对应的UID
     string password;
 };
 

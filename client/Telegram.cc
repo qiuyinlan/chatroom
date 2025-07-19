@@ -235,22 +235,20 @@ void Telegram::listFriends(vector<pair<string, User>> &my_friends) {
 
 void Telegram::addFriend(vector<pair<string, User>> &) const {
     sendMsg(fd, ADD_FRIEND);
-    string UID;
+    string username;
     while (true) {
-        cout << "请输入你要添加好友的UID" << endl;
-        getline(cin, UID);
+        cout << "请输入你要添加好友的用户名：" << endl;
+        getline(cin, username);
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
             return;
         }
-        if (UID.find(' ') != string::npos) {
-            cout << "帐号录入不允许出现空格" << endl;
+        if (username.find(' ') != string::npos) {
+            cout << "用户名不允许出现空格" << endl;
             continue;
         }
-
-        sendMsg(fd, UID);
+        sendMsg(fd, username);
         string temp;
-        //接收服务器发来的信号判断是否可以添加
         recvMsg(fd, temp);
         if (temp == "-1") {
             cout << "该用户不存在" << endl;
@@ -266,7 +264,6 @@ void Telegram::addFriend(vector<pair<string, User>> &) const {
     }
     User her;
     string user_info;
-    //接收服务器从数据库查找的用户信息
     recvMsg(fd, user_info);
     her.json_parse(user_info);
     cout << "您已成功发出好友申请，等待" << her.getUsername() << "的同意" << endl;

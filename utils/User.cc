@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
 #include <random>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -9,7 +6,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-//现将get_time封装到User类中，作为User的一部分使用，更具整体性
+
 string User::get_time() {
     time_t raw_time;
     struct tm *ptm;
@@ -27,21 +24,24 @@ string User::get_time() {
 
 
 User::User() : is_online(false) {
-    random_device rd;
-    mt19937 eng(rd());
-    uniform_int_distribution<> dist(10, 99);
-    int random_num = dist(eng);
-
+    // 取当前时间戳的后两位
     time_t timer;
     time(&timer);
-    //cout<<"timer: "<<to_string(timer)<<endl;
-    string timeStamp = to_string(timer).substr(8, 2);
-    //cout<<"timeStamp: "<<timeStamp<<endl;
-    UID = to_string(random_num).append(timeStamp);
+    string timeStamp = to_string(timer).substr(to_string(timer).size() - 2, 2);
+    // 生成2位随机数
+    std::random_device rd;
+    std::mt19937 eng(rd());
+    std::uniform_int_distribution<> dist(10, 99);
+    int random_num = dist(eng);
+    // 拼接成4位UID
+    UID = timeStamp + to_string(random_num);
     my_time = get_time();
     password = "";
     username = "";
+    email = "";
 }
+//设置邮箱等等，是一个操作不需要返回值
+//但如果要拿东西，这个东西是必须要拿到的
 
 void User::setUID(string uid) {
     UID = std::move(uid);
@@ -49,6 +49,14 @@ void User::setUID(string uid) {
 
 [[nodiscard]] string User::getUID() const {
     return UID;
+}
+
+void User::setEmail(string email) {
+    this->email = std::move(email);
+}
+
+[[nodiscard]] string User::getEmail() const {
+    return email;
 }
 
 void User::setPassword(string password) {
@@ -83,6 +91,7 @@ string User::to_json() {
     json root;
     root["my_time"] = my_time;
     root["UID"] = UID;
+    root["email"] = email;
     root["username"] = username;
     root["password"] = password;
     return root.dump();
@@ -92,6 +101,7 @@ void User::json_parse(const string &json_str) {
     json root = json::parse(json_str);
     my_time = root["my_time"].get<string>();
     UID = root["UID"].get<string>();
+    email = root["email"].get<string>();
     username = root["username"].get<string>();
     password = root["password"].get<string>();
 }

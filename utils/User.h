@@ -19,6 +19,10 @@ public:
 
     [[nodiscard]] string getUID() const;
 
+    void setEmail(string email);
+
+    [[nodiscard]] string getEmail() const;
+
     void setPassword(string password);
 
     void setUsername(string name);
@@ -40,6 +44,7 @@ public:
 
 private:
     string UID;    //由注册时间关联，10位
+    string email;  //用户邮箱，用于辅助查找
     string username; //用户名
     string password; //密码
     string my_time;  //该用户创建时间
