@@ -12,6 +12,13 @@
 using namespace std;
 using json = nlohmann::json;
 
+void start_UI() {
+    cout << "[1]登录    [2]邮箱注册    [3]重置密码    [4]找回密码    [5]退出" << endl;
+    cout << "请输入你的选择" << endl;
+}
+
+
+
 bool isNumber(const string &input) {
     for (char c: input) {
         if (!isdigit(c)) {
@@ -35,7 +42,7 @@ char getch() {
     return ch;
 }
 
-//bug 退格仍然输出"*"，且没有退格的效果，是因为终端配置方案中的按键绑定，改为Solaris就好了，这样Backspace才是\b
+
 void get_password(const string& prompt, string &password) {
     char ch;
     password.clear();
@@ -112,41 +119,61 @@ int login(int fd, User &user) {
         }
     } else if (buf == "-3") {
         cout << "该用户已经登录" << endl;
+        cout << "按任意键返回首页..." << endl;
+        cin.ignore();
         return 0;
     } else if (buf == "1") {
         cout << "登录成功!" << endl;
         string user_info;
         recvMsg(fd, user_info);
         user.json_parse(user_info);
-        cout << "好久不见 " << user.getUsername() << "!" << endl;
+        cout << "欢迎登陆 " << user.getUsername() <<  endl;
         return 1;
     }
     return 0;
 }
 
 int email_register(int fd) {
+    
+    sendMsg(fd, REGISTER_WITH_CODE);//没先发送通信协议，就会直接协议错位！！！
     string email, code, username, password, password2, server_reply;
-    while (true) { // 无限循环，直到输入有效邮箱
+    // 第一次输入邮箱
+    while (true) {
         std::cout << "请输入您的邮箱: ";
         std::getline(std::cin, email);
-        std::cout << "[LOG] 用户输入邮箱: " << email << std::endl;
         if (email.empty()) {
             std::cout << "邮箱不能为空，请重新输入！" << std::endl;
-            // 继续循环，重新提示用户输入
+            continue;
+        }
+        if (email == "0") {
+            sendMsg(fd, email);
+            std::cout << "已返回注册菜单。" << std::endl;
+            return 0;
+        }
+        sendMsg(fd, email);
+        recvMsg(fd, server_reply);
+        if (server_reply.find("已注册") != std::string::npos) {
+            std::cout << server_reply << std::endl;
+            continue;
+        } else if (server_reply.find("格式错误") != std::string::npos) {
+            std::cout << server_reply << std::endl;
+            continue;
         } else {
-            break; // 邮箱不为空，跳出循环
+            // 邮箱未注册，进入后续流程
+            cout << "未注册" << endl ;
+            break;
         }
     }
+
+
+
 
     // 获取验证码
     cout << "按回车获取验证码..." << endl;
     cin.ignore(INT32_MAX, '\n');
-    std::cout << "[LOG] 发送 REQUEST_CODE 指令" << std::endl;
     sendMsg(fd, REQUEST_CODE);
-    std::cout << "[LOG] 发送邮箱: " << email << std::endl;
     sendMsg(fd, email);
     recvMsg(fd, server_reply);
-    std::cout << "[LOG] 收到服务器验证码回复: " << server_reply << std::endl;
     cout << server_reply << endl;
     if (server_reply.find("失败") != string::npos) return 0;
    
@@ -154,7 +181,6 @@ int email_register(int fd) {
     while (true) { // 无限循环，直到输入有效邮箱
         cout << "请输入收到的验证码: ";
         std::getline(std::cin, code);
-        std::cout << "[LOG] 用户输入验证码: " << code << std::endl;
         if (code.empty()) {
             cout << "验证码不能为空！" << endl;
         }
@@ -167,21 +193,21 @@ int email_register(int fd) {
     }
     cout << "请输入您的用户名: ";
     getline(cin, username);
-    std::cout << "[LOG] 用户输入用户名: " << username << std::endl;
     if (username.empty()) {
         cout << "用户名不能为空！" << endl;
         return 0;
     }
-    cout << "请输入您的密码: ";
+
+    //用户名唯一性检测
+    
+
+
+
     get_password("请输入您的密码: ", password);
-    std::cout << "[LOG] 用户输入密码: " << password << std::endl;
     while (true) {
-        cout << "请再次输入您的密码: ";
         get_password("请再次输入您的密码: ", password2);
-        std::cout << "[LOG] 用户再次输入密码: " << password2 << std::endl;
         if (password != password2) {
             cout << "两次密码不一致！请重新输入。" << endl;
-            cout << "请输入您的密码: ";
             get_password("请输入您的密码: ", password);
             continue;
         }
@@ -194,12 +220,8 @@ int email_register(int fd) {
     root["username"] = username;
     root["password"] = password;
     string json_str = root.dump();
-    std::cout << "[LOG] 发送 REGISTER_WITH_CODE 指令" << std::endl;
-    sendMsg(fd, REGISTER_WITH_CODE);
-    std::cout << "[LOG] 发送注册 JSON: " << json_str << std::endl;
     sendMsg(fd, json_str);
     recvMsg(fd, server_reply);
-    std::cout << "[LOG] 收到服务器注册回复: " << server_reply << std::endl;
     cout << server_reply << endl;
     return server_reply == "注册成功";
 }

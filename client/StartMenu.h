@@ -20,4 +20,7 @@ int email_register(int fd);
 int email_reset_password(int fd);
 int email_find_password(int fd);
 
+
+void start_UI() ;
+
 #endif  // CHATROOM_STARTMENU_H

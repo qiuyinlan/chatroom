@@ -1,6 +1,4 @@
-//
-// Created by shawn on 23-7-27.
-//
+
 #ifndef CHATROOM_LOGINHANDLER_H
 #define CHATROOM_LOGINHANDLER_H
 
@@ -12,11 +10,16 @@ void serverOperation(int fd, User &user);
 
 void notify(int fd);
 
-void handleRequestCode(int epfd, int fd);
-void serverRegisterWithCode(int epfd, int fd);
+void handleRequestCode(int epfd, int fd);   //检查重复，发送验证码
+
+void serverRegisterWithCode(int epfd, int fd);  //检查后，带着验证码注册
+
 void handleResetCode(int epfd, int fd);
+
 void resetPasswordWithCode(int epfd, int fd);
+
 bool sendMail(const std::string& to_email, const std::string& code, bool is_find);
+
 void findPasswordWithCode(int epfd, int fd);
 
-#endif  // CHATROOM_LOGINHANDLER_H
+#endif  

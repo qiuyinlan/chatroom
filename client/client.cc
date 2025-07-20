@@ -71,8 +71,3 @@ int main(int argc, char *argv[]) {
         }
     }
 }
-
-void start_UI() {
-    cout << "[1]登录    [2]邮箱注册    [3]重置密码    [4]找回密码    [5]退出" << endl;
-    cout << "请输入你的选择" << endl;
-}

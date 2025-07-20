@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/xuzichun/messengertest/server -I/home/xuzichun/messengertest/client -I/home/xuzichun/messengertest/utils
+CXX_INCLUDES = -I/home/xuzichun/chatroom/messengertest/server -I/home/xuzichun/chatroom/messengertest/client -I/home/xuzichun/chatroom/messengertest/utils
 
 CXX_FLAGS = -std=gnu++17
 

@@ -1,6 +1,6 @@
 CMakeFiles/client.out.dir/client/client.cc.o: \
- /home/xuzichun/messengertest/client/client.cc /usr/include/stdc-predef.h \
- /usr/include/c++/13/functional \
+ /home/xuzichun/chatroom/messengertest/client/client.cc \
+ /usr/include/stdc-predef.h /usr/include/c++/13/functional \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -202,8 +202,8 @@ CMakeFiles/client.out.dir/client/client.cc.o: \
  /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  /usr/include/x86_64-linux-gnu/bits/signal_ext.h \
- /home/xuzichun/messengertest/client/client.h \
- /home/xuzichun/messengertest/client/../utils/TCP.h \
+ /home/xuzichun/chatroom/messengertest/client/client.h \
+ /home/xuzichun/chatroom/messengertest/client/../utils/TCP.h \
  /usr/include/x86_64-linux-gnu/sys/socket.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h \
  /usr/include/x86_64-linux-gnu/bits/socket.h \
@@ -220,7 +220,7 @@ CMakeFiles/client.out.dir/client/client.cc.o: \
  /usr/include/x86_64-linux-gnu/asm/sockios.h \
  /usr/include/asm-generic/sockios.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h \
- /home/xuzichun/messengertest/client/StartMenu.h \
- /home/xuzichun/messengertest/utils/User.h \
- /home/xuzichun/messengertest/client/../utils/proto.h \
- /home/xuzichun/messengertest/client/OperationMenu.h
+ /home/xuzichun/chatroom/messengertest/client/StartMenu.h \
+ /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /home/xuzichun/chatroom/messengertest/client/../utils/proto.h \
+ /home/xuzichun/chatroom/messengertest/client/OperationMenu.h

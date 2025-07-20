@@ -1,8 +1,8 @@
 CMakeFiles/server.out.dir/server/Transaction.cc.o: \
- /home/xuzichun/messengertest/server/Transaction.cc \
+ /home/xuzichun/chatroom/messengertest/server/Transaction.cc \
  /usr/include/stdc-predef.h \
- /home/xuzichun/messengertest/server/Transaction.h \
- /home/xuzichun/messengertest/server/../utils/User.h \
+ /home/xuzichun/chatroom/messengertest/server/Transaction.h \
+ /home/xuzichun/chatroom/messengertest/server/../utils/User.h \
  /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -117,15 +117,15 @@ CMakeFiles/server.out.dir/server/Transaction.cc.o: \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
  /usr/include/c++/13/bits/uses_allocator.h \
  /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/tuple \
- /home/xuzichun/messengertest/server/Redis.h \
- /usr/include/hiredis/hiredis.h /usr/include/hiredis/read.h \
+ /home/xuzichun/chatroom/messengertest/server/Redis.h \
+ /usr/local/include/hiredis/hiredis.h /usr/local/include/hiredis/read.h \
  /usr/include/x86_64-linux-gnu/sys/time.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /usr/include/hiredis/sds.h /usr/include/hiredis/alloc.h \
- /home/xuzichun/messengertest/server/../utils/IO.h \
- /home/xuzichun/messengertest/server/../utils/proto.h \
+ /usr/local/include/hiredis/sds.h /usr/local/include/hiredis/alloc.h \
+ /home/xuzichun/chatroom/messengertest/server/../utils/IO.h \
+ /home/xuzichun/chatroom/messengertest/server/../utils/proto.h \
  /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
  /usr/include/c++/13/ios /usr/include/c++/13/exception \
  /usr/include/c++/13/bits/exception_ptr.h \
@@ -163,10 +163,10 @@ CMakeFiles/server.out.dir/server/Transaction.cc.o: \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
  /usr/include/c++/13/bits/istream.tcc \
- /home/xuzichun/messengertest/server/group_chat.h \
+ /home/xuzichun/chatroom/messengertest/server/group_chat.h \
  /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
- /home/xuzichun/messengertest/utils/User.h \
- /home/xuzichun/messengertest/utils/Group.h \
+ /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /home/xuzichun/chatroom/messengertest/utils/Group.h \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \

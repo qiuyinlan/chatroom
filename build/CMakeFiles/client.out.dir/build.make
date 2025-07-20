@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/xuzichun/messengertest
+CMAKE_SOURCE_DIR = /home/xuzichun/chatroom/messengertest
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/xuzichun/messengertest/build
+CMAKE_BINARY_DIR = /home/xuzichun/chatroom/messengertest/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/client.out.dir/depend.make
@@ -70,158 +70,158 @@ include CMakeFiles/client.out.dir/progress.make
 include CMakeFiles/client.out.dir/flags.make
 
 CMakeFiles/client.out.dir/client/client.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/client/client.cc.o: /home/xuzichun/messengertest/client/client.cc
+CMakeFiles/client.out.dir/client/client.cc.o: /home/xuzichun/chatroom/messengertest/client/client.cc
 CMakeFiles/client.out.dir/client/client.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/client.out.dir/client/client.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/client.cc.o -MF CMakeFiles/client.out.dir/client/client.cc.o.d -o CMakeFiles/client.out.dir/client/client.cc.o -c /home/xuzichun/messengertest/client/client.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/client.out.dir/client/client.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/client.cc.o -MF CMakeFiles/client.out.dir/client/client.cc.o.d -o CMakeFiles/client.out.dir/client/client.cc.o -c /home/xuzichun/chatroom/messengertest/client/client.cc
 
 CMakeFiles/client.out.dir/client/client.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/client/client.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/client/client.cc > CMakeFiles/client.out.dir/client/client.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/client/client.cc > CMakeFiles/client.out.dir/client/client.cc.i
 
 CMakeFiles/client.out.dir/client/client.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/client/client.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/client/client.cc -o CMakeFiles/client.out.dir/client/client.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/client/client.cc -o CMakeFiles/client.out.dir/client/client.cc.s
 
 CMakeFiles/client.out.dir/client/StartMenu.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/client/StartMenu.cc.o: /home/xuzichun/messengertest/client/StartMenu.cc
+CMakeFiles/client.out.dir/client/StartMenu.cc.o: /home/xuzichun/chatroom/messengertest/client/StartMenu.cc
 CMakeFiles/client.out.dir/client/StartMenu.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/client.out.dir/client/StartMenu.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/StartMenu.cc.o -MF CMakeFiles/client.out.dir/client/StartMenu.cc.o.d -o CMakeFiles/client.out.dir/client/StartMenu.cc.o -c /home/xuzichun/messengertest/client/StartMenu.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/client.out.dir/client/StartMenu.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/StartMenu.cc.o -MF CMakeFiles/client.out.dir/client/StartMenu.cc.o.d -o CMakeFiles/client.out.dir/client/StartMenu.cc.o -c /home/xuzichun/chatroom/messengertest/client/StartMenu.cc
 
 CMakeFiles/client.out.dir/client/StartMenu.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/client/StartMenu.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/client/StartMenu.cc > CMakeFiles/client.out.dir/client/StartMenu.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/client/StartMenu.cc > CMakeFiles/client.out.dir/client/StartMenu.cc.i
 
 CMakeFiles/client.out.dir/client/StartMenu.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/client/StartMenu.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/client/StartMenu.cc -o CMakeFiles/client.out.dir/client/StartMenu.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/client/StartMenu.cc -o CMakeFiles/client.out.dir/client/StartMenu.cc.s
 
 CMakeFiles/client.out.dir/client/OperationMenu.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/client/OperationMenu.cc.o: /home/xuzichun/messengertest/client/OperationMenu.cc
+CMakeFiles/client.out.dir/client/OperationMenu.cc.o: /home/xuzichun/chatroom/messengertest/client/OperationMenu.cc
 CMakeFiles/client.out.dir/client/OperationMenu.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/client.out.dir/client/OperationMenu.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/OperationMenu.cc.o -MF CMakeFiles/client.out.dir/client/OperationMenu.cc.o.d -o CMakeFiles/client.out.dir/client/OperationMenu.cc.o -c /home/xuzichun/messengertest/client/OperationMenu.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/client.out.dir/client/OperationMenu.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/OperationMenu.cc.o -MF CMakeFiles/client.out.dir/client/OperationMenu.cc.o.d -o CMakeFiles/client.out.dir/client/OperationMenu.cc.o -c /home/xuzichun/chatroom/messengertest/client/OperationMenu.cc
 
 CMakeFiles/client.out.dir/client/OperationMenu.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/client/OperationMenu.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/client/OperationMenu.cc > CMakeFiles/client.out.dir/client/OperationMenu.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/client/OperationMenu.cc > CMakeFiles/client.out.dir/client/OperationMenu.cc.i
 
 CMakeFiles/client.out.dir/client/OperationMenu.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/client/OperationMenu.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/client/OperationMenu.cc -o CMakeFiles/client.out.dir/client/OperationMenu.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/client/OperationMenu.cc -o CMakeFiles/client.out.dir/client/OperationMenu.cc.s
 
 CMakeFiles/client.out.dir/client/Notifications.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/client/Notifications.cc.o: /home/xuzichun/messengertest/client/Notifications.cc
+CMakeFiles/client.out.dir/client/Notifications.cc.o: /home/xuzichun/chatroom/messengertest/client/Notifications.cc
 CMakeFiles/client.out.dir/client/Notifications.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/client.out.dir/client/Notifications.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/Notifications.cc.o -MF CMakeFiles/client.out.dir/client/Notifications.cc.o.d -o CMakeFiles/client.out.dir/client/Notifications.cc.o -c /home/xuzichun/messengertest/client/Notifications.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/client.out.dir/client/Notifications.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/Notifications.cc.o -MF CMakeFiles/client.out.dir/client/Notifications.cc.o.d -o CMakeFiles/client.out.dir/client/Notifications.cc.o -c /home/xuzichun/chatroom/messengertest/client/Notifications.cc
 
 CMakeFiles/client.out.dir/client/Notifications.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/client/Notifications.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/client/Notifications.cc > CMakeFiles/client.out.dir/client/Notifications.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/client/Notifications.cc > CMakeFiles/client.out.dir/client/Notifications.cc.i
 
 CMakeFiles/client.out.dir/client/Notifications.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/client/Notifications.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/client/Notifications.cc -o CMakeFiles/client.out.dir/client/Notifications.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/client/Notifications.cc -o CMakeFiles/client.out.dir/client/Notifications.cc.s
 
 CMakeFiles/client.out.dir/client/Telegram.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/client/Telegram.cc.o: /home/xuzichun/messengertest/client/Telegram.cc
+CMakeFiles/client.out.dir/client/Telegram.cc.o: /home/xuzichun/chatroom/messengertest/client/Telegram.cc
 CMakeFiles/client.out.dir/client/Telegram.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/client.out.dir/client/Telegram.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/Telegram.cc.o -MF CMakeFiles/client.out.dir/client/Telegram.cc.o.d -o CMakeFiles/client.out.dir/client/Telegram.cc.o -c /home/xuzichun/messengertest/client/Telegram.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/client.out.dir/client/Telegram.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/Telegram.cc.o -MF CMakeFiles/client.out.dir/client/Telegram.cc.o.d -o CMakeFiles/client.out.dir/client/Telegram.cc.o -c /home/xuzichun/chatroom/messengertest/client/Telegram.cc
 
 CMakeFiles/client.out.dir/client/Telegram.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/client/Telegram.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/client/Telegram.cc > CMakeFiles/client.out.dir/client/Telegram.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/client/Telegram.cc > CMakeFiles/client.out.dir/client/Telegram.cc.i
 
 CMakeFiles/client.out.dir/client/Telegram.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/client/Telegram.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/client/Telegram.cc -o CMakeFiles/client.out.dir/client/Telegram.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/client/Telegram.cc -o CMakeFiles/client.out.dir/client/Telegram.cc.s
 
 CMakeFiles/client.out.dir/client/GroupChat.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/client/GroupChat.cc.o: /home/xuzichun/messengertest/client/GroupChat.cc
+CMakeFiles/client.out.dir/client/GroupChat.cc.o: /home/xuzichun/chatroom/messengertest/client/GroupChat.cc
 CMakeFiles/client.out.dir/client/GroupChat.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/client.out.dir/client/GroupChat.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/GroupChat.cc.o -MF CMakeFiles/client.out.dir/client/GroupChat.cc.o.d -o CMakeFiles/client.out.dir/client/GroupChat.cc.o -c /home/xuzichun/messengertest/client/GroupChat.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/client.out.dir/client/GroupChat.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/client/GroupChat.cc.o -MF CMakeFiles/client.out.dir/client/GroupChat.cc.o.d -o CMakeFiles/client.out.dir/client/GroupChat.cc.o -c /home/xuzichun/chatroom/messengertest/client/GroupChat.cc
 
 CMakeFiles/client.out.dir/client/GroupChat.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/client/GroupChat.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/client/GroupChat.cc > CMakeFiles/client.out.dir/client/GroupChat.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/client/GroupChat.cc > CMakeFiles/client.out.dir/client/GroupChat.cc.i
 
 CMakeFiles/client.out.dir/client/GroupChat.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/client/GroupChat.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/client/GroupChat.cc -o CMakeFiles/client.out.dir/client/GroupChat.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/client/GroupChat.cc -o CMakeFiles/client.out.dir/client/GroupChat.cc.s
 
 CMakeFiles/client.out.dir/utils/User.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/utils/User.cc.o: /home/xuzichun/messengertest/utils/User.cc
+CMakeFiles/client.out.dir/utils/User.cc.o: /home/xuzichun/chatroom/messengertest/utils/User.cc
 CMakeFiles/client.out.dir/utils/User.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/client.out.dir/utils/User.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/User.cc.o -MF CMakeFiles/client.out.dir/utils/User.cc.o.d -o CMakeFiles/client.out.dir/utils/User.cc.o -c /home/xuzichun/messengertest/utils/User.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/client.out.dir/utils/User.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/User.cc.o -MF CMakeFiles/client.out.dir/utils/User.cc.o.d -o CMakeFiles/client.out.dir/utils/User.cc.o -c /home/xuzichun/chatroom/messengertest/utils/User.cc
 
 CMakeFiles/client.out.dir/utils/User.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/utils/User.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/utils/User.cc > CMakeFiles/client.out.dir/utils/User.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/utils/User.cc > CMakeFiles/client.out.dir/utils/User.cc.i
 
 CMakeFiles/client.out.dir/utils/User.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/utils/User.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/utils/User.cc -o CMakeFiles/client.out.dir/utils/User.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/utils/User.cc -o CMakeFiles/client.out.dir/utils/User.cc.s
 
 CMakeFiles/client.out.dir/utils/TCP.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/utils/TCP.cc.o: /home/xuzichun/messengertest/utils/TCP.cc
+CMakeFiles/client.out.dir/utils/TCP.cc.o: /home/xuzichun/chatroom/messengertest/utils/TCP.cc
 CMakeFiles/client.out.dir/utils/TCP.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/client.out.dir/utils/TCP.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/TCP.cc.o -MF CMakeFiles/client.out.dir/utils/TCP.cc.o.d -o CMakeFiles/client.out.dir/utils/TCP.cc.o -c /home/xuzichun/messengertest/utils/TCP.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/client.out.dir/utils/TCP.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/TCP.cc.o -MF CMakeFiles/client.out.dir/utils/TCP.cc.o.d -o CMakeFiles/client.out.dir/utils/TCP.cc.o -c /home/xuzichun/chatroom/messengertest/utils/TCP.cc
 
 CMakeFiles/client.out.dir/utils/TCP.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/utils/TCP.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/utils/TCP.cc > CMakeFiles/client.out.dir/utils/TCP.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/utils/TCP.cc > CMakeFiles/client.out.dir/utils/TCP.cc.i
 
 CMakeFiles/client.out.dir/utils/TCP.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/utils/TCP.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/utils/TCP.cc -o CMakeFiles/client.out.dir/utils/TCP.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/utils/TCP.cc -o CMakeFiles/client.out.dir/utils/TCP.cc.s
 
 CMakeFiles/client.out.dir/utils/IO.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/utils/IO.cc.o: /home/xuzichun/messengertest/utils/IO.cc
+CMakeFiles/client.out.dir/utils/IO.cc.o: /home/xuzichun/chatroom/messengertest/utils/IO.cc
 CMakeFiles/client.out.dir/utils/IO.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/client.out.dir/utils/IO.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/IO.cc.o -MF CMakeFiles/client.out.dir/utils/IO.cc.o.d -o CMakeFiles/client.out.dir/utils/IO.cc.o -c /home/xuzichun/messengertest/utils/IO.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/client.out.dir/utils/IO.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/IO.cc.o -MF CMakeFiles/client.out.dir/utils/IO.cc.o.d -o CMakeFiles/client.out.dir/utils/IO.cc.o -c /home/xuzichun/chatroom/messengertest/utils/IO.cc
 
 CMakeFiles/client.out.dir/utils/IO.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/utils/IO.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/utils/IO.cc > CMakeFiles/client.out.dir/utils/IO.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/utils/IO.cc > CMakeFiles/client.out.dir/utils/IO.cc.i
 
 CMakeFiles/client.out.dir/utils/IO.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/utils/IO.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/utils/IO.cc -o CMakeFiles/client.out.dir/utils/IO.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/utils/IO.cc -o CMakeFiles/client.out.dir/utils/IO.cc.s
 
 CMakeFiles/client.out.dir/utils/proto.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/utils/proto.cc.o: /home/xuzichun/messengertest/utils/proto.cc
+CMakeFiles/client.out.dir/utils/proto.cc.o: /home/xuzichun/chatroom/messengertest/utils/proto.cc
 CMakeFiles/client.out.dir/utils/proto.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/client.out.dir/utils/proto.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/proto.cc.o -MF CMakeFiles/client.out.dir/utils/proto.cc.o.d -o CMakeFiles/client.out.dir/utils/proto.cc.o -c /home/xuzichun/messengertest/utils/proto.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/client.out.dir/utils/proto.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/proto.cc.o -MF CMakeFiles/client.out.dir/utils/proto.cc.o.d -o CMakeFiles/client.out.dir/utils/proto.cc.o -c /home/xuzichun/chatroom/messengertest/utils/proto.cc
 
 CMakeFiles/client.out.dir/utils/proto.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/utils/proto.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/utils/proto.cc > CMakeFiles/client.out.dir/utils/proto.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/utils/proto.cc > CMakeFiles/client.out.dir/utils/proto.cc.i
 
 CMakeFiles/client.out.dir/utils/proto.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/utils/proto.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/utils/proto.cc -o CMakeFiles/client.out.dir/utils/proto.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/utils/proto.cc -o CMakeFiles/client.out.dir/utils/proto.cc.s
 
 CMakeFiles/client.out.dir/utils/Group.cc.o: CMakeFiles/client.out.dir/flags.make
-CMakeFiles/client.out.dir/utils/Group.cc.o: /home/xuzichun/messengertest/utils/Group.cc
+CMakeFiles/client.out.dir/utils/Group.cc.o: /home/xuzichun/chatroom/messengertest/utils/Group.cc
 CMakeFiles/client.out.dir/utils/Group.cc.o: CMakeFiles/client.out.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/client.out.dir/utils/Group.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/Group.cc.o -MF CMakeFiles/client.out.dir/utils/Group.cc.o.d -o CMakeFiles/client.out.dir/utils/Group.cc.o -c /home/xuzichun/messengertest/utils/Group.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/client.out.dir/utils/Group.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/client.out.dir/utils/Group.cc.o -MF CMakeFiles/client.out.dir/utils/Group.cc.o.d -o CMakeFiles/client.out.dir/utils/Group.cc.o -c /home/xuzichun/chatroom/messengertest/utils/Group.cc
 
 CMakeFiles/client.out.dir/utils/Group.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/client.out.dir/utils/Group.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/messengertest/utils/Group.cc > CMakeFiles/client.out.dir/utils/Group.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xuzichun/chatroom/messengertest/utils/Group.cc > CMakeFiles/client.out.dir/utils/Group.cc.i
 
 CMakeFiles/client.out.dir/utils/Group.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/client.out.dir/utils/Group.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/messengertest/utils/Group.cc -o CMakeFiles/client.out.dir/utils/Group.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xuzichun/chatroom/messengertest/utils/Group.cc -o CMakeFiles/client.out.dir/utils/Group.cc.s
 
 # Object files for target client.out
 client_out_OBJECTS = \
@@ -253,7 +253,7 @@ client.out: CMakeFiles/client.out.dir/utils/proto.cc.o
 client.out: CMakeFiles/client.out.dir/utils/Group.cc.o
 client.out: CMakeFiles/client.out.dir/build.make
 client.out: CMakeFiles/client.out.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/xuzichun/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable client.out"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/xuzichun/chatroom/messengertest/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable client.out"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/client.out.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -265,6 +265,6 @@ CMakeFiles/client.out.dir/clean:
 .PHONY : CMakeFiles/client.out.dir/clean
 
 CMakeFiles/client.out.dir/depend:
-	cd /home/xuzichun/messengertest/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/xuzichun/messengertest /home/xuzichun/messengertest /home/xuzichun/messengertest/build /home/xuzichun/messengertest/build /home/xuzichun/messengertest/build/CMakeFiles/client.out.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/xuzichun/chatroom/messengertest/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/xuzichun/chatroom/messengertest /home/xuzichun/chatroom/messengertest /home/xuzichun/chatroom/messengertest/build /home/xuzichun/chatroom/messengertest/build /home/xuzichun/chatroom/messengertest/build/CMakeFiles/client.out.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/client.out.dir/depend
 

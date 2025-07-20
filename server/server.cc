@@ -13,25 +13,20 @@
 #include "Redis.h"
 #include <curl/curl.h>
 #include <string>
-/*通过将模板函数的声明和定义放在同一个头文件中，并将其包含到需要使用模板函数的源文件中
- * 可以确保编译器在实例化模板函数时能够正确找到模板函数的定义*/
+
+
+
 using namespace std;
-
-void serverLogin(int epfd, int fd);
-void serverRegister(int epfd, int fd);
-void notify(int fd);
-
-
 
 void signalHandler(int signum) {
     cout << "signum: " << signum << endl;
 }
 
+
 int main(int argc, char *argv[]) {
     if (argc == 1) {
-        IP = "10.30.0.202";
-        //IP="172.20.10.13";
-        PORT = 8888;
+        IP = "10.30.0.146";
+        PORT = 8000;
     } else if (argc == 3) {
         IP = argv[1];
         PORT = stoi(argv[2]);
@@ -78,6 +73,7 @@ int main(int argc, char *argv[]) {
                 continue;
 
             int fd = ep[i].data.fd;
+            //控制连接
             if (ep[i].data.fd == listenfd) {
                 struct sockaddr_in cli_addr;
                 memset(&cli_addr, 0, sizeof(cli_addr));
@@ -112,7 +108,9 @@ int main(int argc, char *argv[]) {
                     sys_err("epoll_ctl error");
                 }
 
-            } else {
+            } 
+            //数据连接
+              else {
                 recvMsg(fd, msg);
                 if (msg == LOGIN) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
@@ -135,13 +133,11 @@ int main(int argc, char *argv[]) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ findPasswordWithCode(epfd, fd); });
                 }
+                else{
+                    cout << "协议指令错误" << endl ;
+                }
             }
         }
     }
 }
 
-
-void handleRequestCode(int epfd, int fd); // 注册验证码
-void serverRegisterWithCode(int epfd, int fd); // 验证码注册
-void handleResetCode(int epfd, int fd); // 找回密码验证码
-void resetPasswordWithCode(int epfd, int fd); // 验证码重置密码

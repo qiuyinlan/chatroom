@@ -1,7 +1,7 @@
 CMakeFiles/client.out.dir/client/Telegram.cc.o: \
- /home/xuzichun/messengertest/client/Telegram.cc \
+ /home/xuzichun/chatroom/messengertest/client/Telegram.cc \
  /usr/include/stdc-predef.h \
- /home/xuzichun/messengertest/client/Telegram.h \
+ /home/xuzichun/chatroom/messengertest/client/Telegram.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -52,8 +52,8 @@ CMakeFiles/client.out.dir/client/Telegram.cc.o: \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
  /usr/include/c++/13/bits/uses_allocator.h \
  /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/tuple \
- /home/xuzichun/messengertest/utils/User.h /usr/include/c++/13/string \
- /usr/include/c++/13/bits/stringfwd.h \
+ /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /usr/include/c++/13/string /usr/include/c++/13/bits/stringfwd.h \
  /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/postypes.h /usr/include/c++/13/cwchar \
  /usr/include/wchar.h \
@@ -120,12 +120,12 @@ CMakeFiles/client.out.dir/client/Telegram.cc.o: \
  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
  /usr/include/c++/13/bits/charconv.h \
  /usr/include/c++/13/bits/basic_string.tcc \
- /home/xuzichun/messengertest/client/../utils/proto.h \
- /home/xuzichun/messengertest/client/../utils/IO.h \
- /home/xuzichun/messengertest/client/Notifications.h \
- /home/xuzichun/messengertest/client/GroupChat.h \
- /home/xuzichun/messengertest/utils/Group.h /usr/include/c++/13/thread \
- /usr/include/c++/13/bits/std_thread.h \
+ /home/xuzichun/chatroom/messengertest/client/../utils/proto.h \
+ /home/xuzichun/chatroom/messengertest/client/../utils/IO.h \
+ /home/xuzichun/chatroom/messengertest/client/Notifications.h \
+ /home/xuzichun/chatroom/messengertest/client/GroupChat.h \
+ /home/xuzichun/chatroom/messengertest/utils/Group.h \
+ /usr/include/c++/13/thread /usr/include/c++/13/bits/std_thread.h \
  /usr/include/c++/13/bits/unique_ptr.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/gthr.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h \

@@ -1,5 +1,5 @@
-/home/xuzichun/messengertest/build/CMakeFiles/server.out.dir
-/home/xuzichun/messengertest/build/CMakeFiles/client.out.dir
-/home/xuzichun/messengertest/build/CMakeFiles/test.out.dir
-/home/xuzichun/messengertest/build/CMakeFiles/edit_cache.dir
-/home/xuzichun/messengertest/build/CMakeFiles/rebuild_cache.dir
+/home/xuzichun/chatroom/messengertest/build/CMakeFiles/server.out.dir
+/home/xuzichun/chatroom/messengertest/build/CMakeFiles/client.out.dir
+/home/xuzichun/chatroom/messengertest/build/CMakeFiles/test.out.dir
+/home/xuzichun/chatroom/messengertest/build/CMakeFiles/edit_cache.dir
+/home/xuzichun/chatroom/messengertest/build/CMakeFiles/rebuild_cache.dir

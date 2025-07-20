@@ -1,9 +1,9 @@
 CMakeFiles/client.out.dir/client/OperationMenu.cc.o: \
- /home/xuzichun/messengertest/client/OperationMenu.cc \
+ /home/xuzichun/chatroom/messengertest/client/OperationMenu.cc \
  /usr/include/stdc-predef.h \
- /home/xuzichun/messengertest/client/OperationMenu.h \
- /home/xuzichun/messengertest/utils/User.h /usr/include/c++/13/string \
- /usr/include/c++/13/bits/requires_hosted.h \
+ /home/xuzichun/chatroom/messengertest/client/OperationMenu.h \
+ /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -117,12 +117,12 @@ CMakeFiles/client.out.dir/client/OperationMenu.cc.o: \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
  /usr/include/c++/13/bits/uses_allocator.h \
  /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/tuple \
- /home/xuzichun/messengertest/client/Telegram.h \
+ /home/xuzichun/chatroom/messengertest/client/Telegram.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
  /usr/include/c++/13/bits/vector.tcc \
- /home/xuzichun/messengertest/client/Notifications.h \
+ /home/xuzichun/chatroom/messengertest/client/Notifications.h \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/typeinfo /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
@@ -194,5 +194,5 @@ CMakeFiles/client.out.dir/client/OperationMenu.cc.o: \
  /usr/include/c++/13/bits/locale_conv.h \
  /usr/include/c++/13/bits/quoted_string.h /usr/include/c++/13/sstream \
  /usr/include/c++/13/bits/sstream.tcc \
- /home/xuzichun/messengertest/client/../utils/proto.h \
- /home/xuzichun/messengertest/client/../utils/IO.h
+ /home/xuzichun/chatroom/messengertest/client/../utils/proto.h \
+ /home/xuzichun/chatroom/messengertest/client/../utils/IO.h

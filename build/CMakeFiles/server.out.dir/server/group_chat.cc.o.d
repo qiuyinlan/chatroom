@@ -1,7 +1,8 @@
 CMakeFiles/server.out.dir/server/group_chat.cc.o: \
- /home/xuzichun/messengertest/server/group_chat.cc \
- /usr/include/stdc-predef.h /home/xuzichun/messengertest/server/Redis.h \
- /usr/include/hiredis/hiredis.h /usr/include/hiredis/read.h \
+ /home/xuzichun/chatroom/messengertest/server/group_chat.cc \
+ /usr/include/stdc-predef.h \
+ /home/xuzichun/chatroom/messengertest/server/Redis.h \
+ /usr/local/include/hiredis/hiredis.h /usr/local/include/hiredis/read.h \
  /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -41,7 +42,8 @@ CMakeFiles/server.out.dir/server/group_chat.cc.o: \
  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /usr/include/hiredis/sds.h /usr/include/x86_64-linux-gnu/sys/types.h \
+ /usr/local/include/hiredis/sds.h \
+ /usr/include/x86_64-linux-gnu/sys/types.h \
  /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/timer_t.h /usr/include/endian.h \
@@ -53,7 +55,7 @@ CMakeFiles/server.out.dir/server/group_chat.cc.o: \
  /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
  /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
- /usr/include/hiredis/alloc.h /usr/include/c++/13/string \
+ /usr/local/include/hiredis/alloc.h /usr/include/c++/13/string \
  /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -121,9 +123,9 @@ CMakeFiles/server.out.dir/server/group_chat.cc.o: \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
  /usr/include/c++/13/bits/uses_allocator.h \
  /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/tuple \
- /home/xuzichun/messengertest/utils/IO.h \
- /home/xuzichun/messengertest/server/group_chat.h \
+ /home/xuzichun/chatroom/messengertest/utils/IO.h \
+ /home/xuzichun/chatroom/messengertest/server/group_chat.h \
  /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
- /home/xuzichun/messengertest/utils/User.h \
- /home/xuzichun/messengertest/utils/Group.h \
- /home/xuzichun/messengertest/utils/proto.h
+ /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /home/xuzichun/chatroom/messengertest/utils/Group.h \
+ /home/xuzichun/chatroom/messengertest/utils/proto.h

@@ -1,6 +1,7 @@
 CMakeFiles/server.out.dir/utils/User.cc.o: \
- /home/xuzichun/messengertest/utils/User.cc /usr/include/stdc-predef.h \
- /usr/include/c++/13/random /usr/include/c++/13/bits/requires_hosted.h \
+ /home/xuzichun/chatroom/messengertest/utils/User.cc \
+ /usr/include/stdc-predef.h /usr/include/c++/13/random \
+ /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -285,4 +286,4 @@ CMakeFiles/server.out.dir/utils/User.cc.o: \
  /usr/include/nlohmann/ordered_map.hpp /usr/include/c++/13/any \
  /usr/include/nlohmann/detail/macro_unscope.hpp \
  /usr/include/nlohmann/thirdparty/hedley/hedley_undef.hpp \
- /home/xuzichun/messengertest/utils/User.h
+ /home/xuzichun/chatroom/messengertest/utils/User.h

@@ -1,7 +1,7 @@
 CMakeFiles/client.out.dir/client/StartMenu.cc.o: \
- /home/xuzichun/messengertest/client/StartMenu.cc \
+ /home/xuzichun/chatroom/messengertest/client/StartMenu.cc \
  /usr/include/stdc-predef.h \
- /home/xuzichun/messengertest/client/StartMenu.h \
+ /home/xuzichun/chatroom/messengertest/client/StartMenu.h \
  /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -116,9 +116,10 @@ CMakeFiles/client.out.dir/client/StartMenu.cc.o: \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
  /usr/include/c++/13/bits/uses_allocator.h \
  /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/tuple \
- /home/xuzichun/messengertest/utils/User.h /usr/include/c++/13/iostream \
- /usr/include/c++/13/ostream /usr/include/c++/13/ios \
- /usr/include/c++/13/exception /usr/include/c++/13/bits/exception_ptr.h \
+ /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
+ /usr/include/c++/13/ios /usr/include/c++/13/exception \
+ /usr/include/c++/13/bits/exception_ptr.h \
  /usr/include/c++/13/bits/cxxabi_init_exception.h \
  /usr/include/c++/13/typeinfo /usr/include/c++/13/bits/nested_exception.h \
  /usr/include/c++/13/bits/ios_base.h /usr/include/c++/13/ext/atomicity.h \
@@ -156,9 +157,9 @@ CMakeFiles/client.out.dir/client/StartMenu.cc.o: \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /home/xuzichun/messengertest/client/../utils/IO.h \
- /home/xuzichun/messengertest/client/../utils/proto.h \
- /home/xuzichun/messengertest/client/OperationMenu.h \
+ /home/xuzichun/chatroom/messengertest/client/../utils/IO.h \
+ /home/xuzichun/chatroom/messengertest/client/../utils/proto.h \
+ /home/xuzichun/chatroom/messengertest/client/OperationMenu.h \
  /usr/include/termios.h /usr/include/x86_64-linux-gnu/bits/termios.h \
  /usr/include/x86_64-linux-gnu/bits/termios-struct.h \
  /usr/include/x86_64-linux-gnu/bits/termios-c_cc.h \

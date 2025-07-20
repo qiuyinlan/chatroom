@@ -270,33 +270,34 @@ bool sendMail(const std::string& to_email, const std::string& code, bool is_find
         curl_easy_setopt(curl, CURLOPT_READDATA, &up_status);
         curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
         curl_easy_setopt(curl, CURLOPT_INFILESIZE, (long)full_mail_payload.length());
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // 启用详细模式
 
         res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            std::cerr << "[sendMail] curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-        } else {
-            std::cout << "[sendMail] 邮件发送成功: " << to_email << std::endl;
-        }
-
         curl_slist_free_all(recipients);
         curl_easy_cleanup(curl);
 
         return res == CURLE_OK;
     }
-    std::cerr << "[sendMail] curl_easy_init() failed!" << std::endl;
+
     return false;
 }
 
 void handleRequestCode(int epfd, int fd) {
+    Redis redis;
+    redis.connect();
+    struct epoll_event temp;
+    temp.data.fd = fd;
+    temp.events = EPOLLIN;
     // 1. 接收邮箱
-    string email;
-    recvMsg(fd, email);
+
+   string email;
+   int ret2;
+    ret2 = recvMsg(fd, email);
+   
+   
     // 2. 生成验证码
     string code = generateCode();
     // 3. 存到Redis，5分钟有效
-    Redis redis;
-    redis.connect();
+
     redis.hset("verify_code", email, code);
     // 4. 发邮件
     bool ok = sendMail(email, code, false);
@@ -306,9 +307,6 @@ void handleRequestCode(int epfd, int fd) {
     } else {
         sendMsg(fd, "验证码发送失败，请稍后重试");
     }
-    struct epoll_event temp;
-    temp.data.fd = fd;
-    temp.events = EPOLLIN;
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
 
@@ -342,65 +340,81 @@ void serverRegisterWithCode(int epfd, int fd) {
     temp.events = EPOLLIN;
     string json_str;
 
-    std::cout << "[LOG] [serverRegisterWithCode] 等待接收客户端注册 JSON..." << std::endl;
-    int ret = recvMsg(fd, json_str);
-    std::cout << "[LOG] [serverRegisterWithCode] recvMsg 返回: " << ret << ", 收到内容: " << json_str << std::endl;
+    Redis redis;
+
+    string email;
+    int ret;
+    while (true) {
+        ret = recvMsg(fd, email);
+        std::cout << "[SERVER] 收到邮箱输入: " << email << std::endl;
+        if (ret == 0) { 
+            std::cout << "[SERVER] 客户端断开，关闭fd" << std::endl;
+            close(fd);
+            return;
+        }
+        if (email == "0") { 
+            std::cout << "[SERVER] 用户选择返回注册菜单" << std::endl;
+            epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+            return;   
+        }
+        if (!redis.hexists("email_to_uid", email)) {
+            std::cout << "[SERVER] 邮箱未注册，进入后续流程" << std::endl;
+            break;
+        }
+        std::cout << "[SERVER] 邮箱已注册，发送提示" << std::endl;
+        sendMsg(fd, "该邮箱已注册，请重新输入邮箱（输入0返回）：");
+    }
+    ret = recvMsg(fd, json_str);
     if (ret <= 0) {
-        cout << "[serverRegisterWithCode] 接收注册信息失败，客户端可能已断开连接" << endl;
         sendMsg(fd, "接收注册信息失败");
-        std::cout << "[LOG] [serverRegisterWithCode] return: 接收注册信息失败" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-    cout << "[serverRegisterWithCode] Received JSON: " << json_str << endl;
 
     json root;
     try {
         root = json::parse(json_str);
     } catch (const json::exception& e) {
-        cout << "[serverRegisterWithCode] JSON 解析失败: " << e.what() << endl;
         sendMsg(fd, "JSON 格式错误");
-        std::cout << "[LOG] [serverRegisterWithCode] return: JSON 格式错误" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
 
-    string email = root["email"].get<string>();
+     email = root["email"].get<string>();
     string code = root["code"].get<string>();
     string username = root["username"].get<string>();
     string password = root["password"].get<string>();
 
-    cout << "[serverRegisterWithCode] Email: " << email << ", Username: " << username << endl;
-
-    Redis redis;
-    std::cout << "[LOG] [serverRegisterWithCode] 尝试连接Redis..." << std::endl;
     if (!redis.connect()) {
-        cout << "[serverRegisterWithCode] Redis 连接失败" << endl;
         sendMsg(fd, "服务器内部错误");
-        std::cout << "[LOG] [serverRegisterWithCode] return: Redis 连接失败" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
 
     // 验证验证码
     string real_code = redis.hget("verify_code", email);
-    cout << "[LOG] [serverRegisterWithCode] 数据库验证码: " << real_code << ", 用户输入验证码: " << code << std::endl;
     if (real_code != code) {
         sendMsg(fd, "验证码错误");
-        cout << "[serverRegisterWithCode] 验证码错误: " << real_code << " != " << code << endl;
-        std::cout << "[LOG] [serverRegisterWithCode] return: 验证码错误" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-
-    // 检查邮箱和用户名唯一性
-    if (redis.hexists("email_to_uid", email)) {
-        sendMsg(fd, "该邮箱已注册");
+    // 检查用户名是否已注册，若已注册则循环让客户端重新输入
+    int ret2;
+    while (true) {
+        ret2 = recvMsg(fd, email);
+        if (ret2 == 0) { // 客户端断开连接
+            close(fd);
         return;
     }
-    if (redis.hexists("username_to_uid", username)) {
-        sendMsg(fd, "该用户名已注册");
+        if (email == "0") { // 用户选择返回
+            epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
+        }
+        if (!redis.hexists("username_to_uid", email)) {
+            break; // 未注册，可以继续后续流程
+        }
+        sendMsg(fd, "该用户名已注册，请重新输入（输入0返回）：");
+        // 循环，等待客户端输入新邮箱
     }
 
     // 生成UID并创建User对象
@@ -411,68 +425,27 @@ void serverRegisterWithCode(int epfd, int fd) {
     // UID自动生成
 
     string user_info = user.to_json();
-    cout << "[serverRegisterWithCode] user.to_json(): " << user_info << endl;
-
-    std::cout << "[LOG] [serverRegisterWithCode] 写入 user_info..." << std::endl;
     if (!redis.hset("user_info", user.getUID(), user_info)) {
-        cout << "[serverRegisterWithCode] 写入 Redis 失败: user_info" << endl;
         sendMsg(fd, "服务器内部错误");
-        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 user_info 失败" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-    std::cout << "[LOG] [serverRegisterWithCode] 写入 email_to_uid..." << std::endl;
     if (!redis.hset("email_to_uid", email, user.getUID())) {
-        cout << "[serverRegisterWithCode] 写入 Redis 失败: email_to_uid" << endl;
         sendMsg(fd, "服务器内部错误");
-        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 email_to_uid 失败" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-    std::cout << "[LOG] [serverRegisterWithCode] 写入 username_to_uid..." << std::endl;
     if (!redis.hset("username_to_uid", username, user.getUID())) {
-        cout << "[serverRegisterWithCode] 写入 Redis 失败: username_to_uid" << endl;
         sendMsg(fd, "服务器内部错误");
-        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 username_to_uid 失败" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-
-    // 检查邮箱是否已注册
-    std::cout << "[LOG] [serverRegisterWithCode] 检查邮箱是否已注册..." << std::endl;
-    if (redis.sismember("all_uid", email)) {
-        sendMsg(fd, "该邮箱已注册");
-        cout << "[serverRegisterWithCode] 邮箱已注册: " << email << endl;
-        std::cout << "[LOG] [serverRegisterWithCode] return: 邮箱已注册" << std::endl;
-        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
-        return;
-    }
-
-    // 注册用户
-    user_info = user.to_json();
-    cout << "[serverRegisterWithCode] user.to_json(): " << user_info << endl;
-
-    std::cout << "[LOG] [serverRegisterWithCode] 写入 user_info..." << std::endl;
-    if (!redis.hset("user_info", user.getUID(), user_info)) {
-        cout << "[serverRegisterWithCode] 写入 Redis 失败: user_info" << endl;
-        sendMsg(fd, "服务器内部错误");
-        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 user_info 失败" << std::endl;
-        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
-        return;
-    }
-    std::cout << "[LOG] [serverRegisterWithCode] 写入 all_uid..." << std::endl;
     if (!redis.sadd("all_uid", user.getUID())) {
-        cout << "[serverRegisterWithCode] 写入 Redis 失败: all_uid" << endl;
         sendMsg(fd, "服务器内部错误");
-        std::cout << "[LOG] [serverRegisterWithCode] return: 写入 all_uid 失败" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-
     sendMsg(fd, "注册成功");
-    cout << "[serverRegisterWithCode] 注册成功: " << email << endl;
-    std::cout << "[LOG] [serverRegisterWithCode] 注册成功，流程结束" << std::endl;
-
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
 

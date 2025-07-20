@@ -8,17 +8,17 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/xuzichun/messengertest/client/GroupChat.cc" "CMakeFiles/client.out.dir/client/GroupChat.cc.o" "gcc" "CMakeFiles/client.out.dir/client/GroupChat.cc.o.d"
-  "/home/xuzichun/messengertest/client/Notifications.cc" "CMakeFiles/client.out.dir/client/Notifications.cc.o" "gcc" "CMakeFiles/client.out.dir/client/Notifications.cc.o.d"
-  "/home/xuzichun/messengertest/client/OperationMenu.cc" "CMakeFiles/client.out.dir/client/OperationMenu.cc.o" "gcc" "CMakeFiles/client.out.dir/client/OperationMenu.cc.o.d"
-  "/home/xuzichun/messengertest/client/StartMenu.cc" "CMakeFiles/client.out.dir/client/StartMenu.cc.o" "gcc" "CMakeFiles/client.out.dir/client/StartMenu.cc.o.d"
-  "/home/xuzichun/messengertest/client/Telegram.cc" "CMakeFiles/client.out.dir/client/Telegram.cc.o" "gcc" "CMakeFiles/client.out.dir/client/Telegram.cc.o.d"
-  "/home/xuzichun/messengertest/client/client.cc" "CMakeFiles/client.out.dir/client/client.cc.o" "gcc" "CMakeFiles/client.out.dir/client/client.cc.o.d"
-  "/home/xuzichun/messengertest/utils/Group.cc" "CMakeFiles/client.out.dir/utils/Group.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/Group.cc.o.d"
-  "/home/xuzichun/messengertest/utils/IO.cc" "CMakeFiles/client.out.dir/utils/IO.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/IO.cc.o.d"
-  "/home/xuzichun/messengertest/utils/TCP.cc" "CMakeFiles/client.out.dir/utils/TCP.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/TCP.cc.o.d"
-  "/home/xuzichun/messengertest/utils/User.cc" "CMakeFiles/client.out.dir/utils/User.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/User.cc.o.d"
-  "/home/xuzichun/messengertest/utils/proto.cc" "CMakeFiles/client.out.dir/utils/proto.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/proto.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/GroupChat.cc" "CMakeFiles/client.out.dir/client/GroupChat.cc.o" "gcc" "CMakeFiles/client.out.dir/client/GroupChat.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/Notifications.cc" "CMakeFiles/client.out.dir/client/Notifications.cc.o" "gcc" "CMakeFiles/client.out.dir/client/Notifications.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/OperationMenu.cc" "CMakeFiles/client.out.dir/client/OperationMenu.cc.o" "gcc" "CMakeFiles/client.out.dir/client/OperationMenu.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/StartMenu.cc" "CMakeFiles/client.out.dir/client/StartMenu.cc.o" "gcc" "CMakeFiles/client.out.dir/client/StartMenu.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/Telegram.cc" "CMakeFiles/client.out.dir/client/Telegram.cc.o" "gcc" "CMakeFiles/client.out.dir/client/Telegram.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/client.cc" "CMakeFiles/client.out.dir/client/client.cc.o" "gcc" "CMakeFiles/client.out.dir/client/client.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/utils/Group.cc" "CMakeFiles/client.out.dir/utils/Group.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/Group.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/utils/IO.cc" "CMakeFiles/client.out.dir/utils/IO.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/IO.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/utils/TCP.cc" "CMakeFiles/client.out.dir/utils/TCP.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/TCP.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/utils/User.cc" "CMakeFiles/client.out.dir/utils/User.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/User.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/utils/proto.cc" "CMakeFiles/client.out.dir/utils/proto.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/proto.cc.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

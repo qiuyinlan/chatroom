@@ -8,9 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/xuzichun/messengertest/server/test.cc" "CMakeFiles/test.out.dir/server/test.cc.o" "gcc" "CMakeFiles/test.out.dir/server/test.cc.o.d"
-  "/home/xuzichun/messengertest/utils/Group.cc" "CMakeFiles/test.out.dir/utils/Group.cc.o" "gcc" "CMakeFiles/test.out.dir/utils/Group.cc.o.d"
-  "/home/xuzichun/messengertest/utils/User.cc" "CMakeFiles/test.out.dir/utils/User.cc.o" "gcc" "CMakeFiles/test.out.dir/utils/User.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/server/test.cc" "CMakeFiles/test.out.dir/server/test.cc.o" "gcc" "CMakeFiles/test.out.dir/server/test.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/utils/Group.cc" "CMakeFiles/test.out.dir/utils/Group.cc.o" "gcc" "CMakeFiles/test.out.dir/utils/Group.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/utils/User.cc" "CMakeFiles/test.out.dir/utils/User.cc.o" "gcc" "CMakeFiles/test.out.dir/utils/User.cc.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

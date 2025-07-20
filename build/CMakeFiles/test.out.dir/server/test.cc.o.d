@@ -1,6 +1,7 @@
 CMakeFiles/test.out.dir/server/test.cc.o: \
- /home/xuzichun/messengertest/server/test.cc /usr/include/stdc-predef.h \
- /usr/include/c++/13/iostream /usr/include/c++/13/bits/requires_hosted.h \
+ /home/xuzichun/chatroom/messengertest/server/test.cc \
+ /usr/include/stdc-predef.h /usr/include/c++/13/iostream \
+ /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -149,9 +150,9 @@ CMakeFiles/test.out.dir/server/test.cc.o: \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
  /usr/include/c++/13/bits/istream.tcc \
- /home/xuzichun/messengertest/utils/User.h \
- /home/xuzichun/messengertest/utils/Group.h /usr/include/termios.h \
- /usr/include/x86_64-linux-gnu/bits/termios.h \
+ /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /home/xuzichun/chatroom/messengertest/utils/Group.h \
+ /usr/include/termios.h /usr/include/x86_64-linux-gnu/bits/termios.h \
  /usr/include/x86_64-linux-gnu/bits/termios-struct.h \
  /usr/include/x86_64-linux-gnu/bits/termios-c_cc.h \
  /usr/include/x86_64-linux-gnu/bits/termios-c_iflag.h \
