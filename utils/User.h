@@ -1,6 +1,4 @@
-//
-// Created by shawn on 23-7-27.
-//
+
 #ifndef CHATROOM_USER_H
 #define CHATROOM_USER_H
 

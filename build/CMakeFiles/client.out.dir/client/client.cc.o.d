@@ -220,7 +220,8 @@ CMakeFiles/client.out.dir/client/client.cc.o: \
  /usr/include/x86_64-linux-gnu/asm/sockios.h \
  /usr/include/asm-generic/sockios.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h \
- /home/xuzichun/chatroom/messengertest/client/StartMenu.h \
+ /home/xuzichun/chatroom/messengertest/client/controller/StartMenu.h \
  /home/xuzichun/chatroom/messengertest/utils/User.h \
  /home/xuzichun/chatroom/messengertest/client/../utils/proto.h \
- /home/xuzichun/chatroom/messengertest/client/OperationMenu.h
+ /home/xuzichun/chatroom/messengertest/client/controller/OperationMenu.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h

@@ -1,6 +1,4 @@
-//
-// Created by shawn on 23-8-7.
-//
+
 #ifndef CHATROOM_PROTO_H
 #define CHATROOM_PROTO_H
 #include <string>

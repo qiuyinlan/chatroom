@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
 #include "Notifications.h"
 #include "../utils/proto.h"
 #include "../utils/TCP.h"

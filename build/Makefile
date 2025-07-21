@@ -155,126 +155,6 @@ test.out/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.out.dir/build.make CMakeFiles/test.out.dir/build
 .PHONY : test.out/fast
 
-client/GroupChat.o: client/GroupChat.cc.o
-.PHONY : client/GroupChat.o
-
-# target to build an object file
-client/GroupChat.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/GroupChat.cc.o
-.PHONY : client/GroupChat.cc.o
-
-client/GroupChat.i: client/GroupChat.cc.i
-.PHONY : client/GroupChat.i
-
-# target to preprocess a source file
-client/GroupChat.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/GroupChat.cc.i
-.PHONY : client/GroupChat.cc.i
-
-client/GroupChat.s: client/GroupChat.cc.s
-.PHONY : client/GroupChat.s
-
-# target to generate assembly for a file
-client/GroupChat.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/GroupChat.cc.s
-.PHONY : client/GroupChat.cc.s
-
-client/Notifications.o: client/Notifications.cc.o
-.PHONY : client/Notifications.o
-
-# target to build an object file
-client/Notifications.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/Notifications.cc.o
-.PHONY : client/Notifications.cc.o
-
-client/Notifications.i: client/Notifications.cc.i
-.PHONY : client/Notifications.i
-
-# target to preprocess a source file
-client/Notifications.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/Notifications.cc.i
-.PHONY : client/Notifications.cc.i
-
-client/Notifications.s: client/Notifications.cc.s
-.PHONY : client/Notifications.s
-
-# target to generate assembly for a file
-client/Notifications.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/Notifications.cc.s
-.PHONY : client/Notifications.cc.s
-
-client/OperationMenu.o: client/OperationMenu.cc.o
-.PHONY : client/OperationMenu.o
-
-# target to build an object file
-client/OperationMenu.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/OperationMenu.cc.o
-.PHONY : client/OperationMenu.cc.o
-
-client/OperationMenu.i: client/OperationMenu.cc.i
-.PHONY : client/OperationMenu.i
-
-# target to preprocess a source file
-client/OperationMenu.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/OperationMenu.cc.i
-.PHONY : client/OperationMenu.cc.i
-
-client/OperationMenu.s: client/OperationMenu.cc.s
-.PHONY : client/OperationMenu.s
-
-# target to generate assembly for a file
-client/OperationMenu.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/OperationMenu.cc.s
-.PHONY : client/OperationMenu.cc.s
-
-client/StartMenu.o: client/StartMenu.cc.o
-.PHONY : client/StartMenu.o
-
-# target to build an object file
-client/StartMenu.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/StartMenu.cc.o
-.PHONY : client/StartMenu.cc.o
-
-client/StartMenu.i: client/StartMenu.cc.i
-.PHONY : client/StartMenu.i
-
-# target to preprocess a source file
-client/StartMenu.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/StartMenu.cc.i
-.PHONY : client/StartMenu.cc.i
-
-client/StartMenu.s: client/StartMenu.cc.s
-.PHONY : client/StartMenu.s
-
-# target to generate assembly for a file
-client/StartMenu.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/StartMenu.cc.s
-.PHONY : client/StartMenu.cc.s
-
-client/Telegram.o: client/Telegram.cc.o
-.PHONY : client/Telegram.o
-
-# target to build an object file
-client/Telegram.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/Telegram.cc.o
-.PHONY : client/Telegram.cc.o
-
-client/Telegram.i: client/Telegram.cc.i
-.PHONY : client/Telegram.i
-
-# target to preprocess a source file
-client/Telegram.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/Telegram.cc.i
-.PHONY : client/Telegram.cc.i
-
-client/Telegram.s: client/Telegram.cc.s
-.PHONY : client/Telegram.s
-
-# target to generate assembly for a file
-client/Telegram.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/Telegram.cc.s
-.PHONY : client/Telegram.cc.s
-
 client/client.o: client/client.cc.o
 .PHONY : client/client.o
 
@@ -298,6 +178,198 @@ client/client.s: client/client.cc.s
 client/client.cc.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/client.cc.s
 .PHONY : client/client.cc.s
+
+client/controller/OperationMenu.o: client/controller/OperationMenu.cc.o
+.PHONY : client/controller/OperationMenu.o
+
+# target to build an object file
+client/controller/OperationMenu.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/controller/OperationMenu.cc.o
+.PHONY : client/controller/OperationMenu.cc.o
+
+client/controller/OperationMenu.i: client/controller/OperationMenu.cc.i
+.PHONY : client/controller/OperationMenu.i
+
+# target to preprocess a source file
+client/controller/OperationMenu.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/controller/OperationMenu.cc.i
+.PHONY : client/controller/OperationMenu.cc.i
+
+client/controller/OperationMenu.s: client/controller/OperationMenu.cc.s
+.PHONY : client/controller/OperationMenu.s
+
+# target to generate assembly for a file
+client/controller/OperationMenu.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/controller/OperationMenu.cc.s
+.PHONY : client/controller/OperationMenu.cc.s
+
+client/controller/StartMenu.o: client/controller/StartMenu.cc.o
+.PHONY : client/controller/StartMenu.o
+
+# target to build an object file
+client/controller/StartMenu.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/controller/StartMenu.cc.o
+.PHONY : client/controller/StartMenu.cc.o
+
+client/controller/StartMenu.i: client/controller/StartMenu.cc.i
+.PHONY : client/controller/StartMenu.i
+
+# target to preprocess a source file
+client/controller/StartMenu.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/controller/StartMenu.cc.i
+.PHONY : client/controller/StartMenu.cc.i
+
+client/controller/StartMenu.s: client/controller/StartMenu.cc.s
+.PHONY : client/controller/StartMenu.s
+
+# target to generate assembly for a file
+client/controller/StartMenu.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/controller/StartMenu.cc.s
+.PHONY : client/controller/StartMenu.cc.s
+
+client/service/FileTransfer.o: client/service/FileTransfer.cc.o
+.PHONY : client/service/FileTransfer.o
+
+# target to build an object file
+client/service/FileTransfer.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/FileTransfer.cc.o
+.PHONY : client/service/FileTransfer.cc.o
+
+client/service/FileTransfer.i: client/service/FileTransfer.cc.i
+.PHONY : client/service/FileTransfer.i
+
+# target to preprocess a source file
+client/service/FileTransfer.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/FileTransfer.cc.i
+.PHONY : client/service/FileTransfer.cc.i
+
+client/service/FileTransfer.s: client/service/FileTransfer.cc.s
+.PHONY : client/service/FileTransfer.s
+
+# target to generate assembly for a file
+client/service/FileTransfer.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/FileTransfer.cc.s
+.PHONY : client/service/FileTransfer.cc.s
+
+client/service/Notifications.o: client/service/Notifications.cc.o
+.PHONY : client/service/Notifications.o
+
+# target to build an object file
+client/service/Notifications.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/Notifications.cc.o
+.PHONY : client/service/Notifications.cc.o
+
+client/service/Notifications.i: client/service/Notifications.cc.i
+.PHONY : client/service/Notifications.i
+
+# target to preprocess a source file
+client/service/Notifications.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/Notifications.cc.i
+.PHONY : client/service/Notifications.cc.i
+
+client/service/Notifications.s: client/service/Notifications.cc.s
+.PHONY : client/service/Notifications.s
+
+# target to generate assembly for a file
+client/service/Notifications.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/Notifications.cc.s
+.PHONY : client/service/Notifications.cc.s
+
+client/social/FriendManager.o: client/social/FriendManager.cc.o
+.PHONY : client/social/FriendManager.o
+
+# target to build an object file
+client/social/FriendManager.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/FriendManager.cc.o
+.PHONY : client/social/FriendManager.cc.o
+
+client/social/FriendManager.i: client/social/FriendManager.cc.i
+.PHONY : client/social/FriendManager.i
+
+# target to preprocess a source file
+client/social/FriendManager.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/FriendManager.cc.i
+.PHONY : client/social/FriendManager.cc.i
+
+client/social/FriendManager.s: client/social/FriendManager.cc.s
+.PHONY : client/social/FriendManager.s
+
+# target to generate assembly for a file
+client/social/FriendManager.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/FriendManager.cc.s
+.PHONY : client/social/FriendManager.cc.s
+
+client/social/G_chat.o: client/social/G_chat.cc.o
+.PHONY : client/social/G_chat.o
+
+# target to build an object file
+client/social/G_chat.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chat.cc.o
+.PHONY : client/social/G_chat.cc.o
+
+client/social/G_chat.i: client/social/G_chat.cc.i
+.PHONY : client/social/G_chat.i
+
+# target to preprocess a source file
+client/social/G_chat.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chat.cc.i
+.PHONY : client/social/G_chat.cc.i
+
+client/social/G_chat.s: client/social/G_chat.cc.s
+.PHONY : client/social/G_chat.s
+
+# target to generate assembly for a file
+client/social/G_chat.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chat.cc.s
+.PHONY : client/social/G_chat.cc.s
+
+client/social/G_chatctrl.o: client/social/G_chatctrl.cc.o
+.PHONY : client/social/G_chatctrl.o
+
+# target to build an object file
+client/social/G_chatctrl.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.o
+.PHONY : client/social/G_chatctrl.cc.o
+
+client/social/G_chatctrl.i: client/social/G_chatctrl.cc.i
+.PHONY : client/social/G_chatctrl.i
+
+# target to preprocess a source file
+client/social/G_chatctrl.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.i
+.PHONY : client/social/G_chatctrl.cc.i
+
+client/social/G_chatctrl.s: client/social/G_chatctrl.cc.s
+.PHONY : client/social/G_chatctrl.s
+
+# target to generate assembly for a file
+client/social/G_chatctrl.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.s
+.PHONY : client/social/G_chatctrl.cc.s
+
+client/social/chat.o: client/social/chat.cc.o
+.PHONY : client/social/chat.o
+
+# target to build an object file
+client/social/chat.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/chat.cc.o
+.PHONY : client/social/chat.cc.o
+
+client/social/chat.i: client/social/chat.cc.i
+.PHONY : client/social/chat.i
+
+# target to preprocess a source file
+client/social/chat.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/chat.cc.i
+.PHONY : client/social/chat.cc.i
+
+client/social/chat.s: client/social/chat.cc.s
+.PHONY : client/social/chat.s
+
+# target to generate assembly for a file
+client/social/chat.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/chat.cc.s
+.PHONY : client/social/chat.cc.s
 
 server/LoginHandler.o: server/LoginHandler.cc.o
 .PHONY : server/LoginHandler.o
@@ -619,24 +691,33 @@ help:
 	@echo "... client.out"
 	@echo "... server.out"
 	@echo "... test.out"
-	@echo "... client/GroupChat.o"
-	@echo "... client/GroupChat.i"
-	@echo "... client/GroupChat.s"
-	@echo "... client/Notifications.o"
-	@echo "... client/Notifications.i"
-	@echo "... client/Notifications.s"
-	@echo "... client/OperationMenu.o"
-	@echo "... client/OperationMenu.i"
-	@echo "... client/OperationMenu.s"
-	@echo "... client/StartMenu.o"
-	@echo "... client/StartMenu.i"
-	@echo "... client/StartMenu.s"
-	@echo "... client/Telegram.o"
-	@echo "... client/Telegram.i"
-	@echo "... client/Telegram.s"
 	@echo "... client/client.o"
 	@echo "... client/client.i"
 	@echo "... client/client.s"
+	@echo "... client/controller/OperationMenu.o"
+	@echo "... client/controller/OperationMenu.i"
+	@echo "... client/controller/OperationMenu.s"
+	@echo "... client/controller/StartMenu.o"
+	@echo "... client/controller/StartMenu.i"
+	@echo "... client/controller/StartMenu.s"
+	@echo "... client/service/FileTransfer.o"
+	@echo "... client/service/FileTransfer.i"
+	@echo "... client/service/FileTransfer.s"
+	@echo "... client/service/Notifications.o"
+	@echo "... client/service/Notifications.i"
+	@echo "... client/service/Notifications.s"
+	@echo "... client/social/FriendManager.o"
+	@echo "... client/social/FriendManager.i"
+	@echo "... client/social/FriendManager.s"
+	@echo "... client/social/G_chat.o"
+	@echo "... client/social/G_chat.i"
+	@echo "... client/social/G_chat.s"
+	@echo "... client/social/G_chatctrl.o"
+	@echo "... client/social/G_chatctrl.i"
+	@echo "... client/social/G_chatctrl.s"
+	@echo "... client/social/chat.o"
+	@echo "... client/social/chat.i"
+	@echo "... client/social/chat.s"
 	@echo "... server/LoginHandler.o"
 	@echo "... server/LoginHandler.i"
 	@echo "... server/LoginHandler.s"

@@ -1,6 +1,4 @@
-//
-// Created by shawn on 23-8-7.
-//
+
 #include "TCP.h"
 #include <arpa/inet.h>
 #include <cstring>

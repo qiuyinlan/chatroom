@@ -1,7 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
-
 #include "Telegram.h"
 #include "../utils/proto.h"
 #include "../utils/IO.h"

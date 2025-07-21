@@ -1,6 +1,4 @@
-//
-// Created by shawn on 23-8-13.
-//
+
 
 #ifndef CHATROOM_GROUP_H
 #define CHATROOM_GROUP_H

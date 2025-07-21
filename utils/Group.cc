@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-13.
-//
 
 #include <nlohmann/json.hpp>
 

@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
 #ifndef CHATROOM_CLIENT_H
 #define CHATROOM_CLIENT_H
 

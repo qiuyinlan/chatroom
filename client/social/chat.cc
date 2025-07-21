@@ -43,7 +43,7 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
     sendMsg(fd, START_CHAT);
     //bug who必须要减1,不然只有一个好友的话，会导致数组索引越界
     who--;
-    cout << "你好，我是" << my_friends[who].second.getUsername() << "快来与我聊天吧！" << endl;
+    cout <<  my_friends[who].second.getUsername() << endl;
     string records_index = user.getUID() + my_friends[who].second.getUID();
     //向服务器发送历史聊天记录索引
     sendMsg(fd, records_index);
@@ -85,8 +85,9 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
     string msg, json;
 
     //####有好友，开始聊天
+    return_last();
     while (true) {
-        return_last();
+        
         cin >> msg;
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
@@ -124,8 +125,10 @@ void ChatSession::findHistory(vector<pair<string, User>> &my_friends) const {
         cout << i + 1 << ":" << my_friends[i].second.getUsername() << endl;
     }
     cout << "-----------------------------------" << endl;
+
+    //输入要选第几个好友
     int who;
-    while (!(cin >> who) || who < 0 || who > my_friends.size()) {
+    while (!(cin >> who) || who <= 0 || who > my_friends.size()) {
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
             return;

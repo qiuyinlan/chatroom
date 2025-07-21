@@ -8,12 +8,15 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/xuzichun/chatroom/messengertest/client/GroupChat.cc" "CMakeFiles/client.out.dir/client/GroupChat.cc.o" "gcc" "CMakeFiles/client.out.dir/client/GroupChat.cc.o.d"
-  "/home/xuzichun/chatroom/messengertest/client/Notifications.cc" "CMakeFiles/client.out.dir/client/Notifications.cc.o" "gcc" "CMakeFiles/client.out.dir/client/Notifications.cc.o.d"
-  "/home/xuzichun/chatroom/messengertest/client/OperationMenu.cc" "CMakeFiles/client.out.dir/client/OperationMenu.cc.o" "gcc" "CMakeFiles/client.out.dir/client/OperationMenu.cc.o.d"
-  "/home/xuzichun/chatroom/messengertest/client/StartMenu.cc" "CMakeFiles/client.out.dir/client/StartMenu.cc.o" "gcc" "CMakeFiles/client.out.dir/client/StartMenu.cc.o.d"
-  "/home/xuzichun/chatroom/messengertest/client/Telegram.cc" "CMakeFiles/client.out.dir/client/Telegram.cc.o" "gcc" "CMakeFiles/client.out.dir/client/Telegram.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/client/client.cc" "CMakeFiles/client.out.dir/client/client.cc.o" "gcc" "CMakeFiles/client.out.dir/client/client.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/controller/OperationMenu.cc" "CMakeFiles/client.out.dir/client/controller/OperationMenu.cc.o" "gcc" "CMakeFiles/client.out.dir/client/controller/OperationMenu.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/controller/StartMenu.cc" "CMakeFiles/client.out.dir/client/controller/StartMenu.cc.o" "gcc" "CMakeFiles/client.out.dir/client/controller/StartMenu.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/service/FileTransfer.cc" "CMakeFiles/client.out.dir/client/service/FileTransfer.cc.o" "gcc" "CMakeFiles/client.out.dir/client/service/FileTransfer.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/service/Notifications.cc" "CMakeFiles/client.out.dir/client/service/Notifications.cc.o" "gcc" "CMakeFiles/client.out.dir/client/service/Notifications.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/social/FriendManager.cc" "CMakeFiles/client.out.dir/client/social/FriendManager.cc.o" "gcc" "CMakeFiles/client.out.dir/client/social/FriendManager.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/social/G_chat.cc" "CMakeFiles/client.out.dir/client/social/G_chat.cc.o" "gcc" "CMakeFiles/client.out.dir/client/social/G_chat.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/social/G_chatctrl.cc" "CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.o" "gcc" "CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.o.d"
+  "/home/xuzichun/chatroom/messengertest/client/social/chat.cc" "CMakeFiles/client.out.dir/client/social/chat.cc.o" "gcc" "CMakeFiles/client.out.dir/client/social/chat.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/utils/Group.cc" "CMakeFiles/client.out.dir/utils/Group.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/Group.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/utils/IO.cc" "CMakeFiles/client.out.dir/utils/IO.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/IO.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/utils/TCP.cc" "CMakeFiles/client.out.dir/utils/TCP.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/TCP.cc.o.d"

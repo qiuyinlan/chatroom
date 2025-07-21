@@ -62,21 +62,6 @@ void serverLogin(int epfd, int fd) {
 }
 
 void serverOperation(int fd, User &user) {
-    map<int, function<void(int fd, User &user)>> LoginOperation = {
-            {4,  start_chat},
-            {5,  history},
-            {6,  list_friend},
-            {7,  add_friend},
-            {8,  findRequest},
-            {9,  del_friend},
-            {10, blockedLists},
-            {11, unblocked},
-            {12, group},
-            {13, send_file},
-            {14, receive_file},
-            //改协议后，同步出错
-            {17, synchronize}
-    };
     Redis redis;
     redis.connect();
     int friend_num = redis.scard(user.getUID());
@@ -86,26 +71,48 @@ void serverOperation(int fd, User &user) {
     for (int i = 0; i < friend_num; i++) {
         string friend_info = redis.hget("user_info", arr[i]->str);
         //循环发送好友信息
+        cout << "serverOperation" << endl ;
         sendMsg(fd, friend_info);
     }
     string temp;
     int ret;
     while (true) {
         //接收用户输入的操作
-        //important: ret 看来是必要的 可以有效的删掉在线用户，防止虚空在线
         ret = recvMsg(fd, temp);
         if (temp == BACK || ret == 0) {
             break;
         }
         int option = stoi(temp);
-        if (LoginOperation.find(option) == LoginOperation.end()) {
+        if (option == 4) {
+            start_chat(fd, user);
+        } else if (option == 5) {
+            history(fd, user);
+        } else if (option == 6) {
+            list_friend(fd, user);
+        } else if (option == 7) {
+            add_friend(fd, user);
+        } else if (option == 8) {
+            findRequest(fd, user);
+        } else if (option == 9) {
+            del_friend(fd, user);
+        } else if (option == 10) {
+            blockedLists(fd, user);
+        } else if (option == 11) {
+            unblocked(fd, user);
+        } else if (option == 12) {
+            group(fd, user);
+        } else if (option == 13) {
+            send_file(fd, user);
+        } else if (option == 14) {
+            receive_file(fd, user);
+        } else if (option == 17) {
+            synchronize(fd, user);
+        } else {
             cout << "没有这个选项，请重新输入" << endl;
             continue;
         }
-        LoginOperation[option](fd, user);
     }
     close(fd);
-    //只用在这里删除就行了
     redis.hdel("is_online", user.getUID());
 }
 

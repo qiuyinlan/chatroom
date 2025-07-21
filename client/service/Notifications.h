@@ -1,7 +1,3 @@
-//
-// Created by shawn on 23-8-2.
-//
-
 #ifndef CHATROOM_NOTIFICATIONS_H
 #define CHATROOM_NOTIFICATIONS_H
 

@@ -1,6 +1,4 @@
-//
-// Created by shawn on 23-7-26.
-//
+
 #ifndef CHATROOM_REDIS_H
 #define CHATROOM_REDIS_H
 

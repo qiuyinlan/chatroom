@@ -11,7 +11,6 @@
 #include <map>
 #include "Notifications.h"
 using namespace std;
-using namespace std;
 
 void GroupChat::groupMenu() {
     cout << "[1]开始聊天                     [2]创建群聊" << endl;

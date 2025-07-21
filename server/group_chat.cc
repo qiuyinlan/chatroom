@@ -3,9 +3,9 @@
 #include "group_chat.h"
 #include "Group.h"
 #include "proto.h"
-//
-// Created by shawn on 23-8-13.
-//
+
+#include <iostream>
+
 using namespace std;
 
 GroupChat::GroupChat(int fd, const User &user) : fd(fd), user(user) {
@@ -24,7 +24,7 @@ void GroupChat::sync() {
         redisReply **arr = redis.smembers(created);
         for (int i = 0; i < num; i++) {
             string json = redis.hget("group_info", arr[i]->str);
-
+            std::cout << "[SERVER DEBUG] sendMsg to client: " << json << std::endl;
             sendMsg(fd, json);
             freeReplyObject(arr[i]);
         }
@@ -36,7 +36,7 @@ void GroupChat::sync() {
         redisReply **arr = redis.smembers(managed);
         for (int i = 0; i < num; i++) {
             string json = redis.hget("group_info", arr[i]->str);
-
+            std::cout << "[SERVER DEBUG] sendMsg to client: " << json << std::endl;
             sendMsg(fd, json);
             freeReplyObject(arr[i]);
         }
@@ -48,7 +48,7 @@ void GroupChat::sync() {
         redisReply **arr = redis.smembers(joined);
         for (int i = 0; i < num; i++) {
             string json = redis.hget("group_info", arr[i]->str);
-
+            std::cout << "[SERVER DEBUG] sendMsg to client: " << json << std::endl;
             sendMsg(fd, json);
             freeReplyObject(arr[i]);
         }
@@ -267,6 +267,7 @@ void GroupChat::remove(Group &group) const {
     for (int i = 0; i < num; i++) {
         member_info = redis.hget("user_info", arr[i]->str);
         //发送群员信息
+        std::cout << "[SERVER DEBUG] sendMsg to client: " << member_info << std::endl;
         sendMsg(fd, member_info);
         freeReplyObject(arr[i]);
     }

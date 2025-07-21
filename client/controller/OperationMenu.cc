@@ -25,7 +25,20 @@ void operationMenu() {
     cout << "请输入您的选择" << endl;
 }
 
-
+void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) {
+    sendMsg(fd, SYNC);                // 1. 发送 SYNC
+    my_friends.clear();               // 2. 清空本地 my_friends
+    string friend_num;
+    recvMsg(fd, friend_num);          // 3. 接收好友个数
+    int num = stoi(friend_num);
+    User _friend;
+    string friend_info;
+    for (int i = 0; i < num; i++) {   // 4. 循环接收并解析
+        recvMsg(fd, friend_info);
+        _friend.json_parse(friend_info);
+        my_friends.emplace_back(my_uid, _friend);
+    }
+}
 
 
 void clientOperation(int fd, User &user) {
@@ -74,7 +87,7 @@ void clientOperation(int fd, User &user) {
             std::cout << "输入格式错误 请重新输入" << std::endl;
             continue;
         }
-        sendMsg(fd, SYNC);
+        syncFriends(fd, my_uid, my_friends);
         // 传统if-else分发
         if (opt == 1) {
             chatSession.startChat(my_friends);

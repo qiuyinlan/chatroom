@@ -12,6 +12,12 @@
 using namespace std;
 
 
+void start_UI() {
+    cout << "[1]登录    [2]邮箱注册    [3]重置密码    [4]找回密码    [5]退出" << endl;
+    cout << "请输入你的选择" << endl;
+}
+
+
 int main(int argc, char *argv[]) {
     if (argc == 1) {
         IP = "10.30.0.202";

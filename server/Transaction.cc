@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
 #include "Transaction.h"
 #include "Redis.h"
 #include "../utils/IO.h"
@@ -16,6 +13,7 @@
 #include <sys/sendfile.h>
 #include <unistd.h>
 
+
 using namespace std;
 
 void synchronize(int fd, User &user) {
@@ -29,6 +27,7 @@ void synchronize(int fd, User &user) {
     for (int i = 0; i < num; i++) {
         friend_info = redis.hget("user_info", arr[i]->str);
 
+        std::cout << "调用了synchronize[SERVER DEBUG] sendMsg to client: " << friend_info << std::endl;
         sendMsg(fd, friend_info);
         freeReplyObject(arr[i]);
     }
@@ -70,7 +69,7 @@ void start_chat(int fd, User &user) {
     while (true) {
         int ret = recvMsg(fd, msg);
         if (msg == EXIT || ret == 0) {
-            //给线程发消息
+            //协议的冗余设计，有利于兼容不同实现
             sendMsg(fd, EXIT);
             redis.srem("is_chat", user.getUID());
             //用户异常退出直接删除在线列表
@@ -106,6 +105,7 @@ void start_chat(int fd, User &user) {
         string _fd = redis.hget("is_online", UID);
         int her_fd = stoi(_fd);
         //cout<<"fd: "<<fd<<endl;
+        std::cout << "[SERVER DEBUG] 这里吗sendMsg to client: " << msg << std::endl;
         sendMsg(her_fd, msg);
         string me = message.getUidFrom() + message.getUidTo();
         string her = message.getUidTo() + message.getUidFrom();
