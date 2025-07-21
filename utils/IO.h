@@ -3,6 +3,7 @@
 
 #include <string>
 
+void return_last();
 int write_n(int fd, const char *msg, int n);
 
 int sendMsg(int fd, std::string msg);

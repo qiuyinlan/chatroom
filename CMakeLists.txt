@@ -10,9 +10,12 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 
 #加上这个可以直接#include "User.h"而不用#include "../utils/User.h"
 include_directories(
-        server
-        client
-        utils
+    server
+    client
+    client/controller
+    client/social
+    client/service
+    utils
 )
 
 add_executable(
@@ -33,11 +36,14 @@ add_executable(
 add_executable(
         client.out
         client/client.cc
-        client/StartMenu.cc
-        client/OperationMenu.cc
-        client/Notifications.cc
-        client/Telegram.cc
-        client/GroupChat.cc
+        client/controller/StartMenu.cc
+        client/controller/OperationMenu.cc
+        client/service/FileTransfer.cc
+        client/service/Notifications.cc
+        client/social/FriendManager.cc
+        client/social/G_chatctrl.cc
+        client/social/chat.cc
+        client/social/G_chat.cc
         utils/User.cc
         utils/TCP.cc
         utils/IO.cc

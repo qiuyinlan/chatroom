@@ -1,6 +1,3 @@
-//
-// Created by shawn on 23-8-7.
-//
 #include "proto.h"
 #include <nlohmann/json.hpp>
 
@@ -118,8 +115,6 @@ string Message::get_time() {
 }
 
 string Message::to_json() {
-    //bug 消息时间time没有初始化
-    //变量名time与get_time中的time函数冲突，现改名为timeStamp
     timeStamp = get_time();
     json root;
     root["timeStamp"] = timeStamp;

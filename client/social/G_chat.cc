@@ -1,8 +1,4 @@
-//
-// Created by shawn on 23-8-10.
-//
-
-#include "GroupChat.h"
+#include "G_chat.h"
 #include "User.h"
 #include "IO.h"
 #include "Group.h"
@@ -14,8 +10,19 @@
 #include <functional>
 #include <map>
 #include "Notifications.h"
-
 using namespace std;
+using namespace std;
+
+void GroupChat::groupMenu() {
+    cout << "[1]开始聊天                     [2]创建群聊" << endl;
+    cout << "[3]加入群聊                     [4]查看群聊历史记录" << endl;
+    cout << "[5]管理我的群                   [6]管理我创建的群" << endl;
+    cout << "[7]查看群成员                   [8]退出群聊" << endl;
+    cout << "[9]查看我加入的群                [10]查看我管理的群" << endl;
+    cout << "[11]查看我创建的群" << endl;
+    cout << "[0]返回" << endl;
+    cout << "请输入您的选择" << endl;
+}
 
 GroupChat::GroupChat(int fd, const User &user) : fd(fd), user(user) {
     joined = "joined" + user.getUID();
