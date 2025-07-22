@@ -43,12 +43,10 @@ const std::string GREEN = "\033[32m";
 const std::string YELLOW = "\033[33m";
 const std::string BLUE = "\033[34m";
 
-//数据传输操作上方空一行以突出逻辑
 class LoginRequest {
 public:
     LoginRequest();
 
-    //LoginRequest(const std::string &uid, const std::string &passwd) : UID(uid), passwd(passwd) {}
     LoginRequest(string uid, string passwd);
 
     [[nodiscard]] const string &getUID() const;
@@ -64,7 +62,7 @@ public:
     void json_parse(const string &json);
 
 private:
-    string UID;    // 实际存储邮箱，用于登录时查找对应的UID
+    string UID;  
     string password;
 };
 

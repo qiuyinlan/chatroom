@@ -115,10 +115,10 @@ int login(int fd, User &user) {
         return 0;
     } else if (buf == "1") {
         cout << "登录成功!" << endl;
-        string user_info;
-        recvMsg(fd, user_info);
-        user.json_parse(user_info);
-        cout << "好久不见 " << user.getUsername() << "!" << endl;
+        string user_uid;
+        recvMsg(fd, user_uid);
+        user.json_parse(user_uid);
+        cout <<  user.getUsername() <<  endl;
         return 1;
     }
     return 0;

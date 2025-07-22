@@ -159,22 +159,36 @@ void FriendManager::delFriend(vector<pair<string, User>> &my_friends) {
             cout << "读到文件结尾" << endl;
             return;
         }
-        int who;
-        while (!(cin >> who) || who < 0 || who > my_friends.size()) {
-            if (cin.eof()) {
-                cout << "读到文件结尾" << endl;
-                return;
-            }
-            cout << "输入格式错误" << endl;
-            cin.clear();
-            cin.ignore(INT32_MAX, '\n');
+
+        // 检查输入是否为空
+        if (del.empty()) {
+            cout << "输入不能为空，请重新输入" << endl;
+            continue;
         }
-        cin.ignore(INT32_MAX, '\n');
+
+        // 将字符串转换为整数
+        int who;
+        try {
+            who = stoi(del);
+        } catch (const exception& e) {
+            cout << "输入格式错误，请输入数字" << endl;
+            continue;
+        }
+
+        // 检查范围
+        if (who < 1 || who > my_friends.size()) {
+            cout << "输入超出范围，请输入1-" << my_friends.size() << "之间的数字" << endl;
+            continue;
+        }
+
         //向服务器发送删除好友的信号
         sendMsg(fd, DEL_FRIEND);
         //发送删除好友的UID
-        who--;
+        who--;  // 转换为0基索引
         sendMsg(fd, my_friends[who].second.getUID());
+
+        cout << "已删除好友 " << my_friends[who].second.getUsername() << endl;
+        break;  // 发送完请求后退出循环
     }
 }
 

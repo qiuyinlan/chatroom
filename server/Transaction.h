@@ -1,11 +1,9 @@
-//
-// Created by shawn on 23-8-1.
-//
-
 #ifndef CHATROOM_TRANSACTION_H
 #define CHATROOM_TRANSACTION_H
 
 #include "../utils/User.h"
+
+//业务处理函数，对应实现的所有功能
 
 void synchronize(int fd, User &user);
 

@@ -12,6 +12,12 @@
 using namespace std;
 
 
+void signalHandler(int signum) {
+    cout << "\n接收到信号 " << signum << "，客户端正在退出..." << endl;
+    cout << "再见！" << endl;
+    exit(signum);
+}
+
 void start_UI() {
     cout << "[1]登录    [2]邮箱注册    [3]重置密码    [4]找回密码    [5]退出" << endl;
     cout << "请输入你的选择" << endl;
@@ -30,7 +36,7 @@ int main(int argc, char *argv[]) {
         cerr << "Invalid number of arguments. Usage: program_name [IP] [port]" << endl;
         return 1;
     }
-    //signal(SIGINT, signalHandler);
+    signal(SIGINT, signalHandler);
     int fd;
     User user;
     fd = Socket();

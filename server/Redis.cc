@@ -81,9 +81,16 @@ string Redis::hget(const string &key, const string &field) {
 }
 
 bool Redis::hset(const string &key, const string &field, const string &value) {
-    string command = "HSET " + key + " " + field + " " + value;
-    reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
-    bool success = reply != nullptr && reply->type != REDIS_REPLY_ERROR;
+    // 使用参数化命令，避免字符串拼接导致的解析问题
+    reply = static_cast<redisReply *>(redisCommand(context, "HSET %s %s %s", key.c_str(), field.c_str(), value.c_str()));
+    if (reply == nullptr) {
+        cout << "[REDIS ERROR] HSET command failed" << endl;
+        return false;
+    }
+    bool success = reply->type != REDIS_REPLY_ERROR;
+    if (!success) {
+        cout << "[REDIS ERROR] HSET error: " << reply->str << endl;
+    }
     freeReplyObject(reply);
     return success;
 }
@@ -125,8 +132,15 @@ redisReply **Redis::lrange(const string &key) {
 }
 
 void Redis::lpush(const string &key, const string &value) {
-    string command = "LPUSH " + key + " " + value;
-    reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
+    // 使用参数化命令，避免字符串拼接导致的解析问题
+    reply = static_cast<redisReply *>(redisCommand(context, "LPUSH %s %s", key.c_str(), value.c_str()));
+    if (reply == nullptr) {
+        cout << "[REDIS ERROR] LPUSH command failed" << endl;
+        return;
+    }
+    if (reply->type == REDIS_REPLY_ERROR) {
+        cout << "[REDIS ERROR] LPUSH error: " << reply->str << endl;
+    }
     freeReplyObject(reply);
 }
 

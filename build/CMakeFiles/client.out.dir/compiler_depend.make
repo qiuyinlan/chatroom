@@ -283,6 +283,7 @@ CMakeFiles/client.out.dir/client/controller/OperationMenu.cc.o: /home/xuzichun/c
   /home/xuzichun/chatroom/messengertest/client/social/G_chatctrl.h \
   /home/xuzichun/chatroom/messengertest/client/social/chat.h \
   /home/xuzichun/chatroom/messengertest/utils/IO.h \
+  /home/xuzichun/chatroom/messengertest/utils/User.h \
   /home/xuzichun/chatroom/messengertest/utils/proto.h \
   /home/xuzichun/chatroom/messengertest/utils/User.h \
   /usr/include/alloca.h \
@@ -2034,6 +2035,7 @@ CMakeFiles/client.out.dir/client/social/chat.cc.o: /home/xuzichun/chatroom/messe
   /home/xuzichun/chatroom/messengertest/client/service/Notifications.h \
   /home/xuzichun/chatroom/messengertest/client/social/chat.h \
   /home/xuzichun/chatroom/messengertest/utils/IO.h \
+  /home/xuzichun/chatroom/messengertest/utils/User.h \
   /home/xuzichun/chatroom/messengertest/utils/proto.h \
   /home/xuzichun/chatroom/messengertest/utils/User.h \
   /usr/include/alloca.h \

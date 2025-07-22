@@ -9,6 +9,7 @@
 #include <thread>
 #include <functional>
 #include <map>
+#include <exception>
 #include "Notifications.h"
 using namespace std;
 
@@ -110,11 +111,15 @@ void GroupChat::startChat(vector<Group> &joinedGroup) {
     string msg;
     Message history_message;
     for (int i = 0; i < num; i++) {
-
         recvMsg(fd, msg);
-        history_message.json_parse(msg);
-        cout << "\t\t\t\t" << history_message.getTime() << endl;
-        cout << history_message.getUsername() << ": " << history_message.getContent() << endl;
+        try {
+            history_message.json_parse(msg);
+            cout << "\t\t\t\t" << history_message.getTime() << endl;
+            cout << history_message.getUsername() << ": " << history_message.getContent() << endl;
+        } catch (const exception& e) {
+            // 静默跳过损坏的历史消息
+            continue;
+        }
     }
     cout << YELLOW << "-----------------------以上为历史消息-----------------------" << RESET << endl;
     Message message(user.getUsername(), user.getUID(), joinedGroup[which].getGroupUid());

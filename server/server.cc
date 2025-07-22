@@ -19,7 +19,21 @@
 using namespace std;
 
 void signalHandler(int signum) {
-    cout << "signum: " << signum << endl;
+    cout << "\n接收到信号 " << signum << "，正在清理资源..." << endl;
+
+    // 清理Redis中的在线状态
+    Redis redis;
+    if (redis.connect()) {
+        cout << "清理Redis中的在线状态..." << endl;
+        redis.del("is_online");
+        redis.del("is_chat");
+        cout << "Redis清理完成" << endl;
+    } else {
+        cout << "Redis连接失败，无法清理" << endl;
+    }
+
+    cout << "服务器正常退出" << endl;
+    exit(signum);
 }
 
 
@@ -36,13 +50,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     signal(SIGPIPE, signalHandler);
+    signal(SIGINT, signalHandler);   // 处理Ctrl+C
+    signal(SIGTERM, signalHandler);  // 处理终止信号
     //服务器启动时删除所有在线用户
     Redis redis;
-    redis.connect();
-    int len = redis.hlen("is_online");
-    redisReply **arr = redis.hgetall("is_online");
-    for (int i = 0; i < len; i++) {
-        redis.hdel("is_online", arr[i]->str);
+    if (redis.connect()) {
+        cout << "服务器启动，清理残留的在线状态..." << endl;
+        redis.del("is_online");
+        redis.del("is_chat");
+        cout << "在线状态清理完成" << endl;
+    } else {
+        cout << "Redis连接失败，无法清理在线状态" << endl;
     }
 
     int ret;

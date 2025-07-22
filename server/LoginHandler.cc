@@ -17,15 +17,23 @@
 using namespace std;
 using json = nlohmann::json;
 
+//登陆
+
 void serverLogin(int epfd, int fd) {
     struct epoll_event temp;
     temp.data.fd = fd;
     temp.events = EPOLLIN;
     User user;
     Redis redis;
-    redis.connect();
+    // 确保 Redis 连接成功
+    if (!redis.connect()) {
+        cout << "Redis connection failed during login" << endl;
+        sendMsg(fd, "-4"); // 服务器内部错误
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
     string request;
-    //接收用户发送的邮箱和密码
+
     recvMsg(fd, request);
     LoginRequest loginRequest;
     loginRequest.json_parse(request);
@@ -39,8 +47,8 @@ void serverLogin(int epfd, int fd) {
         return;
     }
     string UID = redis.hget("email_to_uid", email);
-    string user_info = redis.hget("user_info", UID);
-    user.json_parse(user_info);
+    string user_uid = redis.hget("user_info", UID);
+    user.json_parse(user_uid);
     if (password != user.getPassword()) {
         sendMsg(fd, "-2"); // 密码错误
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
@@ -56,24 +64,21 @@ void serverLogin(int epfd, int fd) {
     sendMsg(fd, "1");
     redis.hset("is_online", UID, to_string(fd));
     //发送从数据库获取的用户信息
-    sendMsg(fd, user_info);
+    sendMsg(fd, user_uid);
     serverOperation(fd, user);
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
 
+
+
+
+//登陆后业务分发
+
 void serverOperation(int fd, User &user) {
+    //同步好友信息
+    synchronize(fd,user);
     Redis redis;
     redis.connect();
-    int friend_num = redis.scard(user.getUID());
-    //发送好友个数
-    sendMsg(fd, to_string(friend_num));
-    redisReply **arr = redis.smembers(user.getUID());
-    for (int i = 0; i < friend_num; i++) {
-        string friend_info = redis.hget("user_info", arr[i]->str);
-        //循环发送好友信息
-        cout << "serverOperation" << endl ;
-        sendMsg(fd, friend_info);
-    }
     string temp;
     int ret;
     while (true) {
@@ -124,88 +129,76 @@ void notify(int fd) {
     int ret = recvMsg(fd, UID);
     if (ret == 0) {
         redis.hdel("is_online", UID);
+        return;
     }
+
     //判断是否有好友添加
     if (redis.sismember("add_friend", UID)) {
-
         sendMsg(fd, REQUEST_NOTIFICATION);
         redis.srem("add_friend", UID);
-    } else {
-
-        sendMsg(fd, "NO");
     }
+
     //判断是否有加群
     if (redis.sismember("add_group", UID)) {
-
         sendMsg(fd, GROUP_REQUEST);
         redis.srem("add_group", UID);
-    } else {
-
-        sendMsg(fd, "NO");
     }
+
     //判断是否有消息
     if (redis.hexists("chat", UID)) {
-
-        sendMsg(fd, redis.hget("chat", UID));
-        //bug hdel写的有问题，返回的一直是"0",key和field之间没有加空格,并且hdel还写错了
+        string sender = redis.hget("chat", UID);
+        sendMsg(fd, "MESSAGE:" + sender);
         redis.hdel("chat", UID);
-    } else {
-
-        sendMsg(fd, "NO");
     }
     //被删除好友
     int num = redis.scard(UID + "del");
-
-    sendMsg(fd, to_string(num));
     if (num != 0) {
         redisReply **arr = redis.smembers(UID + "del");
         for (int i = 0; i < num; i++) {
-
-            sendMsg(fd, arr[i]->str);
+            sendMsg(fd, "DELETED:" + string(arr[i]->str));
             redis.srem(UID + "del", arr[i]->str);
             freeReplyObject(arr[i]);
         }
     }
+
     //被设置为管理员
     num = redis.scard("appoint_admin" + UID);
-
-    sendMsg(fd, to_string(num));
     if (num != 0) {
         redisReply **arr = redis.smembers("appoint_admin" + UID);
         for (int i = 0; i < num; i++) {
-
-            sendMsg(fd, arr[i]->str);
+            sendMsg(fd, "ADMIN_ADD:" + string(arr[i]->str));
             redis.srem("appoint_admin" + UID, arr[i]->str);
             freeReplyObject(arr[i]);
         }
     }
+
     //被取消管理员权限
     num = redis.scard("revoke_admin" + UID);
-
-    sendMsg(fd, to_string(num));
     if (num != 0) {
         redisReply **arr = redis.smembers("revoke_admin" + UID);
         for (int i = 0; i < num; i++) {
-
-            sendMsg(fd, arr[i]->str);
+            sendMsg(fd, "ADMIN_REMOVE:" + string(arr[i]->str));
             redis.srem("revoke_admin" + UID, arr[i]->str);
             freeReplyObject(arr[i]);
         }
     }
+
     //文件消息提醒
     num = redis.scard("file" + UID);
-
-    sendMsg(fd, to_string(num));
     if (num != 0) {
         redisReply **arr = redis.smembers("file" + UID);
         for (int i = 0; i < num; i++) {
-
-            sendMsg(fd, arr[i]->str);
+            sendMsg(fd, "FILE:" + string(arr[i]->str));
             redis.srem("file" + UID, arr[i]->str);
             freeReplyObject(arr[i]);
         }
     }
+
+    // 发送结束标志
+    sendMsg(fd, "END");
 }
+
+
 
 std::string generateCode() {
     // 取当前时间戳的后两位

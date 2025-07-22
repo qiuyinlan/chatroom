@@ -4,11 +4,15 @@
 
 #include "User.h"
 
+//以下是登陆后的业务派发
+
 void serverLogin(int epfd, int fd);
 
 void serverOperation(int fd, User &user);
 
 void notify(int fd);
+
+//以下是注册登陆函数
 
 void handleRequestCode(int epfd, int fd);   //检查重复，发送验证码
 

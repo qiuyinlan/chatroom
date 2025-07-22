@@ -12,9 +12,11 @@
 #include <fcntl.h>
 #include <sys/sendfile.h>
 #include <unistd.h>
+#include <nlohmann/json.hpp>
 
 
 using namespace std;
+using json = nlohmann::json;
 
 void synchronize(int fd, User &user) {
     Redis redis;
@@ -26,8 +28,6 @@ void synchronize(int fd, User &user) {
     redisReply **arr = redis.smembers(user.getUID());
     for (int i = 0; i < num; i++) {
         friend_info = redis.hget("user_info", arr[i]->str);
-
-        std::cout << "调用了synchronize[SERVER DEBUG] sendMsg to client: " << friend_info << std::endl;
         sendMsg(fd, friend_info);
         freeReplyObject(arr[i]);
     }
@@ -53,8 +53,17 @@ void start_chat(int fd, User &user) {
     redisReply **arr = redis.lrange(records_index, "0", to_string(num - 1));
     //先发最新的消息，所以要倒序遍历
     for (int i = num - 1; i >= 0; i--) {
+        string msg_content = arr[i]->str;
 
-        sendMsg(fd, arr[i]->str);
+        // 验证JSON格式，跳过损坏的消息
+        try {
+            json test_json = json::parse(msg_content);
+            sendMsg(fd, msg_content);
+        } catch (const exception& e) {
+            // 静默跳过损坏的消息
+            continue;
+        }
+
         freeReplyObject(arr[i]);
     }
     string friend_uid;
@@ -105,7 +114,6 @@ void start_chat(int fd, User &user) {
         string _fd = redis.hget("is_online", UID);
         int her_fd = stoi(_fd);
         //cout<<"fd: "<<fd<<endl;
-        std::cout << "[SERVER DEBUG] 这里吗sendMsg to client: " << msg << std::endl;
         sendMsg(her_fd, msg);
         string me = message.getUidFrom() + message.getUidTo();
         string her = message.getUidTo() + message.getUidFrom();
@@ -160,7 +168,8 @@ void add_friend(int fd, User &user) {
     string username;
 
     recvMsg(fd, username);
-    // 只允许通过用户名查找
+
+
     if (!redis.hexists("username_to_uid", username)) {
         sendMsg(fd, "-1"); // 用户不存在
         return;

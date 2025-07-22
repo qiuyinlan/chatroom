@@ -1,14 +1,18 @@
 #ifndef CHAT_H
 #define CHAT_H
 #include <vector>
-#include "User.h"
+#include <string>
+#include "../utils/User.h"
+
+using namespace std;
+
 class ChatSession {
 public:
     ChatSession(int fd, User user);
-    void startChat(std::vector<std::pair<std::string, User>> &my_friends);
-    void findHistory(std::vector<std::pair<std::string, User>> &my_friends) const;
+    void startChat(vector<pair<string, User>> &my_friends);
+    void findHistory(vector<pair<string, User>> &my_friends);
 private:
     int fd;
     User user;
 };
-#endif //CHAT_H 
+#endif //CHAT_H

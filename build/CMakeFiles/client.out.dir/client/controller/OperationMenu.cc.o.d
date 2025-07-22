@@ -123,6 +123,7 @@ CMakeFiles/client.out.dir/client/controller/OperationMenu.cc.o: \
  /home/xuzichun/chatroom/messengertest/utils/User.h \
  /home/xuzichun/chatroom/messengertest/client/social/FriendManager.h \
  /home/xuzichun/chatroom/messengertest/client/social/chat.h \
+ /home/xuzichun/chatroom/messengertest/server/../utils/User.h \
  /home/xuzichun/chatroom/messengertest/client/social/G_chatctrl.h \
  /home/xuzichun/chatroom/messengertest/client/service/FileTransfer.h \
  /home/xuzichun/chatroom/messengertest/client/service/Notifications.h \

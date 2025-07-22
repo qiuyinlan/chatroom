@@ -29,8 +29,6 @@ void LoginRequest::setPassword(const std::string &password) {
 
 string LoginRequest::to_json() {
     json root;
-    //bug 序列化和反序列化方式不不一致，一种是数组，一种是对象键值对
-    //root.append(UID);
     root["UID"] = UID;
     root["password"] = password;
     return root.dump();

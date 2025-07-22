@@ -15,12 +15,11 @@
 using namespace std;
 
 void operationMenu() {
-    cout << "[1]开始聊天                  [2]历史记录" << endl;
-    cout << "[3]查看好友                  [4]添加好友" << endl;
-    cout << "[5]查看添加好友请求          [6]删除好友" << endl;
-    cout << "[7]屏蔽好友                  [8]解除屏蔽" << endl;
-    cout << "[9]群聊                      [10]发送文件" << endl;
-    cout << "[11]接收文件                 [12]查看我的个人信息" << endl;
+    cout << "[1]开始聊天                  [2]添加好友" << endl;
+    cout << "[3]查看添加好友请求          [4]删除好友" << endl;
+    cout << "[5]屏蔽好友                  [6]解除屏蔽" << endl;
+    cout << "[7]群聊                      [8]发送文件" << endl;
+    cout << "[9]接收文件" << endl;
     cout << "按[0]退出登陆" << endl;
     cout << "请输入您的选择" << endl;
 }
@@ -48,7 +47,7 @@ void clientOperation(int fd, User &user) {
     //接收好友个数
     recvMsg(fd, friend_num);
     int num = stoi(friend_num);
-    cout << "您的好友个数为:" << num << endl;
+    cout << "你的好友个数为:" << num << endl;
     //存储了uid和用户的关系
     vector<pair<string, User>> my_friends;
     string friend_info;
@@ -88,28 +87,24 @@ void clientOperation(int fd, User &user) {
             continue;
         }
         syncFriends(fd, my_uid, my_friends);
-        // 传统if-else分发
+        // if-else分发
         if (opt == 1) {
             chatSession.startChat(my_friends);
         } else if (opt == 2) {
-            chatSession.findHistory(my_friends);
-        } else if (opt == 3) {
-            friendManager.listFriends(my_friends);
-        } else if (opt == 4) {
             friendManager.addFriend(my_friends);
-        } else if (opt == 5) {
+        } else if (opt == 3) {
             friendManager.findRequest(my_friends);
-        } else if (opt == 6) {
+        } else if (opt == 4) {
             friendManager.delFriend(my_friends);
-        } else if (opt == 7) {
+        } else if (opt == 5) {
             friendManager.blockedLists(my_friends);
-        } else if (opt == 8) {
+        } else if (opt == 6) {
             friendManager.unblocked(my_friends);
-        } else if (opt == 9) {
+        } else if (opt == 7) {
             groupChatSession.group(my_friends);
-        } else if (opt == 10) {
+        } else if (opt == 8) {
             fileTransfer.sendFile(my_friends);
-        } else if (opt == 11) {
+        } else if (opt == 9) {
             fileTransfer.receiveFile(my_friends);
         } else {
             cout << "没有这个选项，请重新输入" << endl;
