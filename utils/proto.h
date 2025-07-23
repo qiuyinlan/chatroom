@@ -4,8 +4,8 @@
 #include <string>
 
 using std::string;
-//maybe 消息不能重复
-//type
+
+
 const string LOGIN = "1";
 const string NOTIFY = "3";
 //客户端子线程进行实时通知，私聊，群聊
@@ -26,6 +26,9 @@ const string GROUP_REQUEST = "16";
 const string SYNC = "17";
 const string EXIT = "18";
 const string BACK = "19";
+#define BLOCKED_MESSAGE "BLOCKED_MESSAGE"
+#define FRIEND_VERIFICATION_NEEDED "FRIEND_VERIFICATION_NEEDED"
+#define MESSAGE_SENT "MESSAGE_SENT"
 /*\033[30m：黑色
 \033[31m：红色
 \033[32m：绿色
@@ -66,7 +69,7 @@ private:
     string password;
 };
 
-struct Message {
+class Message {
 public:
     Message();
 
@@ -125,4 +128,5 @@ inline const std::string REQUEST_RESET_CODE = "22"; // 找回密码请求验证�
 inline const std::string RESET_PASSWORD_WITH_CODE = "23"; // 验证码重置密码
 inline const std::string FIND_PASSWORD_WITH_CODE = "24"; // 邮箱+验证码找回密码
 
-#endif //CHATROOM_PROTO_H
+#endif
+

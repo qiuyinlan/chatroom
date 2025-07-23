@@ -49,50 +49,73 @@ void start_chat(int fd, User &user) {
         num = 10;
         sendMsg(fd, "10");
     }
-    //bug 只写key的话就是全部发，但是不能全部发
     redisReply **arr = redis.lrange(records_index, "0", to_string(num - 1));
     //先发最新的消息，所以要倒序遍历
     for (int i = num - 1; i >= 0; i--) {
         string msg_content = arr[i]->str;
-
-        // 验证JSON格式，跳过损坏的消息
         try {
             json test_json = json::parse(msg_content);
             sendMsg(fd, msg_content);
         } catch (const exception& e) {
-            // 静默跳过损坏的消息
             continue;
         }
-
         freeReplyObject(arr[i]);
     }
     string friend_uid;
-    //接收客户端发送的想要聊天的好友的UID，判断是否拉黑的逻辑
+    //接收客户端发送的想要聊天的好友的UID
     recvMsg(fd, friend_uid);
-    if (redis.sismember("blocked" + friend_uid, user.getUID())) {
-        sendMsg(fd, "-1");
-        return;
-    }
+    
+    // 移除删除检查，允许进入聊天界面
     sendMsg(fd, "1");
+    
     string msg;
     while (true) {
         int ret = recvMsg(fd, msg);
-        if (msg == EXIT || ret == 0) {
-            //协议的冗余设计，有利于兼容不同实现
+        if (ret <= 0) {
+            // 连接断开或接收错误
             sendMsg(fd, EXIT);
             redis.srem("is_chat", user.getUID());
-            //用户异常退出直接删除在线列表
-            if (ret == 0) {
-                redis.hdel("is_online", user.getUID());
-            }
+            redis.hdel("is_online", user.getUID());
             return;
         }
+
+        if (msg == EXIT) {
+            sendMsg(fd, EXIT);
+            redis.srem("is_chat", user.getUID());
+            return;
+        }
+
         Message message;
-        message.json_parse(msg);
+        try {
+            message.json_parse(msg);
+        } catch (const exception& e) {
+            // JSON解析失败，跳过这条消息
+            cout << "[SERVER ERROR] JSON解析失败: " << e.what() << endl;
+            continue;
+        }
         string UID = message.getUidTo();
-//        if (redis.sismember("blocked" + UID, user.getUID())) {
-//            continue;
-//        }
+        
+        // 检查是否被对方删除（在发送消息时检查）
+        if (!redis.sismember(UID, user.getUID())) {
+            // 消息保存到发送者的历史记录中
+            string me = user.getUID() + UID;
+            redis.lpush(me, msg);
+
+            // 通知发送者需要好友验证
+            sendMsg(fd, "FRIEND_VERIFICATION_NEEDED");
+            continue;  // 不发送给对方
+        }
+        
+        // 检查对方是否屏蔽了我
+        if (redis.sismember("blocked" + UID, user.getUID())) {
+            // 发送被拒收提示
+            sendMsg(fd, "BLOCKED_MESSAGE");
+            continue;
+        }
+        
+        // 正常发送消息的逻辑
+        sendMsg(fd, "MESSAGE_SENT");
+        
         //对方不在线
         if (!redis.hexists("is_online", UID)) {
             redis.hset("chat", UID, message.getUsername());
@@ -111,10 +134,22 @@ void start_chat(int fd, User &user) {
             redis.lpush(her, msg);
             continue;
         }
-        string _fd = redis.hget("is_online", UID);
-        int her_fd = stoi(_fd);
-        //cout<<"fd: "<<fd<<endl;
-        sendMsg(her_fd, msg);
+        
+        // 检查我是否屏蔽了对方（我屏蔽对方，对方的消息我收不到）
+        if (!redis.sismember("blocked" + user.getUID(), UID)) {
+            string _fd = redis.hget("is_online", UID);
+            if (!_fd.empty()) {
+                try {
+                    int her_fd = stoi(_fd);
+                    // 验证消息格式
+                    json test_json = json::parse(msg);
+                    sendMsg(her_fd, msg);
+                } catch (const exception& e) {
+                    cout << "[ERROR] 消息格式错误，跳过发送: " << e.what() << endl;
+                }
+            }
+        }
+        
         string me = message.getUidFrom() + message.getUidTo();
         string her = message.getUidTo() + message.getUidFrom();
         redis.lpush(me, msg);
@@ -169,8 +204,10 @@ void add_friend(int fd, User &user) {
 
     recvMsg(fd, username);
 
+    cout << "[DEBUG] 添加好友请求: " << user.getUsername() << " 想添加 " << username << endl;
 
     if (!redis.hexists("username_to_uid", username)) {
+        cout << "[DEBUG] 用户名不存在于username_to_uid: " << username << endl;
         sendMsg(fd, "-1"); // 用户不存在
         return;
     }
@@ -178,16 +215,28 @@ void add_friend(int fd, User &user) {
     if (!redis.hexists("user_info", UID)) {
         sendMsg(fd, "-1");
         return;
-    } else if (redis.sismember(user.getUID(), UID)) {
-        sendMsg(fd, "-2");
+    } else if (redis.sismember(user.getUID(), UID) && redis.sismember(UID, user.getUID())) {
+        sendMsg(fd, "-2"); // 双方都互为好友才算已经是好友
         return;
     } else if (UID == user.getUID()) {
         sendMsg(fd, "-3");
         return;
     }
+    
+    // 检查是否被对方屏蔽
+    if (redis.sismember("blocked" + UID, user.getUID())) {
+        sendMsg(fd, "-4"); // 被屏蔽，无法添加
+        return;
+    }
+    
     sendMsg(fd, "1");
     redis.sadd("add_friend", UID);
     redis.sadd(UID + "add_friend", user.getUID());
+
+    // 设置好友申请通知标记
+    redis.hset("friend_request_notify", UID, "1");
+    cout << "[DEBUG] 为用户 " << UID << " 设置好友申请通知标记" << endl;
+
     string user_info = redis.hget("user_info", UID);
     sendMsg(fd, user_info);
 }
@@ -236,18 +285,14 @@ void del_friend(int fd, User &user) {
     string UID;
 
     recvMsg(fd, UID);
-    //从我的好友列表删除对方
+    //从我的好友列表删除对方（单向删除）
     redis.srem(user.getUID(), UID);
-    //在对方的好友列表删除我
-    redis.srem(UID, user.getUID());
-    //删除历史记录
-    redis.ltrim(user.getUID() + UID);
-    redis.ltrim(UID + user.getUID());
-    //删除黑名单屏蔽
+    //删除我对他的历史记录
+    redis.del(user.getUID() + UID);
+    //删除我对他的屏蔽关系
     redis.srem("blocked" + user.getUID(), UID);
-    redis.srem("blocked" + UID, user.getUID());
-    //缓冲区，用来通知对面被我删除
-    redis.sadd(UID + "del", user.getUsername());
+    // 移除通知机制 - 不再发送删除通知
+    // redis.sadd(UID + "del", user.getUsername());
 }
 
 void blockedLists(int fd, User &user) {

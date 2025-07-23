@@ -129,6 +129,37 @@ void GroupChat::startChat() {
     }
 }
 
+// 辅助函数：通过群名查找群UID
+string GroupChat::findGroupUidByName(Redis& redis, const string& groupName) {
+    // 获取所有群信息
+    redisReply* reply = (redisReply*)redisCommand(redis.getContext(), "HGETALL group_info");
+    if (reply == nullptr || reply->type != REDIS_REPLY_ARRAY) {
+        if (reply) freeReplyObject(reply);
+        return "";
+    }
+
+    // 遍历所有群信息，查找匹配的群名
+    for (size_t i = 0; i < reply->elements; i += 2) {
+        string groupUid = reply->element[i]->str;
+        string groupInfo = reply->element[i + 1]->str;
+
+        try {
+            Group group;
+            group.json_parse(groupInfo);
+            if (group.getGroupName() == groupName) {
+                freeReplyObject(reply);
+                return groupUid;
+            }
+        } catch (const exception& e) {
+            // 跳过损坏的群信息
+            continue;
+        }
+    }
+
+    freeReplyObject(reply);
+    return "";  // 未找到
+}
+
 void GroupChat::createGroup() {
     Redis redis;
     redis.connect();
@@ -148,13 +179,17 @@ void GroupChat::createGroup() {
 void GroupChat::joinGroup() {
     Redis redis;
     redis.connect();
-    string groupUid;
-    //接收客户端发送的群聊UID
-    recvMsg(fd, groupUid);
-    if (!redis.hexists("group_info", groupUid)) {
-        sendMsg(fd, "-1");
+    string groupName;
+    //接收客户端发送的群聊名称
+    recvMsg(fd, groupName);
+
+    // 通过群名查找群UID
+    string groupUid = findGroupUidByName(redis, groupName);
+    if (groupUid.empty()) {
+        sendMsg(fd, "-1");  // 群不存在
         return;
     }
+
     string json = redis.hget("group_info", groupUid);
     Group group;
     group.json_parse(json);

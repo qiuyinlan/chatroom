@@ -9,6 +9,7 @@
 
 #include "User.h"
 #include "Group.h"
+#include "Redis.h"
 
 class GroupChat {
 public:
@@ -50,6 +51,9 @@ private:
     string joined;
     string managed;
     string created;
+
+    // 辅助函数：通过群名查找群UID
+    string findGroupUidByName(Redis& redis, const string& groupName);
 };
 
 #endif //CHATROOM_GROUP_CHAT_H

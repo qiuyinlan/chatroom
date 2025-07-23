@@ -10,7 +10,7 @@ void serverLogin(int epfd, int fd);
 
 void serverOperation(int fd, User &user);
 
-void notify(int fd);
+void notify(int fd, const std::string &UID);
 
 //以下是注册登陆函数
 

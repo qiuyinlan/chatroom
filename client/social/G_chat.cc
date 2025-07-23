@@ -178,22 +178,26 @@ void GroupChat::createGroup() {
 
 void GroupChat::joinGroup() const {
     sendMsg(fd, "3");
-    string group_uid;
+    string group_name;
     while (true) {
-        cout << "输入你要加入的群聊UID" << endl;
-        getline(cin, group_uid);
+        cout << "输入你要加入的群聊名称" << endl;
+        getline(cin, group_name);
         if (cin.eof()) {
             cout << "文件读到结尾" << endl;
             return;
         }
-        if (group_uid.find(' ') != string::npos) {
-            cout << "群聊UID没有空格" << endl;
+        if (group_name.empty()) {
+            cout << "群聊名称不能为空" << endl;
+            continue;
+        }
+        if (group_name.find(' ') != string::npos) {
+            cout << "群聊名称不能包含空格" << endl;
             continue;
         }
         break;
     }
 
-    sendMsg(fd, group_uid);
+    sendMsg(fd, group_name);
     string response;
 
     recvMsg(fd, response);
@@ -289,17 +293,18 @@ void GroupChat::managedGroup(vector<Group> &managedGroup) const {
     }
     cout << "-----------------------------------" << endl;
     for (int i = 0; i < managedGroup.size(); i++) {
-        cout << i + 1 << managedGroup[i].getGroupName() << endl;
+        string groupName = managedGroup[i].getGroupName();
+        cout << i + 1 << ". " << groupName << endl;
     }
     cout << "-----------------------------------" << endl;
-    cout << "选择你要管理的群" << endl;
+    cout << "选择你要管理的群（输入1-" << managedGroup.size() << "）" << endl;
     int which;
-    while (!(cin >> which) || which < 0 || which > managedGroup.size()) {
+    while (!(cin >> which) || which < 1 || which > managedGroup.size()) {
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
             return;
         }
-        cout << "输入格式错误" << endl;
+        cout << "输入格式错误，请输入1-" << managedGroup.size() << "之间的数字" << endl;
         cin.clear();
         cin.ignore(INT32_MAX, '\n');
     }
@@ -399,13 +404,14 @@ void GroupChat::remove(Group &group) const {
         }
     }
     while (true) {
-        cout << "你要踢谁,按[0]返回" << endl;
+        cout << "你要踢谁（输入1-" << arr.size() << "），按[0]返回" << endl;
         int who;
-        while (!(cin >> who) || who < 0 || who > arr.size()) {
+        while (!(cin >> who) || who < 0 || who > (int)arr.size()) {
             if (cin.eof()) {
                 cout << "读到文件结尾" << endl;
                 return;
             }
+            cout << "输入格式错误，请输入0-" << arr.size() << "之间的数字" << endl;
             cin.clear();
             cin.ignore(INT32_MAX, '\n');
         }

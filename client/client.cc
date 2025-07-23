@@ -15,6 +15,8 @@ using namespace std;
 void signalHandler(int signum) {
     cout << "\n接收到信号 " << signum << "，客户端正在退出..." << endl;
     cout << "再见！" << endl;
+    // 注意：这里无法向服务器发送断开通知，因为没有fd
+    // 服务器会通过连接断开自动检测到客户端退出
     exit(signum);
 }
 

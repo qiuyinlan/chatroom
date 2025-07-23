@@ -110,48 +110,34 @@ int read_n(int fd, char *msg, int n) {
 
 int recvMsg(int fd, string &msg) {
     int len = 0;
+    // 使用read_n确保完整接收4字节长度字段
     int header_ret = read_n(fd, (char *) &len, 4);
     if (header_ret != 4) {
         if (header_ret <= 0) {
-            cout << "对端断开连接" << endl;
-            close(fd);
-            return 0;
+            return 0;  // 连接断开
         }
-        cout << "[ERROR] 长度字段读取失败，期望4字节，实际读取" << header_ret << "字节" << endl;
-        close(fd);
-        return -1;
+        return -1;  // 接收错误
     }
 
+    // 网络字节序转换
     len = ntohl(len);
 
-    if (len <= 0 || len > 1024 * 1024) {  // 防止异常长度
-        cout << "接收到异常消息长度: " << len << endl;
-        close(fd);
+    // 检查消息长度是否合理
+    if (len <= 0 || len > 10000) {
+        return -1;  // 异常长度
+    }
+    
+    char *buffer = new char[len + 1];
+    memset(buffer, 0, len + 1);
+
+    // 使用read_n确保完整接收消息内容
+    int content_ret = read_n(fd, buffer, len);
+    if (content_ret != len) {
+        delete[] buffer;
         return -1;
     }
 
-    char *data = (char *) malloc(sizeof(char) * (len + 1));
-    if (!data) {
-        cout << "内存分配失败" << endl;
-        close(fd);
-        return -1;
-    }
-
-    int ret = read_n(fd, data, len);
-    if (ret == 0) {
-        cout << "对端断开连接" << endl;
-        free(data);
-        close(fd);
-        return 0;
-    } else if (ret != len) {
-        cout << "数据接收失败，期望: " << len << ", 实际: " << ret << endl;
-        free(data);
-        close(fd);
-        return -1;
-    }
-
-    data[len] = '\0';
-    msg = string(data);  // 使用 string 构造函数
-    free(data);
-    return ret;
+    msg = string(buffer, len);  // 指定长度，避免字符串截断
+    delete[] buffer;
+    return len;
 }

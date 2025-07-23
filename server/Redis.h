@@ -36,6 +36,7 @@ public:
     void ltrim(const std::string &key);
     redisReply **hgetall(const std::string &key);
     int hlen(const std::string &key);
+    redisContext* getContext() { return context; }  // 添加获取context的方法
 };
 
 #endif  // CHATROOM_REDIS_H

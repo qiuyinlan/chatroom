@@ -10,42 +10,6 @@ using namespace std;
 FriendManager::FriendManager(int fd, User user) : fd(fd), user(std::move(user)) {}
 
 // 迁移自Telegram.cc
-void FriendManager::listFriends(vector<pair<string, User>> &my_friends) {
-    string temp;
-    if (my_friends.empty()) {
-        cout << "您当前没有好友捏... 请按任意键退出" << endl;
-        getline(cin, temp);
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
-        return;
-    }
-    sendMsg(fd, LIST_FRIENDS);
-    string is_online;
-    cout << user.getUsername() << "的好友列表" << endl;
-    cout << "-----------------------------------------" << endl;
-    //发送好友数量
-    sendMsg(fd, to_string(my_friends.size()));
-    for (int i = 0; i < my_friends.size(); ++i) {
-        //循环发送好友的UID来查询信息
-        sendMsg(fd, my_friends[i].second.getUID());
-        //接收好友是否在线的信息
-        recvMsg(fd, is_online);
-        if (is_online == "1") {
-            cout << GREEN << i + 1 << ". " << my_friends[i].second.getUsername() << RESET << endl;
-        } else {
-            cout << i + 1 << ". " << my_friends[i].second.getUsername() << endl;
-        }
-    }
-    cout << "-----------------------------------------" << endl;
-    cout << "按任意键退出" << endl;
-    getline(cin, temp);
-    if (cin.eof()) {
-        cout << "读到文件结尾" << endl;
-        return;
-    }
-}
 
 void FriendManager::addFriend(vector<pair<string, User>> &my_friends) const {
     sendMsg(fd, ADD_FRIEND);
@@ -72,6 +36,9 @@ void FriendManager::addFriend(vector<pair<string, User>> &my_friends) const {
             return;
         } else if (temp == "-3") {
             cout << "你不能添加自己为好友！" << endl;
+            return;
+        } else if (temp == "-4") {
+            cout << "无法添加该用户，可能被对方屏蔽" << endl;
             return;
         }
         break;
@@ -137,7 +104,7 @@ void FriendManager::findRequest(vector<pair<string, User>> &my_friends) const {
 void FriendManager::delFriend(vector<pair<string, User>> &my_friends) {
     string temp;
     if (my_friends.empty()) {
-        cout << "您当前没有好友捏... 请按任意键退出" << endl;
+        cout << "你当前没有好友捏... 请按任意键退出" << endl;
         getline(cin, temp);
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
@@ -145,7 +112,7 @@ void FriendManager::delFriend(vector<pair<string, User>> &my_friends) {
         }
         return;
     }
-    cout << "     " << user.getUsername() << "的好友列表" << endl;
+    cout <<  "你的好友列表" << endl;
     cout << "----------------------------------------" << endl;
     for (int i = 0; i < my_friends.size(); ++i) {
         cout << i + 1 << "." << my_friends[i].second.getUsername() << endl;

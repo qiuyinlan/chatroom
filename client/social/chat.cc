@@ -22,7 +22,7 @@ ChatSession::ChatSession(int fd, User user) : fd(fd), user(std::move(user)) {}
 void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
     string temp;
     if (my_friends.empty()) {
-        cout << "您当前没有好友捏... 请按任意键退出" << endl;
+        cout << "你当前没有好友... 按任意键退出" << endl;
         getline(cin, temp);
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
@@ -31,17 +31,17 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
         return;
     }
     cout << "-------------------------------------" << endl;
+    cout << "好友总数: " << my_friends.size() << endl;
 
-    // 发送LIST_FRIENDS命令查询在线状态
     sendMsg(fd, LIST_FRIENDS);
     sendMsg(fd, to_string(my_friends.size()));
 
     for (int i = 0; i < my_friends.size(); i++) {
-        // 发送好友UID查询在线状态
+        
+        
         sendMsg(fd, my_friends[i].second.getUID());
         string is_online;
-        recvMsg(fd, is_online);
-
+        int recv_ret = recvMsg(fd, is_online);
         if (is_online == "1") {
             cout << GREEN << i + 1 << ". " << my_friends[i].second.getUsername() << " " << my_friends[i].second.getUID() << " (在线)" << RESET << endl;
         } else {
@@ -53,7 +53,7 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
     cout << "请选择聊天对象开始对话" << endl;
     while (!(cin >> who) || who < 0 || who > my_friends.size()) {
         if (cin.eof()) {
-            cout << "读到文件bie de结尾" << endl;
+            cout << "\n检测到输入结束 (Ctrl+D)，退出" << endl;
             return;
         }
         cout << "输入格式错误" << endl;
@@ -62,29 +62,53 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
     }
     cin.ignore(INT32_MAX, '\n');
     system("clear");
-    //发送"4"，服务器进入私聊业务
     sendMsg(fd, START_CHAT);
     who--;
     cout <<  "好友：" << my_friends[who].second.getUsername() << endl;
     string records_index = user.getUID() + my_friends[who].second.getUID();
-    //向服务器发送历史聊天记录索引
     sendMsg(fd, records_index);
     Message history;
     string nums;
-    //接收历史消息数量
-    recvMsg(fd, nums);
-    int num = stoi(nums);
-    //打印历史消息
+    int recv_ret = recvMsg(fd, nums);
+    if (recv_ret <= 0) {
+        cout << "接收历史消息数量失败，连接可能已断开" << endl;
+        return;
+    }
+
+    int num;
+    try {
+        if (nums.empty()) {
+            cout << "接收到空的消息数量字符串" << endl;
+            return;
+        }
+        num = stoi(nums);
+        if (num < 0 || num > 10000) {
+            cout << "接收到异常的消息数量: " << nums << " (长度: " << nums.length() << ")" << endl;
+            return;
+        }
+    } catch (const exception& e) {
+        cout << "解析消息数量失败: '" << nums << "', 错误: " << e.what() << endl;
+        return;
+    }
+    
     string history_message;
     for (int j = 0; j < num; j++) {
-        //接收历史消息
-        recvMsg(fd, history_message);
+        int msg_ret = recvMsg(fd, history_message);
+        if (msg_ret <= 0) {
+            cout << "接收历史消息失败，停止接收" << endl;
+            break;
+        }
+        
         try {
+            if (history_message.empty()) {
+                cout << "接收到空的历史消息，跳过" << endl;
+                continue;
+            }
             history.json_parse(history_message);
             cout << "\t\t\t\t" << history.getTime() << endl;
             cout << history.getUsername() << "  :  " << history.getContent() << endl;
         } catch (const exception& e) {
-            // 静默跳过损坏的历史消息
+            cout << "解析历史消息失败: " << e.what() << endl;
             continue;
         }
     }
@@ -93,38 +117,36 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
     string friend_UID = my_friends[who].second.getUID();
 
     sendMsg(fd, friend_UID);
-    string isBlocked;
+    string isDeleted;
 
-    recvMsg(fd, isBlocked);
-    if (isBlocked == "-1") {
+    recvMsg(fd, isDeleted);
+    if (isDeleted == "-1") {
         cout << EXCLAMATION << "! " << my_friends[who].second.getUsername()
              << "开启了朋友验证，你还不是他（她）朋友。请先发送朋友验证请求，对方验证通过后，才能聊天。" << RESET << endl;
+       
+        string temp;
         cout << "按任意键返回" << endl;
         getline(cin, temp);
         if (cin.eof()) {
             cout << "\n检测到输入结束 (Ctrl+D)，退出聊天" << endl;
-            return;
         }
+        return;
     }
-    //开线程接收私聊好友对方的消息
+    
     thread work(chatReceived, fd, friend_UID);
     work.detach();
     string msg, json;
 
-    //####有好友，开始聊天
     return_last();
     while (true) {
         getline(cin,msg);
         if (cin.eof()) {
             cout << "\n检测到输入结束 (Ctrl+D)，退出聊天" << endl;
-    // 清除 EOF 状态，以便用户下次可以重新进入聊天
-             cin.clear();
+            cin.clear();
             return;
         }
         if (msg == "0") {
-            //从聊天状态中清除用户
             sendMsg(fd, EXIT);
-            //确认数据完整性，防止文件系统数据丢失？？？
             system("sync");
             break;
         }
@@ -135,9 +157,12 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
         message.setContent(msg);
         json = message.to_json();
 
-        //发送聊天消息
         sendMsg(fd, json);
+
+        // 显示自己发送的消息
         cout << "你：" << msg << endl;
+
+        // 不在这里等待响应，让接收线程处理所有服务器消息
     }
 }
 

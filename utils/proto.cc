@@ -106,8 +106,7 @@ string Message::get_time() {
     unique_ptr<char[]> data(new char[60]);
     sprintf(data.get(), "%d-%d-%d-%02d:%02d:%02d", ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour,
             ptm->tm_min, ptm->tm_sec);
-    //string result(data);
-    //delete[] data;
+    
     string result(data.get());
     return result;
 }

@@ -16,7 +16,7 @@ void announce(string UID) {
     int num;
     // 改进方案：使用消息类型标识，不再依赖固定顺序
     while (true) {
-        //this_thread::sleep_for(chrono::seconds(3));
+        this_thread::sleep_for(chrono::milliseconds(500));  // 0.5秒，保持实时性
 
         if (sendMsg(announce_fd, NOTIFY) <= 0) {
             cout << "通知服务连接断开，退出通知线程" << endl;
@@ -83,11 +83,26 @@ void chatReceived(int fd, string UID) {
             if (json_msg == EXIT) {
                 break;
             }
-    
+
+            // 处理特殊响应（包括截断的情况）
+            if (json_msg == "FRIEND_VERIFICATION_NEEDED" ||
+                json_msg.find("VERIFICATION_NEEDED") != string::npos ||
+                json_msg.find("ND_VERIFICATION_NEEDED") != string::npos) {
+                cout << YELLOW << "系统提示：对方开启了好友验证，你还不是他（她）朋友，请先发送朋友验证请求，对方验证通过后，才能聊天。" << RESET << endl;
+                continue;
+            }
+
+            if (json_msg == "BLOCKED_MESSAGE") {
+                cout << YELLOW << "系统提示：消息已发出，但被对方拒收了。" << RESET << endl;
+                continue;
+            }
+
+            if (json_msg == "MESSAGE_SENT") {
+                // 消息发送成功，不需要特殊处理
+                continue;
+            }
+
             try {
-                // 添加调试信息
-                cout << "[DEBUG] 接收到的 JSON: " << json_msg << endl;
-                cout << "[DEBUG] JSON 长度: " << json_msg.length() << endl;
     
                 message.json_parse(json_msg);
                 //私发
@@ -95,8 +110,8 @@ void chatReceived(int fd, string UID) {
                     if (message.getUidFrom() == UID) {
                         cout << message.getUsername() << ": " << message.getContent() << endl;
                     } else {
-                        cout << "\t\t\t\t\t\t\t\t" << RED << "收到一条来自" << message.getUsername() << "的一条消息" << RESET
-                             << endl;
+                        // 显示实际的消息内容，而不只是通知
+                        cout << message.getUsername() << ": " << message.getContent() << endl;
                     }
                     continue;
                 }
@@ -111,16 +126,13 @@ void chatReceived(int fd, string UID) {
                     //cout << "收到一条来自" << message.getUsername() << "的一条消息" << endl;
                 }
             } catch (const exception& e) {
-                cout << "[ERROR] 解析消息失败: " << e.what() << endl;
-                cout << "[ERROR] 问题 JSON: " << json_msg << endl;
-                cout << "[ERROR] JSON 长度: " << json_msg.length() << endl;
-                // 显示 JSON 的十六进制表示
-                cout << "[ERROR] JSON 十六进制: ";
-                for (char c : json_msg) {
-                    printf("%02x ", (unsigned char)c);
+                // 检查是否为特殊控制消息
+                if (json_msg.find("BLOCKED") != string::npos) {
+                    cout << YELLOW << "系统提示：您的消息被对方屏蔽" << RESET << endl;
+                } else {
+                    // 其他解析错误，静默处理
+                    continue;
                 }
-                cout << endl;
-                continue;
             }
     
     }

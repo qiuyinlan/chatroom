@@ -34,9 +34,24 @@ void serverLogin(int epfd, int fd) {
     }
     string request;
 
-    recvMsg(fd, request);
+    int recv_ret = recvMsg(fd, request);
+    if (recv_ret <= 0 || request.empty()) {
+        cout << "[ERROR] 接收登录请求失败或为空" << endl;
+        sendMsg(fd, "-4"); // 服务器内部错误
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+
     LoginRequest loginRequest;
-    loginRequest.json_parse(request);
+    try {
+        loginRequest.json_parse(request);
+    } catch (const exception& e) {
+        cout << "[ERROR] 登录请求JSON解析失败: " << e.what() << endl;
+        cout << "[ERROR] 请求内容: " << request << endl;
+        sendMsg(fd, "-4"); // 服务器内部错误
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
     //得到用户发送的邮箱和密码
     string email = loginRequest.getUID();
     string password = loginRequest.getPassword();
@@ -48,7 +63,23 @@ void serverLogin(int epfd, int fd) {
     }
     string UID = redis.hget("email_to_uid", email);
     string user_uid = redis.hget("user_info", UID);
-    user.json_parse(user_uid);
+
+    if (user_uid.empty()) {
+        cout << "[ERROR] 用户信息为空，UID: " << UID << endl;
+        sendMsg(fd, "-1"); // 账号不存在
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
+
+    try {
+        user.json_parse(user_uid);
+    } catch (const exception& e) {
+        cout << "[ERROR] 用户信息JSON解析失败: " << e.what() << endl;
+        cout << "[ERROR] 用户信息: " << user_uid << endl;
+        sendMsg(fd, "-4"); // 服务器内部错误
+        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+        return;
+    }
     if (password != user.getPassword()) {
         sendMsg(fd, "-2"); // 密码错误
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
@@ -121,48 +152,25 @@ void serverOperation(int fd, User &user) {
     redis.hdel("is_online", user.getUID());
 }
 
-void notify(int fd) {
+void notify(int fd, const string &UID) {
     Redis redis;
     redis.connect();
-    string UID;
 
-    int ret = recvMsg(fd, UID);
-    if (ret == 0) {
-        redis.hdel("is_online", UID);
-        return;
-    }
-
-    //判断是否有好友添加
-    if (redis.sismember("add_friend", UID)) {
+    // 检查好友申请通知（使用单独的通知标记）
+    if (redis.hexists("friend_request_notify", UID)) {
         sendMsg(fd, REQUEST_NOTIFICATION);
-        redis.srem("add_friend", UID);
+        redis.hdel("friend_request_notify", UID);  // 清除通知标记
     }
 
-    //判断是否有加群
-    if (redis.sismember("add_group", UID)) {
-        sendMsg(fd, GROUP_REQUEST);
-        redis.srem("add_group", UID);
-    }
-
-    //判断是否有消息
+    // 检查消息通知
     if (redis.hexists("chat", UID)) {
         string sender = redis.hget("chat", UID);
         sendMsg(fd, "MESSAGE:" + sender);
-        redis.hdel("chat", UID);
-    }
-    //被删除好友
-    int num = redis.scard(UID + "del");
-    if (num != 0) {
-        redisReply **arr = redis.smembers(UID + "del");
-        for (int i = 0; i < num; i++) {
-            sendMsg(fd, "DELETED:" + string(arr[i]->str));
-            redis.srem(UID + "del", arr[i]->str);
-            freeReplyObject(arr[i]);
-        }
+        redis.hdel("chat", UID);  // 清除通知标记
     }
 
     //被设置为管理员
-    num = redis.scard("appoint_admin" + UID);
+    int num = redis.scard("appoint_admin" + UID);
     if (num != 0) {
         redisReply **arr = redis.smembers("appoint_admin" + UID);
         for (int i = 0; i < num; i++) {

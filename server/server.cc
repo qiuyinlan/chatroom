@@ -19,21 +19,34 @@
 using namespace std;
 
 void signalHandler(int signum) {
-    cout << "\n接收到信号 " << signum << "，正在清理资源..." << endl;
+    cout << "\n[服务器] 接收到信号 " << signum;
 
-    // 清理Redis中的在线状态
-    Redis redis;
-    if (redis.connect()) {
-        cout << "清理Redis中的在线状态..." << endl;
-        redis.del("is_online");
-        redis.del("is_chat");
-        cout << "Redis清理完成" << endl;
+    // 只处理用户主动退出的信号
+    if (signum == SIGINT) {
+        cout << " (Ctrl+C)" << endl;
+        cout << "[服务器] 正在清理资源..." << endl;
+
+        // 清理Redis中的在线状态
+        Redis redis;
+        if (redis.connect()) {
+            cout << "[服务器] 清理Redis中的在线状态..." << endl;
+            redis.del("is_online");
+            redis.del("is_chat");
+            cout << "[服务器] Redis清理完成" << endl;
+        } else {
+            cout << "[服务器] Redis连接失败，无法清理" << endl;
+        }
+
+        cout << "[服务器] 服务器正常退出" << endl;
+        exit(signum);
+    } else if (signum == SIGTERM) {
+        cout << " (终止信号)" << endl;
+        cout << "[服务器] 收到终止信号，正在退出..." << endl;
+        exit(signum);
     } else {
-        cout << "Redis连接失败，无法清理" << endl;
+        cout << " (未处理的信号，忽略)" << endl;
+        // 其他信号不处理，让程序继续运行
     }
-
-    cout << "服务器正常退出" << endl;
-    exit(signum);
 }
 
 
@@ -49,7 +62,7 @@ int main(int argc, char *argv[]) {
         cerr << "Invalid number of arguments. Usage: program_name [IP] [port]" << endl;
         return 1;
     }
-    signal(SIGPIPE, signalHandler);
+    signal(SIGPIPE, SIG_IGN);        // 忽略SIGPIPE信号，避免客户端断开导致服务器退出
     signal(SIGINT, signalHandler);   // 处理Ctrl+C
     signal(SIGTERM, signalHandler);  // 处理终止信号
     //服务器启动时删除所有在线用户
@@ -129,12 +142,23 @@ int main(int argc, char *argv[]) {
             } 
             //数据连接
               else {
-                recvMsg(fd, msg);
+                int recv_ret = recvMsg(fd, msg);
+
+                if (recv_ret <= 0 || msg.empty()) {
+                    // 连接断开，从epoll中移除
+                    cout << "[INFO] 客户端 " << fd << " 断开连接" << endl;
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, fd, nullptr);
+                    close(fd);
+                    continue;
+                }
+
                 if (msg == LOGIN) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ serverLogin(epfd, fd); });
                 } else if (msg == NOTIFY) {
-                    notify(fd);
+                    string uid;
+                    recvMsg(fd, uid);  // 接收用户UID
+                    notify(fd, uid);   // 传递fd和uid参数
                 } else if (msg == REQUEST_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ handleRequestCode(epfd, fd); });
@@ -152,7 +176,7 @@ int main(int argc, char *argv[]) {
                     pool.addTask([=](){ findPasswordWithCode(epfd, fd); });
                 }
                 else{
-                    cout << "协议指令错误" << endl ;
+                    cout << "[DEBUG] 未知协议: '" << msg << "' (长度: " << msg.length() << ")" << endl;
                 }
             }
         }
