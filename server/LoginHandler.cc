@@ -53,8 +53,9 @@ void serverLogin(int epfd, int fd) {
         return;
     }
     //得到用户发送的邮箱和密码
-    string email = loginRequest.getUID();
+    string email = loginRequest.getEmail();
     string password = loginRequest.getPassword();
+    cout << "[DEBUG] 登录请求: 邮箱=" << email << endl;
 
     if (!redis.hexists("email_to_uid", email)) {
         sendMsg(fd, "-1"); // 账号不存在
@@ -62,9 +63,9 @@ void serverLogin(int epfd, int fd) {
         return;
     }
     string UID = redis.hget("email_to_uid", email);
-    string user_uid = redis.hget("user_info", UID);
+    string user_info = redis.hget("user_info", UID);
 
-    if (user_uid.empty()) {
+    if (user_info.empty()) {
         cout << "[ERROR] 用户信息为空，UID: " << UID << endl;
         sendMsg(fd, "-1"); // 账号不存在
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
@@ -72,10 +73,10 @@ void serverLogin(int epfd, int fd) {
     }
 
     try {
-        user.json_parse(user_uid);
+        user.json_parse(user_info);
     } catch (const exception& e) {
         cout << "[ERROR] 用户信息JSON解析失败: " << e.what() << endl;
-        cout << "[ERROR] 用户信息: " << user_uid << endl;
+        cout << "[ERROR] 用户信息: " << user_info << endl;
         sendMsg(fd, "-4"); // 服务器内部错误
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
@@ -85,8 +86,9 @@ void serverLogin(int epfd, int fd) {
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-    //用户已经登录
+    //用户已经登录检查
     if (redis.hexists("is_online", UID)) {
+        cout << "[DEBUG] 用户 " << UID << " 已经在线，拒绝重复登录" << endl;
         sendMsg(fd, "-3");
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
@@ -95,7 +97,7 @@ void serverLogin(int epfd, int fd) {
     sendMsg(fd, "1");
     redis.hset("is_online", UID, to_string(fd));
     //发送从数据库获取的用户信息
-    sendMsg(fd, user_uid);
+    sendMsg(fd, user_info);
     serverOperation(fd, user);
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
@@ -106,8 +108,6 @@ void serverLogin(int epfd, int fd) {
 //登陆后业务分发
 
 void serverOperation(int fd, User &user) {
-    //同步好友信息
-    synchronize(fd,user);
     Redis redis;
     redis.connect();
     string temp;
@@ -115,36 +115,38 @@ void serverOperation(int fd, User &user) {
     while (true) {
         //接收用户输入的操作
         ret = recvMsg(fd, temp);
+
         if (temp == BACK || ret == 0) {
             break;
         }
-        int option = stoi(temp);
-        if (option == 4) {
+
+        // 使用宏定义的if-else分发，清晰易懂
+        if (temp == START_CHAT) {
             start_chat(fd, user);
-        } else if (option == 5) {
+        } else if (temp == HISTORY) {
             history(fd, user);
-        } else if (option == 6) {
+        } else if (temp == LIST_FRIENDS) {
             list_friend(fd, user);
-        } else if (option == 7) {
+        } else if (temp == ADD_FRIEND) {
             add_friend(fd, user);
-        } else if (option == 8) {
+        } else if (temp == FIND_REQUEST) {
             findRequest(fd, user);
-        } else if (option == 9) {
+        } else if (temp == DEL_FRIEND) {
             del_friend(fd, user);
-        } else if (option == 10) {
+        } else if (temp == BLOCKED_LISTS) {
             blockedLists(fd, user);
-        } else if (option == 11) {
+        } else if (temp == UNBLOCKED) {
             unblocked(fd, user);
-        } else if (option == 12) {
+        } else if (temp == GROUP) {
             group(fd, user);
-        } else if (option == 13) {
+        } else if (temp == SEND_FILE) {
             send_file(fd, user);
-        } else if (option == 14) {
+        } else if (temp == RECEIVE_FILE) {
             receive_file(fd, user);
-        } else if (option == 17) {
+        } else if (temp == SYNC) {
             synchronize(fd, user);
         } else {
-            cout << "没有这个选项，请重新输入" << endl;
+            cout << "没有这个选项，请重新输入: " << temp << endl;
             continue;
         }
     }

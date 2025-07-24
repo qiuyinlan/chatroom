@@ -72,6 +72,10 @@ int main(int argc, char *argv[]) {
         redis.del("is_online");
         redis.del("is_chat");
         cout << "在线状态清理完成" << endl;
+
+        // 额外检查：显示清理后的在线用户数
+        int online_count = redis.hlen("is_online");
+        cout << "当前在线用户数: " << online_count << endl;
     } else {
         cout << "Redis连接失败，无法清理在线状态" << endl;
     }

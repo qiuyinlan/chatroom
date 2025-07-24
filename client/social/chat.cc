@@ -41,6 +41,8 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
         
         sendMsg(fd, my_friends[i].second.getUID());
         string is_online;
+
+        //在线情况打印
         int recv_ret = recvMsg(fd, is_online);
         if (is_online == "1") {
             cout << GREEN << i + 1 << ". " << my_friends[i].second.getUsername() << " " << my_friends[i].second.getUID() << " (在线)" << RESET << endl;
@@ -51,9 +53,14 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
     cout << "-------------------------------------" << endl;
     int who;
     cout << "请选择聊天对象开始对话" << endl;
-    while (!(cin >> who) || who < 0 || who > my_friends.size()) {
+    return_last();
+    while (!(cin >> who) || who <= 0 || who > my_friends.size()) {
         if (cin.eof()) {
             cout << "\n检测到输入结束 (Ctrl+D)，退出" << endl;
+            return;
+        }
+        else if (who == 0) {
+            getchar();
             return;
         }
         cout << "输入格式错误" << endl;
@@ -143,12 +150,14 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends) {
         if (cin.eof()) {
             cout << "\n检测到输入结束 (Ctrl+D)，退出聊天" << endl;
             cin.clear();
+            sendMsg(fd, EXIT);
+            system("sync");
             return;
         }
         if (msg == "0") {
             sendMsg(fd, EXIT);
             system("sync");
-            break;
+            return;
         }
         else if(msg.empty()){
             cout << "不能发送空白消息" << endl;

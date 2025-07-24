@@ -8,15 +8,14 @@ using json = nlohmann::json;
 
 LoginRequest::LoginRequest() = default;
 
-//LoginRequest(const std::string &uid, const std::string &passwd) : UID(uid), passwd(passwd) {}
-LoginRequest::LoginRequest(std::string uid, std::string password) : UID(std::move(uid)), password(std::move(password)) {}
+LoginRequest::LoginRequest(std::string email, std::string password) : email(std::move(email)), password(std::move(password)) {}
 
-[[nodiscard]] const string &LoginRequest::getUID() const {
-    return UID;
+[[nodiscard]] const string &LoginRequest::getEmail() const {
+    return email;
 }
 
-void LoginRequest::setUid(const std::string &uid) {
-    UID = uid;
+void LoginRequest::setEmail(const std::string &email) {
+    this->email = email;
 }
 
 [[nodiscard]] const string &LoginRequest::getPassword() const {
@@ -29,14 +28,14 @@ void LoginRequest::setPassword(const std::string &password) {
 
 string LoginRequest::to_json() {
     json root;
-    root["UID"] = UID;
+    root["email"] = email;
     root["password"] = password;
     return root.dump();
 }
 
 void LoginRequest::json_parse(const string &json_str) {
     json root = json::parse(json_str);
-    UID = root["UID"].get<string>();
+    email = root["email"].get<string>();
     password = root["password"].get<string>();
 }
 

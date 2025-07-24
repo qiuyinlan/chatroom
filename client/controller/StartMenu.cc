@@ -35,7 +35,7 @@ char getch() {
     return ch;
 }
 
-//bug 退格仍然输出"*"，且没有退格的效果，是因为终端配置方案中的按键绑定，改为Solaris就好了，这样Backspace才是\b
+
 void get_password(const string& prompt, string &password) {
     char ch;
     password.clear();
@@ -83,6 +83,7 @@ int login(int fd, User &user) {
         }
         break;
     }
+    //发
     LoginRequest loginRequest(email, passwd);
     sendMsg(fd, loginRequest.to_json());
     string buf;
@@ -115,9 +116,10 @@ int login(int fd, User &user) {
         return 0;
     } else if (buf == "1") {
         cout << "登录成功!" << endl;
-        string user_uid;
-        recvMsg(fd, user_uid);
-        user.json_parse(user_uid);
+       // system("clear");
+        string user_info;
+        recvMsg(fd, user_info);
+        user.json_parse(user_info);
         cout <<  user.getUsername() <<  endl;
         return 1;
     }

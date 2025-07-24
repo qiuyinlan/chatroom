@@ -48,7 +48,6 @@ void GroupChat::sync() {
         redisReply **arr = redis.smembers(joined);
         for (int i = 0; i < num; i++) {
             string json = redis.hget("group_info", arr[i]->str);
-            std::cout << "[SERVER DEBUG] sendMsg to client: " << json << std::endl;
             sendMsg(fd, json);
             freeReplyObject(arr[i]);
         }

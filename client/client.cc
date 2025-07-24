@@ -39,10 +39,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     signal(SIGINT, signalHandler);
-    int fd;
     User user;
-    fd = Socket();
-    Connect(fd, IP, PORT);
+
     while (true) {
         start_UI();
         string option;
@@ -65,22 +63,30 @@ int main(int argc, char *argv[]) {
             std::cout << "输入格式错误 请重新输入" << std::endl;
             continue;
         }
+
+        // 每次操作都重新建立连接
+        int fd = Socket();
+        Connect(fd, IP, PORT);
         if (opt == 1) {
             if (login(fd, user)) {
                 clientOperation(fd, user);
             }
+            close(fd);  // 登录完成后关闭连接
             continue;
         }
         if (opt == 2) {
             email_register(fd);
+            close(fd);  // 注册完成后关闭连接
             continue;
         }
         if (opt == 3) {
             email_reset_password(fd);
+            close(fd);  // 重置密码完成后关闭连接
             continue;
         }
         if (opt == 4) {
             email_find_password(fd);
+            close(fd);  // 找回密码完成后关闭连接
             continue;
         }
     }

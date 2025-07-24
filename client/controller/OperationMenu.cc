@@ -45,6 +45,7 @@ void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) 
             cout << "服务器连接已断开，好友信息同步中断" << endl;
             return;
         }
+        //接收好友信息
         _friend.json_parse(friend_info);
         my_friends.emplace_back(my_uid, _friend);
     }
@@ -53,25 +54,12 @@ void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) 
 
 void clientOperation(int fd, User &user) {
     string my_uid = user.getUID();
-    User _friend;
-    string friend_num;
-    //接收好友个数
-    recvMsg(fd, friend_num);
-    int num = stoi(friend_num);
-    cout << "你的好友个数为:" << num << endl;
-    //存储了uid和用户的关系
     vector<pair<string, User>> my_friends;
-    string friend_info;
-    for (int i = 0; i < num; i++) {
-        recvMsg(fd, friend_info);
-        _friend.json_parse(friend_info);
-        my_friends.emplace_back(my_uid, _friend);
-    }
     FriendManager friendManager(fd, user);
     ChatSession chatSession(fd, user);
     GroupChatSession groupChatSession(fd, user);
     FileTransfer fileTransfer(fd, user);
-    // 重新启用announce线程，提供实时通知
+    // announce线程，提供实时通知
     thread work(announce, user.getUID());
     work.detach();
 
@@ -81,7 +69,7 @@ void clientOperation(int fd, User &user) {
         getline(cin, option);
         if (option.empty()) {
             cout << "输入为空" << endl;
-            return;
+            continue;
         }
         if (option.length() > 4) {
             cout << "输入错误" << endl;
@@ -93,11 +81,11 @@ void clientOperation(int fd, User &user) {
             } else {
                 cout << "退出成功" << endl;
             }
-            break;
+            return;
         }
         char *end_ptr;
         int opt = (int) strtol(option.c_str(), &end_ptr, 10);
-        if (opt == 0 || option.find(' ') != std::string::npos) {
+        if ( option.find(' ') != std::string::npos) {
             std::cout << "输入格式错误 请重新输入" << std::endl;
             continue;
         }

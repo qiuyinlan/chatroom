@@ -34,7 +34,8 @@ void FileTransfer::sendFile(vector<pair<string, User>> &my_friends) const {
         cout << i + 1 << ". " << my_friends[i].second.getUsername() << endl;
     }
     cout << "-------------------------------------------------" << endl;
-    cout << "请选择你要发送文件的好友,按[0]返回" << endl;
+    cout << "请选择你要发送文件的好友" << endl;
+    return_last();
     int who;
     while (!(cin >> who) || who < 0 || who > my_friends.size()) {
         if (cin.eof()) {
@@ -57,11 +58,16 @@ void FileTransfer::sendFile(vector<pair<string, User>> &my_friends) const {
     off_t offset = 0;
     struct stat fileStat;
     while (true) {
-        cout << "请输入文件路径" << endl;
-        cin >> filePath;
+        cout << "已选择要发送的好友" << endl;
+        cout << "请输入发送文件的绝对路径" << endl;
+        return_last();
+        getline(cin,filePath);
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
             return;
+        }
+        if(filePath == "0" ){
+           return;
         }
         inputFile = open(filePath.c_str(), O_RDONLY);
         if (inputFile == -1) {

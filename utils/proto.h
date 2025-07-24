@@ -50,11 +50,11 @@ class LoginRequest {
 public:
     LoginRequest();
 
-    LoginRequest(string uid, string passwd);
+    LoginRequest(string email, string passwd);
 
-    [[nodiscard]] const string &getUID() const;
+    [[nodiscard]] const string &getEmail() const;
 
-    void setUid(const string &uid);
+    void setEmail(const string &email);
 
     [[nodiscard]] const string &getPassword() const;
 
@@ -65,7 +65,7 @@ public:
     void json_parse(const string &json);
 
 private:
-    string UID;  
+    string email;
     string password;
 };
 

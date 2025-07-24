@@ -23,7 +23,7 @@ void synchronize(int fd, User &user) {
     redis.connect();
     string friend_info;
     int num = redis.scard(user.getUID());
-    //向客户端发送好友数量
+    //发好友数量
     sendMsg(fd, to_string(num));
     redisReply **arr = redis.smembers(user.getUID());
     for (int i = 0; i < num; i++) {
@@ -80,7 +80,6 @@ void start_chat(int fd, User &user) {
         }
 
         if (msg == EXIT) {
-            sendMsg(fd, EXIT);
             redis.srem("is_chat", user.getUID());
             return;
         }
