@@ -39,16 +39,16 @@ int write_n (int fd, const char *msg, int n) {
 }
 
 int sendMsg(int fd, string msg) {
-    if (fd < 0 || msg.empty()) {
-        cout << "[ERROR] sendMsg: 无效参数 fd=" << fd << ", msg长度=" << msg.size() << endl;
+    if (fd < 0) { // fd 也可以是负数，表示无效文件描述符
+        cout << "[ERROR] sendMsg: 无效文件描述符 fd=" << fd << endl;
         return -1;
+    }
+    if (msg.empty()) {
+        cout << "[WARNING] sendMsg: 正在发送空消息" << endl;
+        return 1;
     }
 
-    // 验证消息内容
-    if (msg.size() > 10000) {
-        cout << "[ERROR] 消息过长: " << msg.size() << " 字节" << endl;
-        return -1;
-    }
+
 
     // 验证消息长度
     if (msg.size() > 10000) {
@@ -121,9 +121,12 @@ int recvMsg(int fd, string &msg) {
 
     // 网络字节序转换
     len = ntohl(len);
-
+    if (len == 0) {
+        msg.clear();  // 如果长度为0，返回空字符串
+        return 1;    // 表示成功接收了一个空消息
+    }
     // 检查消息长度是否合理
-    if (len <= 0 || len > 10000) {
+    if (len < 0 || len > 10000) {
         return -1;  // 异常长度
     }
     

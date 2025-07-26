@@ -64,7 +64,9 @@ int main(int argc, char *argv[]) {
     }
     signal(SIGPIPE, SIG_IGN);        // 忽略SIGPIPE信号，避免客户端断开导致服务器退出
     signal(SIGINT, signalHandler);   // 处理Ctrl+C
-    signal(SIGTERM, signalHandler);  // 处理终止信号
+
+    //signal(SIGTERM, signalHandler);  // 处理终止信号
+    
     //服务器启动时删除所有在线用户
     Redis redis;
     if (redis.connect()) {

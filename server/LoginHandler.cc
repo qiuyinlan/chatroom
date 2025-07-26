@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include <random>
 #include <ctime>
+#include "./group_chat.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -139,6 +140,9 @@ void serverOperation(int fd, User &user) {
             unblocked(fd, user);
         } else if (temp == GROUP) {
             group(fd, user);
+        } else if (temp == SYNCGL) {
+            GroupChat groupChat(fd, user);
+            groupChat.synchronizeGL(fd, user);
         } else if (temp == SEND_FILE) {
             send_file(fd, user);
         } else if (temp == RECEIVE_FILE) {
@@ -146,6 +150,7 @@ void serverOperation(int fd, User &user) {
         } else if (temp == SYNC) {
             synchronize(fd, user);
         } else {
+            cout << "[DEBUG] 收到未知协议: '" << temp << "' (长度: " << temp.length() << ")" << endl;
             cout << "没有这个选项，请重新输入: " << temp << endl;
             continue;
         }

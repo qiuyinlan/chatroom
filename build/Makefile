@@ -323,30 +323,6 @@ client/social/G_chat.cc.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chat.cc.s
 .PHONY : client/social/G_chat.cc.s
 
-client/social/G_chatctrl.o: client/social/G_chatctrl.cc.o
-.PHONY : client/social/G_chatctrl.o
-
-# target to build an object file
-client/social/G_chatctrl.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.o
-.PHONY : client/social/G_chatctrl.cc.o
-
-client/social/G_chatctrl.i: client/social/G_chatctrl.cc.i
-.PHONY : client/social/G_chatctrl.i
-
-# target to preprocess a source file
-client/social/G_chatctrl.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.i
-.PHONY : client/social/G_chatctrl.cc.i
-
-client/social/G_chatctrl.s: client/social/G_chatctrl.cc.s
-.PHONY : client/social/G_chatctrl.s
-
-# target to generate assembly for a file
-client/social/G_chatctrl.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.s
-.PHONY : client/social/G_chatctrl.cc.s
-
 client/social/chat.o: client/social/chat.cc.o
 .PHONY : client/social/chat.o
 
@@ -712,9 +688,6 @@ help:
 	@echo "... client/social/G_chat.o"
 	@echo "... client/social/G_chat.i"
 	@echo "... client/social/G_chat.s"
-	@echo "... client/social/G_chatctrl.o"
-	@echo "... client/social/G_chatctrl.i"
-	@echo "... client/social/G_chatctrl.s"
 	@echo "... client/social/chat.o"
 	@echo "... client/social/chat.i"
 	@echo "... client/social/chat.s"

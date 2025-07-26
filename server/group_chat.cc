@@ -1,6 +1,7 @@
 #include "Redis.h"
 #include "IO.h"
 #include "group_chat.h"
+#include <nlohmann/json.hpp>
 #include "Group.h"
 #include "proto.h"
 
@@ -8,62 +9,135 @@
 
 using namespace std;
 
+
 GroupChat::GroupChat(int fd, const User &user) : fd(fd), user(user) {
     joined = "joined" + user.getUID();
     created = "created" + user.getUID();
+    //cout << "created是" << created << endl;
     managed = "managed" + user.getUID();
 }
+
+void GroupChat::synchronizeGL(int fd, User &user) {
+    Redis redis;
+    redis.connect();
+    string group_info;
+    int num = redis.scard(joined);
+
+    //发送群聊数量
+    sendMsg(fd, to_string(num));
+   
+    //发送群info
+    if (num != 0) {
+        redisReply **arr = redis.smembers(joined);
+
+        for (int i = 0; i < num; i++) {
+            // 先检查群是否存在
+            if (!redis.hexists("group_info", arr[i]->str)) {
+                redis.srem(joined, arr[i]->str);
+                continue;
+            }
+
+            group_info = redis.hget("group_info", arr[i]->str);
+            sendMsg(fd, group_info);
+            freeReplyObject(arr[i]);
+        }
+    }
+    else{
+        sendMsg(fd, "0");
+    }
+    
+}    
 
 void GroupChat::sync() {
     Redis redis;
     redis.connect();
     int num = redis.scard(created);
 
-    sendMsg(fd, to_string(num));
-    if (num != 0) {
+    //发送群数量
+    int ret = sendMsg(fd, to_string(num));
+    if (ret <= 0) {
+        std::cerr << "[ERROR] 同步创建群数量sendMsg() 失败" << std::endl;
+        return;
+    }
+   
+    
+    if(num != 0 ) {
+       
         redisReply **arr = redis.smembers(created);
+      
         for (int i = 0; i < num; i++) {
             string json = redis.hget("group_info", arr[i]->str);
-            std::cout << "[SERVER DEBUG] sendMsg to client: " << json << std::endl;
-            sendMsg(fd, json);
+            //std::cout << "[DEBUG] 发送创建的群信息: " << json << std::endl;
+            int ret = sendMsg(fd, json);
+            if (ret <= 0) {
+              //  std::cerr << "[ERROR] 同步创建的群信息sendMsg() 失败" << std::endl;
+                return;
+            }
             freeReplyObject(arr[i]);
         }
     }
     num = redis.scard(managed);
-
+    std::cout << "[DEBUG] 管理的群数量: " << num << std::endl;
+    // 发送管理的群数量
     sendMsg(fd, to_string(num));
     if (num != 0) {
         redisReply **arr = redis.smembers(managed);
         for (int i = 0; i < num; i++) {
             string json = redis.hget("group_info", arr[i]->str);
-            std::cout << "[SERVER DEBUG] sendMsg to client: " << json << std::endl;
+            std::cout << "[DEBUG] 发送管理的群信息: " << json << std::endl;
             sendMsg(fd, json);
             freeReplyObject(arr[i]);
         }
     }
     num = redis.scard(joined);
-
+    std::cout << "[DEBUG] 加入的群数量: " << num << std::endl;
+    // 发送加入的群数量
     sendMsg(fd, to_string(num));
     if (num != 0) {
         redisReply **arr = redis.smembers(joined);
         for (int i = 0; i < num; i++) {
-            string json = redis.hget("group_info", arr[i]->str);
+            string groupId = arr[i]->str;
+            std::cout << "[DEBUG] 正在获取群信息，群ID: " << groupId << std::endl;
+            string json = redis.hget("group_info", groupId);
+            std::cout << "[DEBUG] 获取到的JSON: " << json << std::endl;
+
+            // 在发送前验证JSON格式
+            try {
+                nlohmann::json testParse = nlohmann::json::parse(json);
+                std::cout << "[DEBUG] JSON解析测试成功" << std::endl;
+            } catch (const std::exception& e) {
+                std::cout << "[ERROR] JSON解析测试失败: " << e.what() << std::endl;
+                std::cout << "[ERROR] 问题JSON: " << json << std::endl;
+            }
+
             sendMsg(fd, json);
             freeReplyObject(arr[i]);
         }
     }
+    std::cout << "[DEBUG] GroupChat::sync() 完成" << std::endl;
 }
 
 void GroupChat::startChat() {
+    std::cout << "[DEBUG] GroupChat::startChat() 开始" << std::endl;
     Redis redis;
     redis.connect();
     redis.sadd("group_chat", user.getUID());
     string group_info;
     redisReply **arr;
 
+    std::cout << "[DEBUG] 等待接收群聊信息..." << std::endl;
     recvMsg(fd, group_info);
+    std::cout << "[DEBUG] 接收到群聊信息: " << group_info << std::endl;
+
     Group group;
-    group.json_parse(group_info);
+    try {
+        group.json_parse(group_info);
+        std::cout << "[DEBUG] 群聊信息解析成功: " << group.getGroupName() << std::endl;
+    } catch (const std::exception& e) {
+        std::cout << "[ERROR] 群聊信息解析失败: " << e.what() << std::endl;
+        std::cout << "[ERROR] 问题JSON: " << group_info << std::endl;
+        return;
+    }
     int num = redis.llen(group.getGroupUid() + "history");
     if (num < 5) {
 
@@ -86,11 +160,12 @@ void GroupChat::startChat() {
     while (true) {
         int ret = recvMsg(fd, msg);
         if (msg == EXIT || ret == 0) {
-            sendMsg(fd, EXIT);
-            redis.srem("group_chat", user.getUID());
             if (ret == 0) {
-                redis.hdel("is_online", user.getUID());
+                cout << "[DEBUG] 群聊中检测到连接断开" << endl;
             }
+            redis.srem("group_chat", user.getUID());
+            // 注意：只有在真正连接断开时才删除在线状态
+            // 正常退出群聊不应该影响在线状态
             return;
         }
         message.json_parse(msg);
@@ -127,6 +202,7 @@ void GroupChat::startChat() {
 
     }
 }
+
 
 // 辅助函数：通过群名查找群UID
 string GroupChat::findGroupUidByName(Redis& redis, const string& groupName) {

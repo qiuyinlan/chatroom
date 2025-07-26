@@ -35,12 +35,35 @@ std::string Group::to_json() {
 }
 
 void Group::json_parse(const std::string &json) {
-    nlohmann::json root = nlohmann::json::parse(json);
-    groupName = root["groupName"].get<std::string>();
-    UID = root["UID"].get<std::string>();
-    groupUID = root["groupUID"].get<std::string>();
-    members = root["members"].get<std::string>();
-    admins = root["admins"].get<std::string>();
+    try {
+        nlohmann::json root = nlohmann::json::parse(json);
+
+        // 安全地获取字符串字段
+        if (root.contains("groupName") && root["groupName"].is_string()) {
+            groupName = root["groupName"].get<std::string>();
+        }
+        if (root.contains("UID") && root["UID"].is_string()) {
+            UID = root["UID"].get<std::string>();
+        }
+        if (root.contains("groupUID") && root["groupUID"].is_string()) {
+            groupUID = root["groupUID"].get<std::string>();
+        }
+        if (root.contains("members") && root["members"].is_string()) {
+            members = root["members"].get<std::string>();
+        }
+        if (root.contains("admins") && root["admins"].is_string()) {
+            admins = root["admins"].get<std::string>();
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[ERROR] Group JSON解析失败: " << e.what() << std::endl;
+        std::cerr << "[ERROR] JSON内容: " << json << std::endl;
+        // 设置默认值
+        groupName = "未知群聊";
+        UID = "";
+        groupUID = "";
+        members = "";
+        admins = "";
+    }
 }
 
 const string &Group::getGroupName() const {

@@ -1,6 +1,6 @@
 #include "proto.h"
 #include <nlohmann/json.hpp>
-
+#include <iostream>
 #include <utility>
 //数据传输操作上方空一行以突出逻辑
 using namespace std;
@@ -34,9 +34,23 @@ string LoginRequest::to_json() {
 }
 
 void LoginRequest::json_parse(const string &json_str) {
-    json root = json::parse(json_str);
-    email = root["email"].get<string>();
-    password = root["password"].get<string>();
+    // json root = json::parse(json_str);
+    // email = root["email"].get<string>();
+    // password = root["password"].get<string>();
+    try {
+        json root = json::parse(json_str);
+        // 使用 value() 方法，如果键不存在或为null，返回第二个参数的默认值（空字符串）
+        email = root.value("email", "");
+        password = root.value("password", "");
+    } catch (const json::exception& e) {
+        // 处理JSON解析本身的错误，例如字符串格式不正确
+        cerr << "[ERROR] LoginRequest JSON解析失败: " << e.what() << endl;
+        cerr << "[ERROR] JSON内容: " << json_str << endl;
+        // 可以选择抛出，或者设置成员为默认空值
+        email = "";
+        password = "";
+      
+    }
 }
 
 

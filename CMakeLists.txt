@@ -41,7 +41,7 @@ add_executable(
         client/service/FileTransfer.cc
         client/service/Notifications.cc
         client/social/FriendManager.cc
-        client/social/G_chatctrl.cc
+  
         client/social/chat.cc
         client/social/G_chat.cc
         utils/User.cc

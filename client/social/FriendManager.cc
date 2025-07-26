@@ -9,14 +9,21 @@ using namespace std;
 
 FriendManager::FriendManager(int fd, User user) : fd(fd), user(std::move(user)) {}
 
-// 迁移自Telegram.cc
 
 void FriendManager::addFriend(vector<pair<string, User>> &my_friends) const {
     sendMsg(fd, ADD_FRIEND);
     string username;
     while (true) {
         cout << "请输入你要添加好友的用户名：" << endl;
+        return_last();
         getline(cin, username);
+        if (username.empty()){
+            cout << "用户名不能为空" << endl;
+            continue;
+        }
+        if (username == "0") {
+            return;
+        }
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
             return;
@@ -177,12 +184,18 @@ void FriendManager::blockedLists(vector<pair<string, User>> &my_friends) const {
     }
     cout << "-----------------------------------------" << endl;
     cout << "请输入你要屏蔽的好友的序号" << endl;
+    return_last();
     int who;
     while (!(cin >> who) || who < 0 || who > my_friends.size()) {
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
             return;
         }
+        if (who == 0)
+        {
+            return;
+        }
+        
         cout << "输入格式错误" << endl;
         cin.clear();
         cin.ignore(INT32_MAX, '\n');
@@ -227,10 +240,15 @@ void FriendManager::unblocked(vector<pair<string, User>> &my_friends) const {
         cout << i + 1 << ". " << blocked_user.getUsername() << endl;
     }
     cout << "请输入你要解除屏蔽的好友序号" << endl;
+    return_last();
     int who;
     while (!(cin >> who) || who < 0 || who > num) {
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
+            return;
+        }
+        if (who == 0)
+        {
             return;
         }
         cout << "输入格式错误" << endl;

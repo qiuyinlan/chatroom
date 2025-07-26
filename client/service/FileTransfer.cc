@@ -66,6 +66,7 @@ void FileTransfer::sendFile(vector<pair<string, User>> &my_friends) const {
             cout << "读到文件结尾" << endl;
             return;
         }
+        //按0返回
         if(filePath == "0" ){
            return;
         }

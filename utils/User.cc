@@ -98,10 +98,33 @@ string User::to_json() {
 }
 
 void User::json_parse(const string &json_str) {
-    json root = json::parse(json_str);
-    my_time = root["my_time"].get<string>();
-    UID = root["UID"].get<string>();
-    email = root["email"].get<string>();
-    username = root["username"].get<string>();
-    password = root["password"].get<string>();
+    try {
+        json root = json::parse(json_str);
+
+        // 安全地获取字段
+        if (root.contains("my_time") && root["my_time"].is_string()) {
+            my_time = root["my_time"].get<string>();
+        }
+        if (root.contains("UID") && root["UID"].is_string()) {
+            UID = root["UID"].get<string>();
+        }
+        if (root.contains("email") && root["email"].is_string()) {
+            email = root["email"].get<string>();
+        }
+        if (root.contains("username") && root["username"].is_string()) {
+            username = root["username"].get<string>();
+        }
+        if (root.contains("password") && root["password"].is_string()) {
+            password = root["password"].get<string>();
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[ERROR] User JSON解析失败: " << e.what() << std::endl;
+        std::cerr << "[ERROR] JSON内容: " << json_str << std::endl;
+        // 设置默认值
+        my_time = "";
+        UID = "";
+        email = "";
+        username = "未知用户";
+        password = "";
+    }
 }

@@ -23,9 +23,11 @@ void synchronize(int fd, User &user) {
     redis.connect();
     string friend_info;
     int num = redis.scard(user.getUID());
+
     //发好友数量
     sendMsg(fd, to_string(num));
     redisReply **arr = redis.smembers(user.getUID());
+    //发送好友详细信息
     for (int i = 0; i < num; i++) {
         friend_info = redis.hget("user_info", arr[i]->str);
         sendMsg(fd, friend_info);
@@ -38,23 +40,32 @@ void start_chat(int fd, User &user) {
     redis.connect();
     redis.sadd("is_chat", user.getUID());
     string records_index;
-    //接收历史记录索引
+    //收历史记录索引
     recvMsg(fd, records_index);
     int num = redis.llen(records_index);
-    if (num <= 10) {
-        //发送历史记录数
-        sendMsg(fd, to_string(num));
-    } else {
-        //最多显示10条
-        num = 10;
-        sendMsg(fd, "10");
-    }
+    
+    
+    // if (num <= 10) {
+    //     //发送历史记录数
+    //     sendMsg(fd, to_string(num));
+    // } else {
+    //     //最多显示x条
+    //     num = x;
+    //     sendMsg(fd, "x");
+    // }
+
+    //发送所有
+    sendMsg(fd, to_string(num));
+
+
+
     redisReply **arr = redis.lrange(records_index, "0", to_string(num - 1));
     //先发最新的消息，所以要倒序遍历
     for (int i = num - 1; i >= 0; i--) {
         string msg_content = arr[i]->str;
         try {
             json test_json = json::parse(msg_content);
+            //循环发信息
             sendMsg(fd, msg_content);
         } catch (const exception& e) {
             continue;
@@ -64,32 +75,31 @@ void start_chat(int fd, User &user) {
     string friend_uid;
     //接收客户端发送的想要聊天的好友的UID
     recvMsg(fd, friend_uid);
-    
-    // 移除删除检查，允许进入聊天界面
-    sendMsg(fd, "1");
+    cout << "[DEBUG] 收到消息: " <<  friend_uid << endl;
+    //###先进入聊天，再检查删除和屏蔽，待完善
     
     string msg;
     while (true) {
         int ret = recvMsg(fd, msg);
         if (ret <= 0) {
             // 连接断开或接收错误
-            sendMsg(fd, EXIT);
             redis.srem("is_chat", user.getUID());
-            redis.hdel("is_online", user.getUID());
             return;
         }
 
+        //客户端退出聊天
         if (msg == EXIT) {
+            sendMsg(fd, EXIT);  // 向客户端发送EXIT确认
             redis.srem("is_chat", user.getUID());
             return;
         }
 
+        //正常消息
         Message message;
         try {
             message.json_parse(msg);
         } catch (const exception& e) {
             // JSON解析失败，跳过这条消息
-            cout << "[SERVER ERROR] JSON解析失败: " << e.what() << endl;
             continue;
         }
         string UID = message.getUidTo();
@@ -181,11 +191,12 @@ void list_friend(int fd, User &user) {
     redis.connect();
     string temp;
 
+    //收
     recvMsg(fd, temp);
     int num = stoi(temp);
     string friend_uid;
     for (int i = 0; i < num; ++i) {
-        //接收客户端发送的UID来查询好友是否在线的信息
+        //收
         recvMsg(fd, friend_uid);
         if (redis.hexists("is_online", friend_uid)) {
             //在线发送"1"
@@ -234,7 +245,6 @@ void add_friend(int fd, User &user) {
 
     // 设置好友申请通知标记
     redis.hset("friend_request_notify", UID, "1");
-    cout << "[DEBUG] 为用户 " << UID << " 设置好友申请通知标记" << endl;
 
     string user_info = redis.hget("user_info", UID);
     sendMsg(fd, user_info);
@@ -328,39 +338,66 @@ void unblocked(int fd, User &user) {
 }
 
 void group(int fd, User &user) {
+    std::cout << "[DEBUG] group() 函数开始" << std::endl;
     Redis redis;
     redis.connect();
     GroupChat groupChat(fd, user);
     groupChat.sync();
     string choice;
-    map<int, function<void()>> groupOperation = {
-            {1,  [groupChat]() mutable { groupChat.startChat(); }},
-            {2,  [groupChat]() mutable { groupChat.createGroup(); }},
-            {3,  [groupChat]() mutable { groupChat.joinGroup(); }},
-            {4,  [groupChat]() mutable { groupChat.groupHistory(); }},
-            {5,  [groupChat]() mutable { groupChat.managedGroup(); }},
-            {6,  [groupChat]()mutable { groupChat.managedCreatedGroup(); }},
-            {7,  [groupChat]() mutable { groupChat.showMembers(); }},
-            {8,  [groupChat]() mutable { groupChat.quit(); }},
-            {11, [groupChat]()mutable { groupChat.sync(); }}
-    };
+    
     int ret;
     while (true) {
-
+        std::cout << "[DEBUG] 等待接收客户端选择..." << std::endl;
         ret = recvMsg(fd, choice);
+        std::cout << "[DEBUG] 接收到客户端选择: '" << choice << "', ret=" << ret << std::endl;
+
         if (ret == 0) {
+            std::cout << "[DEBUG] 客户端断开连接" << std::endl;
             redis.hdel("is_online", user.getUID());
-        }
-        if (choice == BACK) {
             break;
         }
-        int option = stoi(choice);
-        if (groupOperation.find(option) == groupOperation.end()) {
-            continue;
+        if (choice == BACK) {
+            std::cout << "[DEBUG] 客户端选择退出" << std::endl;
+            break;
         }
-        groupOperation[option]();
+        try {
+            int option = stoi(choice);
+            std::cout << "[DEBUG] 解析选择为数字: " << option << std::endl;
+
+            if (option == 1) {
+                groupChat.startChat();
+            } else if (option == 2) {
+                groupChat.createGroup();
+            } else if (option == 3) {
+                groupChat.joinGroup();
+            } else if (option == 4) {
+                groupChat.groupHistory();
+            } else if (option == 5) {
+                groupChat.managedGroup();
+            } else if (option == 6) {
+                groupChat.managedCreatedGroup();
+            } else if (option == 7) {
+                groupChat.showMembers();
+            } else if (option == 8) {
+                groupChat.quit();
+            } else if (option == 11) {
+                groupChat.synchronizeGL(fd,user); // 再次同步群聊信息
+            } else {
+                // 处理无效选项，这里选择继续循环等待有效输入
+                std::cout << "[DEBUG] 无效选择: " << option << "，继续等待有效输入" << std::endl;
+                continue;
+            }
+        } catch (const std::exception& e) {
+            std::cout << "[ERROR] 解析选择失败: " << e.what() << std::endl;
+            std::cout << "[ERROR] 选择内容: '" << choice << "'" << std::endl;
+            // 如果解析失败，通常意味着输入格式错误，这里选择断开连接
+            break;
+        }
     }
+    std::cout << "[DEBUG] group() 函数结束" << std::endl;
 }
+
+
 
 void send_file(int fd, User &user) {
     Redis redis;

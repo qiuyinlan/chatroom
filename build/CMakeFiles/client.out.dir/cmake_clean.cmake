@@ -13,8 +13,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/client.out.dir/client/social/FriendManager.cc.o.d"
   "CMakeFiles/client.out.dir/client/social/G_chat.cc.o"
   "CMakeFiles/client.out.dir/client/social/G_chat.cc.o.d"
-  "CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.o"
-  "CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.o.d"
   "CMakeFiles/client.out.dir/client/social/chat.cc.o"
   "CMakeFiles/client.out.dir/client/social/chat.cc.o.d"
   "CMakeFiles/client.out.dir/utils/Group.cc.o"

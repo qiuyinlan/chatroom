@@ -25,6 +25,8 @@ void unblocked(int fd, User &user);
 
 void group(int fd, User &user);
 
+// void synchronizeGL(int fd, User &user);
+
 void send_file(int fd, User &user);
 
 void receive_file(int fd, User &user);

@@ -120,11 +120,20 @@ CMakeFiles/client.out.dir/client/controller/OperationMenu.cc.o: \
  /usr/include/c++/13/bits/charconv.h \
  /usr/include/c++/13/bits/basic_string.tcc /usr/include/c++/13/utility \
  /usr/include/c++/13/bits/stl_relops.h \
- /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /home/xuzichun/chatroom/messengertest/utils/User.h /usr/include/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+ /usr/include/linux/close_range.h \
  /home/xuzichun/chatroom/messengertest/client/social/FriendManager.h \
  /home/xuzichun/chatroom/messengertest/client/social/chat.h \
  /home/xuzichun/chatroom/messengertest/server/../utils/User.h \
- /home/xuzichun/chatroom/messengertest/client/social/G_chatctrl.h \
+ /home/xuzichun/chatroom/messengertest/server/../utils/Group.h \
+ /home/xuzichun/chatroom/messengertest/client/social/G_chat.h \
+ /home/xuzichun/chatroom/messengertest/utils/Group.h \
  /home/xuzichun/chatroom/messengertest/client/service/FileTransfer.h \
  /home/xuzichun/chatroom/messengertest/client/service/Notifications.h \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \

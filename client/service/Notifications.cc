@@ -68,23 +68,28 @@ bool isNumericString(const std::string &str) {
     return true;
 }
 
-//私聊群聊，接收对方发送的消息
+//私聊，接收对方发送的消息
 void chatReceived(int fd, string UID) {
     Message message;
     string json_msg;
-    
+
         while (true) {
             int ret = recvMsg(fd, json_msg);
             if (ret <= 0) {
                 cout << "聊天连接断开，退出聊天接收线程" << endl;
                 break;
             }
-    
+
+            // 处理空消息
+            if (json_msg.empty()) {
+                continue;
+            }
+
             if (json_msg == EXIT) {
                 break;
             }
 
-            // 处理特殊响应（包括截断的情况）
+            // 处理特殊响应
             if (json_msg == "FRIEND_VERIFICATION_NEEDED" ||
                 json_msg.find("VERIFICATION_NEEDED") != string::npos ||
                 json_msg.find("ND_VERIFICATION_NEEDED") != string::npos) {
@@ -103,19 +108,21 @@ void chatReceived(int fd, string UID) {
             }
 
             try {
-    
                 message.json_parse(json_msg);
-                //私发
+                //对方私发给我
                 if (message.getGroupName() == "1") {
+                    //如果此时我处于和对方一样的聊天框
                     if (message.getUidFrom() == UID) {
                         cout << message.getUsername() << ": " << message.getContent() << endl;
                     } else {
-                        // 显示实际的消息内容，而不只是通知
-                        cout << message.getUsername() << ": " << message.getContent() << endl;
+                        cout << "\033[1m\033[31m"
+                        << "           "
+                        << "收到一条来自" << message.getUsername() << "的一条消息"
+                        << "\033[0m" << endl;
                     }
                     continue;
                 }
-                //群发
+                //###群发,逻辑有问题
                 if (message.getUidFrom() == UID) {
                     cout << message.getUsername() << ": " << message.getContent() << endl;
                 } else {
@@ -123,17 +130,39 @@ void chatReceived(int fd, string UID) {
                          << "           "
                          << "收到一条来自" << message.getUsername() << "的一条消息"
                          << "\033[0m" << endl;
-                    //cout << "收到一条来自" << message.getUsername() << "的一条消息" << endl;
                 }
             } catch (const exception& e) {
-                // 检查是否为特殊控制消息
-                if (json_msg.find("BLOCKED") != string::npos) {
-                    cout << YELLOW << "系统提示：您的消息被对方屏蔽" << RESET << endl;
-                } else {
-                    // 其他解析错误，静默处理
-                    continue;
-                }
+                // JSON解析失败，跳过这条消息
+                continue;
             }
-    
+
+    }
+}
+//群聊接收线程函数
+void groupChatReceived(int fd, const string& groupUid) {
+    string buf;
+    while (true) {
+        int ret = recvMsg(fd, buf);
+        if (ret <= 0) {
+            cout << "群聊连接断开，退出接收线程" << endl;
+            break;
+        }
+
+        if (buf == EXIT) {
+            break;
+        }
+
+        try {
+            Message message;
+            message.json_parse(buf);
+
+            // 显示群聊消息
+            cout << "[" << message.getGroupName() << "] "
+                 << message.getUsername() << ": "
+                 << message.getContent() << endl;
+        } catch (const exception& e) {
+            // 跳过无效消息
+            continue;
+        }
     }
 }

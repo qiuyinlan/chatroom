@@ -26,6 +26,7 @@ const string GROUP_REQUEST = "16";
 const string SYNC = "17";
 const string EXIT = "18";
 const string BACK = "19";
+const string SYNCGL = "20";  // 获取群聊列表
 #define BLOCKED_MESSAGE "BLOCKED_MESSAGE"
 #define FRIEND_VERIFICATION_NEEDED "FRIEND_VERIFICATION_NEEDED"
 #define MESSAGE_SENT "MESSAGE_SENT"

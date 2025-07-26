@@ -1,7 +1,8 @@
 #include "OperationMenu.h"
+#include <unistd.h>
 #include "FriendManager.h"
 #include "chat.h"
-#include "G_chatctrl.h"
+#include "G_chat.h"
 #include "FileTransfer.h"
 #include "Notifications.h"
 #include <functional>
@@ -25,41 +26,59 @@ void operationMenu() {
 }
 
 void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) {
-    if (sendMsg(fd, SYNC) <= 0) {     // 1. 发送 SYNC，检查连接
+
+    int send_ret = sendMsg(fd, SYNC);
+    if (send_ret <= 0) {     //发送 SYNC
         cout << "服务器连接已断开，无法同步好友列表" << endl;
-        return;
+        return ;
+    }
+    // 清空本地 my_friends
+    my_friends.clear();               
+    string friend_num ;
+    // 接收好友个数
+    int recv_ret = recvMsg(fd, friend_num);
+ 
+    if (recv_ret <= 0) { 
+         cout << "服务器连接已断开，无法获取好友信息" << endl;
+        return ;
     }
 
-    my_friends.clear();               // 2. 清空本地 my_friends
-    string friend_num;
-    if (recvMsg(fd, friend_num) <= 0) { // 3. 接收好友个数，检查连接
-        cout << "服务器连接已断开，无法获取好友信息" << endl;
-        return;
+    int num;
+    try {
+        num = stoi(friend_num);
+
+    } catch (const exception& e) {
+        cout << "[ERROR] 解析好友数量失败: " << e.what() << ", 内容: '" << friend_num << "'" << endl;
+        return ;
     }
 
-    int num = stoi(friend_num);
-    User _friend;
+    User myfriend;
     string friend_info;
-    for (int i = 0; i < num; i++) {   // 4. 循环接收并解析
-        if (recvMsg(fd, friend_info) <= 0) {
+    //收好友详细信息
+    for (int i = 0; i < num; i++) {
+        int recv_ret2 = recvMsg(fd, friend_info);
+        if (recv_ret2 <= 0) {
             cout << "服务器连接已断开，好友信息同步中断" << endl;
-            return;
+            return ;
         }
         //接收好友信息
-        _friend.json_parse(friend_info);
-        my_friends.emplace_back(my_uid, _friend);
+            myfriend.json_parse(friend_info);
+            my_friends.emplace_back(my_uid, myfriend);
+
     }
+    return ;
 }
 
 
 void clientOperation(int fd, User &user) {
     string my_uid = user.getUID();
+    //好友容器，对
     vector<pair<string, User>> my_friends;
     FriendManager friendManager(fd, user);
     ChatSession chatSession(fd, user);
-    GroupChatSession groupChatSession(fd, user);
+    G_chat gChat(fd, user);
     FileTransfer fileTransfer(fd, user);
-    // announce线程，提供实时通知
+    // 启用通知线程，接收实时通知
     thread work(announce, user.getUID());
     work.detach();
 
@@ -67,11 +86,12 @@ void clientOperation(int fd, User &user) {
         operationMenu();
         string option;
         getline(cin, option);
+        char *end_ptr;
         if (option.empty()) {
-            cout << "输入为空" << endl;
+            cout << "输入不能为空" << endl;
             continue;
         }
-        if (option.length() > 4) {
+        if (option.length() > 1) {
             cout << "输入错误" << endl;
             continue;
         }
@@ -83,16 +103,34 @@ void clientOperation(int fd, User &user) {
             }
             return;
         }
-        char *end_ptr;
+       
+        //字符串类型变成整型，只识别能转换的数字部分
         int opt = (int) strtol(option.c_str(), &end_ptr, 10);
+        if (end_ptr == option.c_str() ||   *end_ptr != '\0' || option.find(' ') != std::string::npos) 
+        {
+            std::cout << "输入格式错误，请输入纯数字选项！" << std::endl;
+            continue;
+        }
         if ( option.find(' ') != std::string::npos) {
             std::cout << "输入格式错误 请重新输入" << std::endl;
             continue;
         }
+        // 同步好友列表17
         syncFriends(fd, my_uid, my_friends);
+
         // if-else分发
+        //私聊
+        
         if (opt == 1) {
-            chatSession.startChat(my_friends);
+            // 获取群聊列表20
+            vector<Group> joinedGroup;
+                G_chat gChat(fd, user);
+                gChat.syncGL(joinedGroup);
+
+                // 调用统一聊天界面
+                cout << "当前加入的群聊列表：" << endl;
+                chatSession.startChat(my_friends, joinedGroup);
+            
         } else if (opt == 2) {
             friendManager.addFriend(my_friends);
         } else if (opt == 3) {
@@ -104,7 +142,7 @@ void clientOperation(int fd, User &user) {
         } else if (opt == 6) {
             friendManager.unblocked(my_friends);
         } else if (opt == 7) {
-            groupChatSession.group(my_friends);
+            gChat.groupctrl(my_friends);
         } else if (opt == 8) {
             fileTransfer.sendFile(my_friends);
         } else if (opt == 9) {

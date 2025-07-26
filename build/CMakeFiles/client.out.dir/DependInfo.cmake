@@ -15,7 +15,6 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/xuzichun/chatroom/messengertest/client/service/Notifications.cc" "CMakeFiles/client.out.dir/client/service/Notifications.cc.o" "gcc" "CMakeFiles/client.out.dir/client/service/Notifications.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/client/social/FriendManager.cc" "CMakeFiles/client.out.dir/client/social/FriendManager.cc.o" "gcc" "CMakeFiles/client.out.dir/client/social/FriendManager.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/client/social/G_chat.cc" "CMakeFiles/client.out.dir/client/social/G_chat.cc.o" "gcc" "CMakeFiles/client.out.dir/client/social/G_chat.cc.o.d"
-  "/home/xuzichun/chatroom/messengertest/client/social/G_chatctrl.cc" "CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.o" "gcc" "CMakeFiles/client.out.dir/client/social/G_chatctrl.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/client/social/chat.cc" "CMakeFiles/client.out.dir/client/social/chat.cc.o" "gcc" "CMakeFiles/client.out.dir/client/social/chat.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/utils/Group.cc" "CMakeFiles/client.out.dir/utils/Group.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/Group.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/utils/IO.cc" "CMakeFiles/client.out.dir/utils/IO.cc.o" "gcc" "CMakeFiles/client.out.dir/utils/IO.cc.o.d"

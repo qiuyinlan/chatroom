@@ -342,4 +342,7 @@ CMakeFiles/server.out.dir/server/LoginHandler.cc.o: \
  /usr/include/nlohmann/thirdparty/hedley/hedley_undef.hpp \
  /usr/include/c++/13/random /usr/include/c++/13/bits/random.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/opt_random.h \
- /usr/include/c++/13/bits/random.tcc
+ /usr/include/c++/13/bits/random.tcc \
+ /home/xuzichun/chatroom/messengertest/server/./group_chat.h \
+ /home/xuzichun/chatroom/messengertest/utils/Group.h \
+ /home/xuzichun/chatroom/messengertest/server/./Redis.h
