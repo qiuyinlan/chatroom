@@ -23,29 +23,38 @@ using namespace std;
 // 群聊聊天
 void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGroups) {
     if (groupIndex < 0 || groupIndex >= joinedGroups.size()) {
-        cout << "群聊索引无效" << endl;
+        cout << "输入错误，群聊索引无效" << endl;
         return;
     }
-    
+    // 从 joinedGroups 中取出一个群，绑定为只读引用，命名为 selectedGroup，从群列表中读取群（引用）
     const Group& selectedGroup = joinedGroups[groupIndex];
+
     
-    
-    // 发送群聊协议
+        // 发送协议
     sendMsg(fd, GROUP);
-    sendMsg(fd, "1");  // 开始群聊
-    Group groupCopy = selectedGroup;  
+    sendMsg(fd, "1");  
+    // 拿一个可以传输的副本（拷贝）
+    Group groupCopy = selectedGroup; 
+
+    //发送群相关信息
     sendMsg(fd, groupCopy.to_json());
     
     // 接收历史消息
     string historyNum;
     int recv_ret = recvMsg(fd, historyNum);
+cout << "lishishuliang" << historyNum << endl;
+recvMsg(fd, historyNum);
+cout << "lishishuliang" << historyNum << endl;
+recvMsg(fd, historyNum);
+cout << "lishishuliang" << historyNum << endl;
+
     if (recv_ret <= 0) {
         cout << "接收群聊历史消息数量失败，连接可能已断开" << endl;
         return;
     }
 
     int num;
-    try {
+    
         if (historyNum.empty()) {
             cout << "接收到空的群聊历史消息数量" << endl;
             return;
@@ -55,10 +64,7 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
             cout << "接收到异常的群聊历史消息数量: " << historyNum << endl;
             return;
         }
-    } catch (const exception& e) {
-        cout << "解析群聊历史消息数量失败: '" << historyNum << "', 错误: " << e.what() << endl;
-        return;
-    }
+cout << "接收到群聊历史消息数量: " << num << endl;
     
    //接收,打印群聊历史
     for (int i = 0; i < num; i++) {
@@ -151,7 +157,7 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
     else{
         //群聊打印
         for (int i = 0; i < joinedGroup.size(); i++) {
-            cout << my_friends.size() + i + 1 << ". "  << joinedGroup[i].getGroupName() << " (群)" << endl;
+            cout << my_friends.size() + i + 1 << ". "  << joinedGroup[i].getGroupName()  << endl;
         }
     }
 

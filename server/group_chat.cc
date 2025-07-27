@@ -139,14 +139,16 @@ void GroupChat::startChat() {
         return;
     }
     int num = redis.llen(group.getGroupUid() + "history");
-    if (num < 5) {
+    // if (num < 5) {
 
-        sendMsg(fd, to_string(num));
-    } else {
-        num = 5;
+    //     sendMsg(fd, to_string(num));
+    // } else {
+    //     num = 5;
 
-        sendMsg(fd, to_string(num));
-    }
+    //     sendMsg(fd, to_string(num));
+    // }
+    sendMsg(fd, to_string(num));
+cout << num << endl;
     if (num != 0) {
         arr = redis.lrange(group.getGroupUid() + "history", "0", to_string(num - 1));
     }

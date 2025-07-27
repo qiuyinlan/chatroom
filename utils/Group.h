@@ -7,7 +7,8 @@
 
 class Group {
 public:
-    Group() = default;
+    //=default 让编译器自动生成构造函数
+    Group() ;
 
     Group(std::string groupName, std::string UID);
 

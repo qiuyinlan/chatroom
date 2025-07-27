@@ -8,6 +8,14 @@
 
 using namespace std;
 
+Group::Group() {
+    groupName = "未知群聊";
+    UID = "";
+    groupUID = "";
+    members = "";
+    admins = "";
+}
+
 Group::Group(string groupName, string UID) : groupName(std::move(groupName)), UID(std::move(UID)) {
     random_device rd;
     mt19937 eng(rd());
@@ -26,12 +34,14 @@ Group::Group(string groupName, string UID) : groupName(std::move(groupName)), UI
 
 std::string Group::to_json() {
     nlohmann::json root;
+    
     root["groupName"] = groupName;
     root["UID"] = UID;
     root["groupUID"] = groupUID;
     root["members"] = members;
     root["admins"] = admins;
     return root.dump();
+
 }
 
 void Group::json_parse(const std::string &json) {

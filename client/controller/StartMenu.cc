@@ -128,24 +128,61 @@ int login(int fd, User &user) {
 
 int email_register(int fd) {
     string email, code, username, password, password2, server_reply;
-    while (true) { // 无限循环，直到输入有效邮箱
-        std::cout << "请输入您的邮箱: ";
+    string prompt = "请输入您的邮箱: ";
+    while(true){
+        cout << prompt << endl;
         std::getline(std::cin, email);
         if (email.empty()) {
             std::cout << "邮箱不能为空，请重新输入！" << std::endl;
-            // 继续循环，重新提示用户输入
-        } else {
-            break; // 邮箱不为空，跳出循环
+            continue;
+        } else if (email == "0") {
+            sendMsg(fd, "0");
+            return 0;
+        }else {
+            //不为空，就让服务器检查一下redis
+            sendMsg(fd, REQUEST_CODE);
+            sendMsg(fd, email);
+            //看邮箱是否重复
+
+            recvMsg(fd, server_reply);
+            if(server_reply == "邮箱已存在"){
+                prompt = "该邮箱已注册，请重新输入邮箱（输入0返回）：";
+                continue;
+            }   
         }
+        break;
+
+    }
+    prompt = "请输入您的用户名: ";
+    while(true){
+        cout << prompt << endl;
+        getline(cin, username);
+        if (username.empty()) {
+            cout << "用户名不能为空！" << endl;
+            continue;
+        }else if (username == "0") {
+            sendMsg(fd, "0");
+            return 0;
+        }else {
+            sendMsg(fd, username);
+            //看是否重复
+
+            recvMsg(fd, server_reply);
+            if(server_reply == "已存在"){
+                prompt = "该用户名已注册，请重新输入（输入0返回）：";
+                continue;
+            }   
+        }
+        break;
+
     }
 
-    // 获取验证码
+    // 邮箱不重复，验证码发
     cout << "按回车获取验证码..." << endl;
     cin.ignore(INT32_MAX, '\n');
-    sendMsg(fd, REQUEST_CODE);
-    sendMsg(fd, email);
+
     recvMsg(fd, server_reply);
-    cout << server_reply << endl;
+    cout << server_reply << endl;//验证码发送是否成功的消息
     if (server_reply.find("失败") != string::npos) return 0;
    
     
@@ -154,28 +191,19 @@ int email_register(int fd) {
         std::getline(std::cin, code);
         if (code.empty()) {
             cout << "验证码不能为空！" << endl;
-        }
-        if (email.empty()) {
-            std::cout << "邮箱不能为空，请重新输入！" << std::endl;
-            // 继续循环，重新提示用户输入
-        } else {
+        }else {
             break; 
         }
     }
-    cout << "请输入您的用户名: ";
-    getline(cin, username);
-    if (username.empty()) {
-        cout << "用户名不能为空！" << endl;
-        return 0;
-    }
-    cout << "请输入您的密码: ";
+    
+
     get_password("请输入您的密码: ", password);
     while (true) {
-        cout << "请再次输入您的密码: ";
+       
         get_password("请再次输入您的密码: ", password2);
         if (password != password2) {
             cout << "两次密码不一致！请重新输入。" << endl;
-            cout << "请输入您的密码: ";
+          
             get_password("请输入您的密码: ", password);
             continue;
         }
@@ -189,7 +217,9 @@ int email_register(int fd) {
     root["password"] = password;
     string json_str = root.dump();
     sendMsg(fd, REGISTER_WITH_CODE);
+
     sendMsg(fd, json_str);
+
     recvMsg(fd, server_reply);
     cout << server_reply << endl;
     return server_reply == "注册成功";

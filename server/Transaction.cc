@@ -337,16 +337,18 @@ void unblocked(int fd, User &user) {
     redis.srem("blocked" + user.getUID(), UID);
 }
 
+
 void group(int fd, User &user) {
     std::cout << "[DEBUG] group() 函数开始" << std::endl;
     Redis redis;
     redis.connect();
     GroupChat groupChat(fd, user);
-    groupChat.sync();
+  
     string choice;
     
     int ret;
     while (true) {
+        groupChat.sync();
         std::cout << "[DEBUG] 等待接收客户端选择..." << std::endl;
         ret = recvMsg(fd, choice);
         std::cout << "[DEBUG] 接收到客户端选择: '" << choice << "', ret=" << ret << std::endl;
@@ -363,7 +365,7 @@ void group(int fd, User &user) {
         try {
             int option = stoi(choice);
             std::cout << "[DEBUG] 解析选择为数字: " << option << std::endl;
-
+            //是在开始聊天那里发送的1
             if (option == 1) {
                 groupChat.startChat();
             } else if (option == 2) {
@@ -380,8 +382,6 @@ void group(int fd, User &user) {
                 groupChat.showMembers();
             } else if (option == 8) {
                 groupChat.quit();
-            } else if (option == 11) {
-                groupChat.synchronizeGL(fd,user); // 再次同步群聊信息
             } else {
                 // 处理无效选项，这里选择继续循环等待有效输入
                 std::cout << "[DEBUG] 无效选择: " << option << "，继续等待有效输入" << std::endl;

@@ -302,11 +302,52 @@ void handleRequestCode(int epfd, int fd) {
     struct epoll_event temp;
     temp.data.fd = fd;
     temp.events = EPOLLIN;
-    // 1. 接收邮箱
+    // 1. 接收邮箱,发验证码之前看看，邮箱和用户名是否存在，存在了就先不发
+    int ret;
+    string email;
+    while (true) {
+        ret = recvMsg(fd, email);
+        std::cout << "[SERVER] 收到邮箱输入: " << email << std::endl;
+        if (ret <= 0) { 
+            std::cout << "[SERVER] 客户端断开" << std::endl;
+            return;
+        }
+        if (email == "0") { 
+            std::cout << "[SERVER] 用户选择返回注册菜单" << std::endl;
+            epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+            return;   
+        }
+        if (!redis.hexists("email_to_uid", email)) {
+            std::cout << "[SERVER] 邮箱未注册，进入后续流程" << std::endl;
+            sendMsg(fd, "未注册");
+            break;
+        }
+        std::cout << "[SERVER] 邮箱已注册，发送提示,让对方重新输入/返回" << std::endl;
+        sendMsg(fd, "邮箱已存在");
+    }
 
-   string email;
-   int ret2;
-    ret2 = recvMsg(fd, email);
+     // 检查用户名是否已注册，若已注册则循环让客户端重新输入
+     string username;
+     while (true) {
+
+        ret = recvMsg(fd, username);
+        if(ret<=0){
+            std::cout << "[SERVER] 客户端断开" << std::endl;
+            return;
+        }
+        std::cout << "[SERVER] 收到用户名输入: " << username << std::endl;
+        
+         if (username == "0") { // 用户选择返回
+             epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+         return;
+         }
+         if (!redis.hexists("username_to_uid", username)) {
+            sendMsg(fd, "未注册");
+             break; // 未注册，可以继续后续流程
+         }
+         sendMsg(fd, "已存在");
+         // 循环，等待客户端输入新邮箱
+     }
    
    
     // 2. 生成验证码
@@ -359,26 +400,7 @@ void serverRegisterWithCode(int epfd, int fd) {
 
     string email;
     int ret;
-    while (true) {
-        ret = recvMsg(fd, email);
-        std::cout << "[SERVER] 收到邮箱输入: " << email << std::endl;
-        if (ret == 0) { 
-            std::cout << "[SERVER] 客户端断开，关闭fd" << std::endl;
-            close(fd);
-            return;
-        }
-        if (email == "0") { 
-            std::cout << "[SERVER] 用户选择返回注册菜单" << std::endl;
-            epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
-            return;   
-        }
-        if (!redis.hexists("email_to_uid", email)) {
-            std::cout << "[SERVER] 邮箱未注册，进入后续流程" << std::endl;
-            break;
-        }
-        std::cout << "[SERVER] 邮箱已注册，发送提示" << std::endl;
-        sendMsg(fd, "该邮箱已注册，请重新输入邮箱（输入0返回）：");
-    }
+   //收信息
     ret = recvMsg(fd, json_str);
     if (ret <= 0) {
         sendMsg(fd, "接收注册信息失败");
@@ -387,14 +409,7 @@ void serverRegisterWithCode(int epfd, int fd) {
     }
 
     json root;
-    try {
-        root = json::parse(json_str);
-    } catch (const json::exception& e) {
-        sendMsg(fd, "JSON 格式错误");
-        epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
-        return;
-    }
-
+    root = json::parse(json_str);
      email = root["email"].get<string>();
     string code = root["code"].get<string>();
     string username = root["username"].get<string>();
@@ -413,24 +428,7 @@ void serverRegisterWithCode(int epfd, int fd) {
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-    // 检查用户名是否已注册，若已注册则循环让客户端重新输入
-    int ret2;
-    while (true) {
-        ret2 = recvMsg(fd, email);
-        if (ret2 == 0) { // 客户端断开连接
-            close(fd);
-        return;
-    }
-        if (email == "0") { // 用户选择返回
-            epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
-        return;
-        }
-        if (!redis.hexists("username_to_uid", email)) {
-            break; // 未注册，可以继续后续流程
-        }
-        sendMsg(fd, "该用户名已注册，请重新输入（输入0返回）：");
-        // 循环，等待客户端输入新邮箱
-    }
+   
 
     // 生成UID并创建User对象
     User user;

@@ -115,20 +115,19 @@ void clientOperation(int fd, User &user) {
             std::cout << "输入格式错误 请重新输入" << std::endl;
             continue;
         }
-        // 同步好友列表17
+        // 同步好友列表，宏定义17
         syncFriends(fd, my_uid, my_friends);
 
         // if-else分发
         //私聊
         
         if (opt == 1) {
-            // 获取群聊列表20
+            // 获取群聊列表,宏定义20
             vector<Group> joinedGroup;
                 G_chat gChat(fd, user);
                 gChat.syncGL(joinedGroup);
 
                 // 调用统一聊天界面
-                cout << "当前加入的群聊列表：" << endl;
                 chatSession.startChat(my_friends, joinedGroup);
             
         } else if (opt == 2) {

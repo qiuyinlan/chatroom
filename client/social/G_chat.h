@@ -23,7 +23,7 @@ public:
     void syncGL (std::vector<Group> &joinedGroup);
     void sync(std::vector<Group> &createdGroup, std::vector<Group> &managedGroup, std::vector<Group> &joinedGroup) const;
 
-    void startChat(std::vector<Group> &joinedGroup);
+    //void startChat(std::vector<Group> &joinedGroup);
 
     void createGroup();
     

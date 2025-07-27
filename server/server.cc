@@ -160,17 +160,17 @@ int main(int argc, char *argv[]) {
 
                 if (msg == LOGIN) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
-                    pool.addTask([=](){ serverLogin(epfd, fd); });
+                    pool.addTask([=](){ serverLogin(epfd, fd); });//登陆
                 } else if (msg == NOTIFY) {
                     string uid;
                     recvMsg(fd, uid);  // 接收用户UID
                     notify(fd, uid);   // 传递fd和uid参数
                 } else if (msg == REQUEST_CODE) {
-                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);//发验证码，发前检查邮箱
                     pool.addTask([=](){ handleRequestCode(epfd, fd); });
                 } else if (msg == REGISTER_WITH_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
-                    pool.addTask([=](){ serverRegisterWithCode(epfd, fd); });
+                    pool.addTask([=](){ serverRegisterWithCode(epfd, fd); });//注册
                 } else if (msg == REQUEST_RESET_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ handleResetCode(epfd, fd); });
