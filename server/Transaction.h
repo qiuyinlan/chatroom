@@ -9,7 +9,6 @@ void synchronize(int fd, User &user);
 
 void start_chat(int fd, User &user);
 
-void history(int fd, User &user);
 
 void list_friend(int fd, User &user);
 

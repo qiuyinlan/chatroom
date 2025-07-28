@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 
                 if (msg == LOGIN) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
-                    pool.addTask([=](){ serverLogin(epfd, fd); });//登陆
+                    pool.addTask([=](){ serverLogin(epfd, fd); });
                 } else if (msg == NOTIFY) {
                     string uid;
                     recvMsg(fd, uid);  // 接收用户UID

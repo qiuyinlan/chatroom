@@ -1,6 +1,4 @@
-//
-// Created by shawn on 23-8-13.
-//
+
 
 #ifndef CHATROOM_GROUP_CHAT_H
 #define CHATROOM_GROUP_CHAT_H
@@ -27,7 +25,6 @@ public:
 
     void joinGroup();
 
-    void groupHistory() const;
 
     void managedGroup() const;
 
@@ -35,7 +32,6 @@ public:
 
     void remove(Group &group) const;
 
-    void managedCreatedGroup() const;
 
     void appointAdmin(Group &createdGroup) const;
 

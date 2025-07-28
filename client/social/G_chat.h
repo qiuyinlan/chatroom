@@ -29,8 +29,7 @@ public:
     
     void joinGroup() const;
 
-    void groupHistory(const std::vector<Group> &joinedGroup);
-
+   
     static void managedMenu();
 
     void managed_Group(std::vector<Group> &managedGroup) const;
@@ -41,7 +40,7 @@ public:
 
     static void ownerMenu();
 
-    void managedCreatedGroup(std::vector<Group> &createdGroup);
+   
 
     void appointAdmin(Group &createdGroup) const;
 
@@ -53,11 +52,7 @@ public:
 
     void quit(std::vector<Group> &);
 
-    void showJoinedGroup(const std::vector<Group> &joinedGroup);
-
-    void showManagedGroup(std::vector<Group> &managedGroup);
-
-    void showCreatedGroup(std::vector<Group> &createdGroup);
+  
 private:
     int fd;
     User user;

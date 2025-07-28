@@ -124,8 +124,6 @@ void serverOperation(int fd, User &user) {
         // 使用宏定义的if-else分发，清晰易懂
         if (temp == START_CHAT) {
             start_chat(fd, user);
-        } else if (temp == HISTORY) {
-            history(fd, user);
         } else if (temp == LIST_FRIENDS) {
             list_friend(fd, user);
         } else if (temp == ADD_FRIEND) {
@@ -140,15 +138,18 @@ void serverOperation(int fd, User &user) {
             unblocked(fd, user);
         } else if (temp == GROUP) {
             group(fd, user);
-        } else if (temp == SYNCGL) {
-            GroupChat groupChat(fd, user);
-            groupChat.synchronizeGL(fd, user);
         } else if (temp == SEND_FILE) {
             send_file(fd, user);
         } else if (temp == RECEIVE_FILE) {
             receive_file(fd, user);
         } else if (temp == SYNC) {
             synchronize(fd, user);
+        }  else if (temp == SYNCGL) {
+            GroupChat groupChat(fd, user);
+            groupChat.synchronizeGL(fd, user);
+        }  else if ( temp == GROUPCHAT ) {
+            GroupChat groupChat(fd, user);
+            groupChat.startChat();
         } else {
             cout << "[DEBUG] 收到未知协议: '" << temp << "' (长度: " << temp.length() << ")" << endl;
             cout << "没有这个选项，请重新输入: " << temp << endl;
@@ -169,7 +170,7 @@ void notify(int fd, const string &UID) {
         redis.hdel("friend_request_notify", UID);  // 清除通知标记
     }
 
-    // 检查消息通知
+    // 检查消息通知，如果之前用户 A 给用户 B 发消息，B当时不在线，A 的 UID 就被记录进 "chat" 哈希中
     if (redis.hexists("chat", UID)) {
         string sender = redis.hget("chat", UID);
         sendMsg(fd, "MESSAGE:" + sender);

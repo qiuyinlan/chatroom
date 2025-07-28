@@ -11,7 +11,6 @@ const string NOTIFY = "3";
 //客户端子线程进行实时通知，私聊，群聊
 //transaction
 const string START_CHAT = "4";
-const string HISTORY = "5";
 const string LIST_FRIENDS = "6";
 const string ADD_FRIEND = "7";
 const string FIND_REQUEST = "8";
@@ -27,6 +26,7 @@ const string SYNC = "17";
 const string EXIT = "18";
 const string BACK = "19";
 const string SYNCGL = "20";  // 获取群聊列表
+const string GROUPCHAT = "100";
 #define BLOCKED_MESSAGE "BLOCKED_MESSAGE"
 #define FRIEND_VERIFICATION_NEEDED "FRIEND_VERIFICATION_NEEDED"
 #define MESSAGE_SENT "MESSAGE_SENT"

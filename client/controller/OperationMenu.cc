@@ -26,18 +26,19 @@ void operationMenu() {
 }
 
 void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) {
+    cout << "syncFriends同步好友列表" << endl;
 
     int send_ret = sendMsg(fd, SYNC);
     if (send_ret <= 0) {     //发送 SYNC
         cout << "服务器连接已断开，无法同步好友列表" << endl;
         return ;
     }
-    // 清空本地 my_friends
+   
     my_friends.clear();               
     string friend_num ;
     // 接收好友个数
     int recv_ret = recvMsg(fd, friend_num);
- 
+cout << "接收好友数量" << friend_num << endl;
     if (recv_ret <= 0) { 
          cout << "服务器连接已断开，无法获取好友信息" << endl;
         return ;
@@ -54,14 +55,14 @@ void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) 
 
     User myfriend;
     string friend_info;
-    //收好友详细信息
+   
     for (int i = 0; i < num; i++) {
+         //收好友详细信息
         int recv_ret2 = recvMsg(fd, friend_info);
         if (recv_ret2 <= 0) {
             cout << "服务器连接已断开，好友信息同步中断" << endl;
             return ;
         }
-        //接收好友信息
             myfriend.json_parse(friend_info);
             my_friends.emplace_back(my_uid, myfriend);
 

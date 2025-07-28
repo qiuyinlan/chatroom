@@ -16,14 +16,12 @@
 using namespace std;
 
 void G_chat::groupMenu() {
-    cout << "                               [2]创建群聊" << endl;
-    cout << "[3]加入群聊                     [4]查看群聊历史记录" << endl;
-    cout << "[5]管理我的群                   [6]管理我创建的群" << endl;
-    cout << "[7]查看群成员                   [8]退出群聊" << endl;
-    cout << "[9]查看我加入的群                [10]查看我管理的群" << endl;
-    cout << "[11]查看我创建的群" << endl;
-    cout << "[0]返回" << endl;
+    
+    cout << "[1] 创建群聊                   [2] 加入群聊" << endl;
+    cout << "[3] 管理我的群                 [4] 查看群成员" << endl;
+    cout << "[5] 退出群聊                   [0] 返回" << endl;
     cout << "请输入您的选择" << endl;
+
 }
 
 void G_chat::groupctrl(vector<pair<string, User>> &my_friends) {
@@ -52,41 +50,27 @@ void G_chat::groupctrl(vector<pair<string, User>> &my_friends) {
             sendMsg(fd, BACK);
             return;
         }
-        // if (option == 1) {
-        //    startChat(joinedGroup);
-        //     continue;
-        // } 
-        else if (option == 2) {
+      
+        else if (option == 1) {
             createGroup();
             continue;
-        } else if (option == 3) {
+        } else if (option == 2) {
             joinGroup();
             continue;
-        } else if (option == 4) {
-            groupHistory(joinedGroup);
-            continue;
-        } else if (option == 5) {
+        } 
+        else if (option == 3) {
             managed_Group(managedGroup);
             continue;
-        } else if (option == 6) {
-            managedCreatedGroup(createdGroup);
-            continue;
-        } else if (option == 7) {
+        } 
+        else if (option == 4) {
             showMembers(joinedGroup);
             continue;
-        } else if (option == 8) {
+        } else if (option == 5) {
             quit(joinedGroup);
             continue;
-        } else if (option == 9) {
-            showJoinedGroup(joinedGroup);
-            continue;
-        } else if (option == 10) {
-            showManagedGroup(managedGroup);
-            continue;
-        } else if (option == 11) {
-            showCreatedGroup(createdGroup);
-            continue;
-        }
+        } 
+       
+
     }
 } 
 
@@ -97,6 +81,7 @@ G_chat::G_chat(int fd, const User &user) : fd(fd), user(user) {
 }
 
 void G_chat::syncGL(std::vector<Group> &joinedGroup) {
+    cout << "syncGL同步群聊列表" << endl;
     joinedGroup.clear();
     // 发送群聊列表获取请求
     int ret = sendMsg(fd, SYNCGL);
@@ -108,6 +93,7 @@ void G_chat::syncGL(std::vector<Group> &joinedGroup) {
 
     //接受群聊数量
     int recv_ret = recvMsg(fd, nums);
+cout << "接收群聊数量" << nums << endl;
     if (recv_ret <= 0) {
         cerr << "[ERROR] 接收群聊数量失败，连接可能断开" << endl;
         return;
@@ -116,7 +102,7 @@ void G_chat::syncGL(std::vector<Group> &joinedGroup) {
     int num = stoi(nums);
     if(num == 0){
         return;
-        //如果要同步三个，就不能直接返回了
+        //如果要同步三个，就不能直接返回了。直接返回——没有东西被push进数组，数组为空
     }
     string group_info;
     //接收群info
@@ -124,7 +110,6 @@ void G_chat::syncGL(std::vector<Group> &joinedGroup) {
     for (int i = 0; i < num; i++) {
         Group group;
 
-        cout <<"1"<< group_info << endl;
         //接收群聊,如果有群聊,就要json解析，没有直接return
         int ret = recvMsg(fd, group_info);
         if(ret <= 0){
@@ -158,11 +143,11 @@ void G_chat::sync(vector<Group> &createdGroup, vector<Group> &managedGroup, vect
     joinedGroup.clear();
 
 
-
     string nums;
 
     //得到群聊数量
     int recv_ret = recvMsg(fd, nums);
+
     if (recv_ret <= 0) {
         cerr << "[ERROR] 接收创建群数量失败，连接可能断开" << endl;
        
@@ -204,6 +189,7 @@ void G_chat::sync(vector<Group> &createdGroup, vector<Group> &managedGroup, vect
     }
     //收
     recv_ret = recvMsg(fd, nums);
+
     if (recv_ret <= 0) {
         cerr << "[ERROR] 接收管理群数量失败，连接可能断开" << endl;
         throw runtime_error("网络连接错误");
@@ -237,6 +223,7 @@ void G_chat::sync(vector<Group> &createdGroup, vector<Group> &managedGroup, vect
     }
     //收
     recv_ret = recvMsg(fd, nums);
+
     if (recv_ret <= 0) {
         cerr << "[ERROR] 接收加入群数量失败，连接可能断开" << endl;
         throw runtime_error("网络连接错误");
@@ -271,93 +258,25 @@ void G_chat::sync(vector<Group> &createdGroup, vector<Group> &managedGroup, vect
 
 }
 
-// void G_chat::startChat(vector<Group> &joinedGroup) {
-//     string temp;
-//     if (joinedGroup.empty()) {
-//         cout << "您当前没有加入任何群聊" << endl;
-//         cout << "按任意键返回" << endl;
-//         getline(cin, temp);
-//         if (cin.eof()) {
-//             return;
-//         }
-//         return;
-//     }
-//     cout << user.getUsername() << "加入的群聊" << endl;
-//     cout << "---------------------------------------" << endl;
-//     for (int i = 0; i < joinedGroup.size(); i++) {
-//         cout << i + 1 << ". " << joinedGroup[i].getGroupName() << endl;
-//     }
-//     cout << "---------------------------------------" << endl;
-//     int which;
-//     while (!(cin >> which) || which < 0 || which > joinedGroup.size()) {
-//         if (cin.eof()) {
-//             cout << "读到文件结尾" << endl;
-//             return;
-//         }
-//         cin.clear();
-//         cin.ignore(INT32_MAX, '\n');
-//     }
-//     cin.ignore(INT32_MAX, '\n');
-
-//     sendMsg(fd, "1");
-//     which--;
-
-//     sendMsg(fd, joinedGroup[which].to_json());
-//     cout << joinedGroup[which].getGroupName() << endl;
-//     string nums;
-
-//     int ret = recvMsg(fd, nums);
-//     if (ret == 0) {
-//         return;
-//     }
-//     int num = stoi(nums);
-//     string msg;
-//     Message history_message;
-//     for (int i = 0; i < num; i++) {
-//         recvMsg(fd, msg);
-//         try {
-//             history_message.json_parse(msg);
-//             cout << "\t\t\t\t" << history_message.getTime() << endl;
-//             cout << history_message.getUsername() << ": " << history_message.getContent() << endl;
-//         } catch (const exception& e) {
-//             // 静默跳过损坏的历史消息
-//             continue;
-//         }
-//     }
-//     cout << YELLOW << "-----------------------以上为历史消息-----------------------" << RESET << endl;
-//     Message message(user.getUsername(), user.getUID(), joinedGroup[which].getGroupUid());
-//     message.setGroupName(joinedGroup[which].getGroupName());
-//     //开线程接收群成员消息
-//     thread work(chatReceived, fd, joinedGroup[which].getGroupUid());
-//     work.detach();
-//     string m;
-//     while (true) {
-//         cin >> m;
-//         if (cin.eof()) {
-//             cout << "读到文件结尾" << endl;
-//             return;
-//         }
-//         if (m == "quit") {
-//             sendMsg(fd, EXIT);
-//             getchar();
-//             break;
-//         }
-//         message.setContent(m);
-//         string json_msg;
-//         json_msg = message.to_json();
-
-//         sendMsg(fd, json_msg);
-//     }
-// }
 
 void G_chat::createGroup() {
-    sendMsg(fd, "2");
+    sendMsg(fd, "1");
     string groupName;
     while (true) {
         cout << "您要创建的群聊名称是什么" << endl;
+        return_last();
         getline(cin, groupName);
+        if(groupName.empty()){
+            cout << "群聊名称不能为空" << endl;
+            continue;
+        }
+        if(groupName == "0"){
+            sendMsg(fd,"BACK");
+            return;
+        }
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
+            sendMsg(fd,"BACK");
             return;
         }
         if (groupName.find(' ') != string::npos) {
@@ -369,7 +288,7 @@ void G_chat::createGroup() {
     Group group(groupName, user.getUID());
 
     sendMsg(fd, group.to_json());
-    cout << "创建成功，该群的群号为：" << group.getGroupUid() << endl;
+    cout << "创建成功，可让其他用户搜索群聊名称加入" << endl;
     string temp;
     cout << "按任意键返回" << endl;
     getline(cin, temp);
@@ -380,15 +299,22 @@ void G_chat::createGroup() {
 }
 
 void G_chat::joinGroup() const {
-    sendMsg(fd, "3");
+   
+    sendMsg(fd, "2");
     string group_name;
     while (true) {
         cout << "输入你要加入的群聊名称" << endl;
+        return_last();
         getline(cin, group_name);
         if (cin.eof()) {
             cout << "文件读到结尾" << endl;
+            sendMsg(fd,"BACK");
             return;
         }
+        if (group_name == "0") {
+            sendMsg(fd,"BACK");
+            return;
+        }   
         if (group_name.empty()) {
             cout << "群聊名称不能为空" << endl;
             continue;
@@ -399,7 +325,6 @@ void G_chat::joinGroup() const {
         }
         break;
     }
-
     sendMsg(fd, group_name);
     string response;
 
@@ -415,69 +340,11 @@ void G_chat::joinGroup() const {
     getline(cin, temp);
     if (cin.eof()) {
         cout << "读到文件结尾" << endl;
+        sendMsg(fd,"BACK");
         return;
     }
 }
 
-
-
-void G_chat::groupHistory(const std::vector<Group> &joinedGroup) {
-    string temp;
-    if (joinedGroup.empty()) {
-        cout << "当前没有加入的群... 按任意键退出" << endl;
-        getline(cin, temp);
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
-        return;
-    }
-    cout << user.getUsername() << "加入的群聊" << endl;
-    cout << "----------------------------------" << endl;
-    for (int i = 0; i < joinedGroup.size(); i++) {
-        cout << i + 1 << ". " << joinedGroup[i].getGroupName() << endl;
-    }
-    cout << "----------------------------------" << endl;
-    cout << "输入要查看的群" << endl;
-    int which;
-    while (!(cin >> which) || which < 0 || which > joinedGroup.size()) {
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
-        cout << "输入格式错误" << endl;
-        cin.clear();
-        cin.ignore(INT32_MAX, '\n');
-    }
-    cin.ignore(INT32_MAX, '\n');
-
-    sendMsg(fd, "4");
-    which--;
-
-    sendMsg(fd, joinedGroup[which].getGroupUid());
-    Message message;
-    string nums;
-
-    recvMsg(fd, nums);
-    int num = stoi(nums);
-    if (num == 0) {
-        cout << "该群暂未有人发言" << endl;
-        return;
-    }
-    string history_msg;
-    for (int i = 0; i < num; i++) {
-
-        recvMsg(fd, history_msg);
-        message.json_parse(history_msg);
-        cout << message.getTime() << message.getUsername() << ": " << message.getContent() << endl;
-    }
-    cout << "按任意键退出" << endl;
-    getline(cin, temp);
-    if (cin.eof()) {
-        cout << "读到文件结尾" << endl;
-        return;
-    }
-}
 
 void G_chat::managedMenu() {
     cout << "[1]处理入群申请" << endl;
@@ -485,15 +352,22 @@ void G_chat::managedMenu() {
     cout << "[0]返回" << endl;
 }
 
+void G_chat::ownerMenu() {
+    cout << "[1]设置管理员" << endl;
+    cout << "[2]撤销管理员" << endl;
+    cout << "[3]解散群聊" << endl;
+    cout << "[0]返回" << endl;
+}
+
+
 void G_chat::managed_Group(vector<Group> &managedGroup) const {
+
+    sendMsg(fd, "3");
     string temp;
     if (managedGroup.empty()) {
         cout << "您当前还没有可以管理的群... 按任意键退出" << endl;
+        sendMsg(fd, "BACK");
         getline(cin, temp);
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
         return;
     }
     cout << "-----------------------------------" << endl;
@@ -504,9 +378,10 @@ void G_chat::managed_Group(vector<Group> &managedGroup) const {
 
     
     cout << "-----------------------------------" << endl;
-    cout << "选择你要管理的群（输入1-" << managedGroup.size() << "）" << endl;
+    cout << "选择你要管理的群" << endl;
+    return_last();
     int which;
-    while (!(cin >> which) || which < 1 || which > managedGroup.size()) {
+    while (!(cin >> which) || which < 0 || which > managedGroup.size()) {
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
             return;
@@ -515,8 +390,11 @@ void G_chat::managed_Group(vector<Group> &managedGroup) const {
         cin.clear();
         cin.ignore(INT32_MAX, '\n');
     }
+    if (which == 0) {
+        sendMsg(fd, BACK);
+        return;
+    }
     cin.ignore(INT32_MAX, '\n');
-    sendMsg(fd, "5");
     which--;
 
     sendMsg(fd, managedGroup[which].to_json());
@@ -526,6 +404,7 @@ void G_chat::managed_Group(vector<Group> &managedGroup) const {
         while (!(cin >> choice) || (choice != 1 && choice != 2 && choice != 0)) {
             if (cin.eof()) {
                 cout << "读到文件结尾" << endl;
+                sendMsg(fd, "BACK");
                 return;
             }
             cout << "输入格式错误" << endl;
@@ -643,76 +522,6 @@ void G_chat::remove(Group &group) const {
     }
 }
 
-void G_chat::ownerMenu() {
-    cout << "[1]设置管理员" << endl;
-    cout << "[2]撤销管理员" << endl;
-    cout << "[3]解散群聊" << endl;
-    cout << "[0]返回" << endl;
-}
-
-void G_chat::managedCreatedGroup(vector<Group> &createdGroup) {
-    string temp;
-    if (createdGroup.empty()) {
-        cout << "您当前还没有创建群... 按任意键退出" << endl;
-        getline(cin, temp);
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
-        return;
-    }
-    cout << user.getUsername() << "的群" << endl;
-    cout << "------------------------------" << endl;
-    for (int i = 0; i < createdGroup.size(); i++) {
-        cout << i + 1 << ". " << createdGroup[i].getGroupName() << endl;
-    }
-    cout << "------------------------------" << endl;
-    cout << "您要整哪个群" << endl;
-    int which;
-    while (!(cin >> which) || which < 0 || which > createdGroup.size()) {
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
-        cout << "输入格式错误" << endl;
-        cin.clear();
-        cin.ignore(INT32_MAX, '\n');
-    }
-    cin.ignore(INT32_MAX, '\n');
-
-    sendMsg(fd, "6");
-    which--;
-
-    sendMsg(fd, createdGroup[which].to_json());
-    G_chat gc;
-    while (true) {
-        ownerMenu();
-        int choice;
-        while (!(cin >> choice) || choice < 0 || choice > 3) {
-            if (cin.eof()) {
-                cout << "读到文件结尾" << endl;
-                return;
-            }
-            cout << "输入格式错误" << endl;
-            cin.clear();
-            cin.ignore(INT32_MAX, '\n');
-        }
-        cin.ignore(INT32_MAX, '\n');
-        //！！！待检查
-        if (choice == 0) {
-            sendMsg(fd, "0");
-            return;
-        }
-        if (choice == 1) {
-            appointAdmin(createdGroup[which]); // 直接调用成员函数
-        } else if (choice == 2) {
-            revokeAdmin(createdGroup[which]); // 直接调用成员函数
-        } else if (choice == 3) {
-            deleteGroup(createdGroup[which]); // 直接调用成员函数
-        }
-    }
-
-}
 
 void G_chat::appointAdmin(Group &createdGroup) const {
     sendMsg(fd, "1");
@@ -833,6 +642,15 @@ void G_chat::deleteGroup(Group &createdGroup) const {
 }
 
 void G_chat::showMembers(std::vector<Group> &group) {
+    sendMsg(fd, "4");
+    //传入的是加入的群的数组——joinedgroup
+    string temp;
+    if (group.empty()) {
+        cout << "您当前还没有加入任何群聊... 按任意键退出" << endl;
+        sendMsg(fd,"BACK");
+        getline(cin, temp);
+        return;
+    }
     cout << user.getUsername() << endl;
     cout << "--------------------------" << endl;
     for (int i = 0; i < group.size(); i++) {
@@ -840,6 +658,7 @@ void G_chat::showMembers(std::vector<Group> &group) {
     }
     cout << "--------------------------" << endl;
     cout << "你要查看哪个群" << endl;
+    return_last();
     int which;
     while (!(cin >> which) || which < 0 || which > group.size()) {
         if (cin.eof()) {
@@ -852,9 +671,13 @@ void G_chat::showMembers(std::vector<Group> &group) {
     }
     cin.ignore(INT32_MAX, '\n');
 
-    sendMsg(fd, "7");
+    if (which == 0) {
+        sendMsg(fd, BACK);
+        return;  // 用户选择退出
+    }
     which--;
-    cout << group[which].getGroupName() << endl;
+    cout << "群聊名称：" << group[which].getGroupName() << endl;
+    cout << "[成员]" << endl;
 
     sendMsg(fd, group[which].to_json());
     string nums;
@@ -885,11 +708,11 @@ void G_chat::quit(vector<Group> &joinedGroup) {
         }
         return;
     }
-    cout << user.getUsername() << endl;
     cout << "-------------------------------------------" << endl;
+    cout << "你加入的群及你的身份" << endl;
     for (int i = 0; i < joinedGroup.size(); i++) {
         if (joinedGroup[i].getOwnerUid() == user.getUID()) {
-            cout << i + 1 << ". " << joinedGroup[i].getGroupName() << "(您是群主)" << endl;
+            cout << i + 1 << ". " << joinedGroup[i].getGroupName() << "(群主)" << endl;
         } else {
             cout << i + 1 << ". " << joinedGroup[i].getGroupName() << endl;
         }
@@ -898,6 +721,7 @@ void G_chat::quit(vector<Group> &joinedGroup) {
     int which;
     while (true) {
         cout << "输入你要退出的群" << endl;
+        return_last();
         while (!(cin >> which) || which < 0 || which > joinedGroup.size()) {
             if (cin.eof()) {
                 cout << "读到文件结尾" << endl;
@@ -907,6 +731,10 @@ void G_chat::quit(vector<Group> &joinedGroup) {
             cin.clear();
             cin.ignore(INT32_MAX, '\n');
         }
+        if (which == 0) {
+            sendMsg(fd,"BACK");
+            return;  // 用户选择退出
+        }
         cin.ignore(INT32_MAX, '\n');
         which--;
         if (joinedGroup[which].getOwnerUid() == user.getUID()) {
@@ -915,91 +743,10 @@ void G_chat::quit(vector<Group> &joinedGroup) {
         }
         break;
     }
-    //退群是"8"
-    sendMsg(fd, "8");
+    sendMsg(fd, "5");
 
     sendMsg(fd, joinedGroup[which].to_json());
     cout << "您已退出该群，按任意键退出" << endl;
-    getline(cin, temp);
-    if (cin.eof()) {
-        cout << "读到文件结尾" << endl;
-        return;
-    }
-}
-
-
-void G_chat::showJoinedGroup(const std::vector<Group> &joinedGroup) {
-    if (joinedGroup.empty()) {
-        cout << "您未加入任何群聊" << endl;
-        cout << "按任意键返回" << endl;
-        string temp;
-        getline(cin, temp);
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
-        return;
-    }
-    cout << user.getUsername() << "加入的群聊" << endl;
-    cout << "------------------------------------" << endl;
-    for (int i = 0; i < joinedGroup.size(); ++i) {
-        cout << i + 1 << ". " << joinedGroup[i].getGroupName() << "(" << joinedGroup[i].getGroupUid() << ")" << endl;
-    }
-    cout << "------------------------------------" << endl;
-    cout << "按任意键返回" << endl;
-    string temp;
-    getline(cin, temp);
-    if (cin.eof()) {
-        cout << "读到文件结尾" << endl;
-        return;
-    }
-}
-
-void G_chat::showManagedGroup(vector<Group> &managedGroup) {
-    string temp;
-    if (managedGroup.empty()) {
-        cout << "您未管理任何群" << endl;
-        cout << "按任意键返回" << endl;
-        getline(cin, temp);
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
-        return;
-    }
-    cout << user.getUsername() << "管理的群" << endl;
-    cout << "----------------------------------" << endl;
-    for (int i = 0; i < managedGroup.size(); ++i) {
-        cout << i + 1 << ". " << managedGroup[i].getGroupName() << "(" << managedGroup[i].getGroupUid() << ")" << endl;
-    }
-    cout << "----------------------------------" << endl;
-    cout << "按任意键退出" << endl;
-    getline(cin, temp);
-    if (cin.eof()) {
-        cout << "读到文件结尾" << endl;
-        return;
-    }
-}
-
-void G_chat::showCreatedGroup(std::vector<Group> &createdGroup) {
-    string temp;
-    if (createdGroup.empty()) {
-        cout << "您未创建任何群" << endl;
-        cout << "按任意键返回" << endl;
-        getline(cin, temp);
-        if (cin.eof()) {
-            cout << "读到文件结尾" << endl;
-            return;
-        }
-        return;
-    }
-    cout << user.getUsername() << "创建的群" << endl;
-    cout << "----------------------------------" << endl;
-    for (int i = 0; i < createdGroup.size(); ++i) {
-        cout << i + 1 << ". " << createdGroup[i].getGroupName() << "(" << createdGroup[i].getGroupUid() << ")" << endl;
-    }
-    cout << "----------------------------------" << endl;
-    cout << "按任意键退出" << endl;
     getline(cin, temp);
     if (cin.eof()) {
         cout << "读到文件结尾" << endl;

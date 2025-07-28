@@ -13,7 +13,6 @@ using namespace std;
 GroupChat::GroupChat(int fd, const User &user) : fd(fd), user(user) {
     joined = "joined" + user.getUID();
     created = "created" + user.getUID();
-    //cout << "created是" << created << endl;
     managed = "managed" + user.getUID();
 }
 
@@ -42,9 +41,7 @@ void GroupChat::synchronizeGL(int fd, User &user) {
             freeReplyObject(arr[i]);
         }
     }
-    else{
-        sendMsg(fd, "0");
-    }
+   cout << "synchronizeGL同步群聊列表结束" << endl;
     
 }    
 
@@ -139,16 +136,8 @@ void GroupChat::startChat() {
         return;
     }
     int num = redis.llen(group.getGroupUid() + "history");
-    // if (num < 5) {
-
-    //     sendMsg(fd, to_string(num));
-    // } else {
-    //     num = 5;
-
-    //     sendMsg(fd, to_string(num));
-    // }
+    
     sendMsg(fd, to_string(num));
-cout << num << endl;
     if (num != 0) {
         arr = redis.lrange(group.getGroupUid() + "history", "0", to_string(num - 1));
     }
@@ -162,12 +151,14 @@ cout << num << endl;
     while (true) {
         int ret = recvMsg(fd, msg);
         if (msg == EXIT || ret == 0) {
+            sendMsg(fd, EXIT);
             if (ret == 0) {
                 cout << "[DEBUG] 群聊中检测到连接断开" << endl;
             }
             redis.srem("group_chat", user.getUID());
+
             // 注意：只有在真正连接断开时才删除在线状态
-            // 正常退出群聊不应该影响在线状态
+           
             return;
         }
         message.json_parse(msg);
@@ -186,11 +177,13 @@ cout << num << endl;
                 freeReplyObject(arr[i]);
                 continue;
             }
+            //不在线，就把用户和群聊名存到chat表里
             if (!redis.hexists("is_online", UIDto)) {
                 redis.hset("chat", UIDto, group.getGroupName());
                 freeReplyObject(arr[i]);
                 continue;
             }
+            //### 逻辑问题，待思考
             if (!redis.sismember("group_chat", UIDto)) {
                 redis.hset("chat", UIDto, group.getGroupName());
                 freeReplyObject(arr[i]);
@@ -198,6 +191,7 @@ cout << num << endl;
             }
             string s_fd = redis.hget("is_online", UIDto);
             int _fd = stoi(s_fd);
+            //可以直接发
             sendMsg(_fd, msg);
             freeReplyObject(arr[i]);
         }
@@ -242,7 +236,11 @@ void GroupChat::createGroup() {
     redis.connect();
     string group_info;
 
-    recvMsg(fd, group_info);
+    recvMsg(fd, group_info);        
+    if (group_info == "BACK") {
+        return;
+    }
+
     Group group;
     group.json_parse(group_info);
     redis.hset("group_info", group.getGroupUid(), group_info);
@@ -259,7 +257,9 @@ void GroupChat::joinGroup() {
     string groupName;
     //接收客户端发送的群聊名称
     recvMsg(fd, groupName);
-
+    if (groupName == "BACK") {
+        return;
+    }
     // 通过群名查找群UID
     string groupUid = findGroupUidByName(redis, groupName);
     if (groupUid.empty()) {
@@ -286,22 +286,12 @@ void GroupChat::joinGroup() {
     }
 }
 
-void GroupChat::groupHistory() const {
-    Redis redis;
-    redis.connect();
-    string group_uid;
 
-    recvMsg(fd, group_uid);
-    string group_history = group_uid + "history";
-    int num = redis.llen(group_history);
-
-    sendMsg(fd, to_string(num));
-    redisReply **arr = redis.lrange(group_history);
-    for (int i = num - 1; i >= 0; i--) {
-
-        sendMsg(fd, arr[i]->str);
-        freeReplyObject(arr[i]);
-    }
+void G_chat::ownerMenu() {
+    cout << "[1]设置管理员" << endl;
+    cout << "[2]撤销管理员" << endl;
+    cout << "[3]解散群聊" << endl;
+    cout << "[0]返回" << endl;
 }
 
 void GroupChat::managedGroup() const {
@@ -311,6 +301,9 @@ void GroupChat::managedGroup() const {
     string group_info;
 
     recvMsg(fd, group_info);
+    if (group_info == "BACK") {
+        return;
+    }
     group.json_parse(group_info);
     string choice;
     int ret;
@@ -399,33 +392,6 @@ void GroupChat::remove(Group &group) const {
     redis.sadd(member.getUID() + "del", group.getGroupName());
 }
 
-void GroupChat::managedCreatedGroup() const {
-    Redis redis;
-    redis.connect();
-    string group_info;
-
-    recvMsg(fd, group_info);
-    Group group;
-    group.json_parse(group_info);
-    string choice;
-    while (true) {
-
-        int ret = recvMsg(fd, choice);
-        if (ret == 0) {
-            redis.hdel("is_online", user.getUID());
-        }
-        if (choice == "0") {
-            break;
-        }
-        if (choice == "1") {
-            approve(group);
-        } else if (choice == "2") {
-            revokeAdmin(group);
-        } else if (choice == "3") {
-            deleteGroup(group);
-        }
-    }
-}
 
 void GroupChat::appointAdmin(Group &group) const {
     Redis redis;
@@ -510,6 +476,9 @@ void GroupChat::showMembers() const {
     Group group;
 
     recvMsg(fd, group_info);
+    if (group_info == BACK) {
+        return;
+    }
     group.json_parse(group_info);
     int num = redis.scard(group.getMembers());
 
@@ -533,6 +502,9 @@ void GroupChat::quit() {
     string group_info;
 
     recvMsg(fd, group_info);
+    if (group_info == BACK) {
+        return;
+    }
     group.json_parse(group_info);
     redis.srem("joined" + user.getUID(), group.getGroupUid());
     redis.srem("managed" + user.getUID(), group.getGroupUid());

@@ -74,7 +74,7 @@ void Redis::srem(const string &key, const string &value) {
 string Redis::hget(const string &key, const string &field) {
     string command = "HGET " + key + " " + field;
     reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
-    //bug 之前在free之后直接返回reply->str,导致直接没反应
+  
     string get_info = reply->str;
     freeReplyObject(reply);
     return get_info;

@@ -18,6 +18,7 @@ void announce(string UID) {
     while (true) {
         this_thread::sleep_for(chrono::milliseconds(500));  // 0.5秒，保持实时性
 
+        //不停地让服务器进入notify函数
         if (sendMsg(announce_fd, NOTIFY) <= 0) {
             cout << "通知服务连接断开，退出通知线程" << endl;
             break;
@@ -45,7 +46,7 @@ void announce(string UID) {
             } else if (buf == GROUP_REQUEST) {
                 cout << "您收到一条群聊添加申请" << endl;
             } else if (buf.find("MESSAGE:") == 0) {
-                cout << "收到一条来自" << buf.substr(8) << "的消息" << endl;
+                cout << "收到一条来自" << buf.substr(8) << "的消息" << endl;  //群聊和私聊都可以显示
             } else if (buf.find("DELETED:") == 0) {
                 cout << "您已经被" << buf.substr(8) << "删除" << endl;
             } else if (buf.find("ADMIN_ADD:") == 0) {
@@ -55,6 +56,8 @@ void announce(string UID) {
             } else if (buf.find("FILE:") == 0) {
                 cout << "收到" << buf.substr(5) << "发送的文件" << endl;
             }
+            //chat
+            // else if 
         }
     }
 }
@@ -77,12 +80,13 @@ void chatReceived(int fd, string UID) {
             int ret = recvMsg(fd, json_msg);
             if (ret <= 0) {
                 cout << "聊天连接断开，退出聊天接收线程" << endl;
-                break;
+                return;
             }
 
             // 处理空消息
             if (json_msg.empty()) {
                 continue;
+
             }
 
             if (json_msg == EXIT) {
@@ -107,49 +111,51 @@ void chatReceived(int fd, string UID) {
                 continue;
             }
 
-            try {
-                message.json_parse(json_msg);
-                //对方私发给我
-                if (message.getGroupName() == "1") {
-                    //如果此时我处于和对方一样的聊天框
-                    if (message.getUidFrom() == UID) {
-                        cout << message.getUsername() << ": " << message.getContent() << endl;
-                    } else {
-                        cout << "\033[1m\033[31m"
-                        << "           "
-                        << "收到一条来自" << message.getUsername() << "的一条消息"
-                        << "\033[0m" << endl;
-                    }
-                    continue;
-                }
-                //###群发,逻辑有问题
-                if (message.getUidFrom() == UID) {
-                    cout << message.getUsername() << ": " << message.getContent() << endl;
-                } else {
-                    cout << "\033[1m\033[31m"
-                         << "           "
-                         << "收到一条来自" << message.getUsername() << "的一条消息"
-                         << "\033[0m" << endl;
-                }
-            } catch (const exception& e) {
-                // JSON解析失败，跳过这条消息
-                continue;
-            }
+            // try {
+            //     message.json_parse(json_msg);
+            //     //对方私发给我
+            //     if (message.getGroupName() == "1") {
+            //         //如果此时我处于和对方一样的聊天框
+            //         if (message.getUidFrom() == UID) {
+            //             cout << message.getUsername() << ": " << message.getContent() << endl;
+            //         } else {
+            //             cout << "\033[1m\033[31m"
+            //             << "           "
+            //             << "收到一条来自" << message.getUsername() << "的一条消息"
+            //             << "\033[0m" << endl;
+            //         }
+
+            //         continue;
+            //     }
+            //     //###群发,逻辑有问题
+            //     if (message.getUidFrom() == UID) {
+            //         cout << message.getUsername() << ": " << message.getContent() << endl;
+            //     } else {
+            //         cout << "\033[1m\033[31m"
+            //              << "           "
+            //              << "收到一条来自" << message.getUsername() << "的一条消息"
+            //              << "\033[0m" << endl;
+            //     }
+            // } catch (const exception& e) {
+            //     // JSON解析失败，跳过这条消息
+            //     continue;
+            // }
 
     }
 }
 //群聊接收线程函数
 void groupChatReceived(int fd, const string& groupUid) {
+    //### 待完善————如果被踢了，要显示，你无法在被踢的群聊中发送消息
     string buf;
     while (true) {
         int ret = recvMsg(fd, buf);
         if (ret <= 0) {
             cout << "群聊连接断开，退出接收线程" << endl;
-            break;
+            return ;
         }
 
         if (buf == EXIT) {
-            break;
+            return;
         }
 
         try {

@@ -18,6 +18,64 @@
 using namespace std;
 using json = nlohmann::json;
 
+
+void group(int fd, User &user) {
+    std::cout << "[DEBUG] group() 函数开始" << std::endl;
+    Redis redis;
+    redis.connect();
+    GroupChat groupChat(fd, user);
+  
+    string choice;
+    
+    int ret;
+    while (true) {
+        groupChat.sync();
+        std::cout << "[DEBUG] 等待接收客户端选择..." << std::endl;
+        ret = recvMsg(fd, choice);
+        std::cout << "[DEBUG] 接收到客户端选择: '" << choice << "', ret=" << ret << std::endl;
+
+        if (ret == 0) {
+            std::cout << "[DEBUG] 客户端断开连接" << std::endl;
+            redis.hdel("is_online", user.getUID());
+            break;
+        }
+        if (choice == BACK) {
+            std::cout << "[DEBUG] 客户端选择退出" << std::endl;
+            break;
+        }
+        try {
+            int option = stoi(choice);
+            std::cout << "[DEBUG] 解析选择为数字: " << option << std::endl;
+             
+            if (option == 1) {
+                groupChat.createGroup();
+                continue;
+            } else if (option == 2) {
+                groupChat.joinGroup();
+                continue;
+            }  else if (option == 3) {
+                groupChat.managedGroup();
+                continue;
+            } else if (option == 4) {
+                groupChat.showMembers();
+                continue;
+            } else if (option == 5) {
+                groupChat.quit();
+                continue;
+            } else {
+                // 处理无效选项，这里选择继续循环等待有效输入
+                std::cout << "[DEBUG] 无效选择: " << option << "，继续等待有效输入" << std::endl;
+                continue;
+            }
+        } catch (const std::exception& e) {
+            std::cout << "[ERROR] 解析选择失败: " << e.what() << std::endl;
+            std::cout << "[ERROR] 选择内容: '" << choice << "'" << std::endl;
+            // 如果解析失败，通常意味着输入格式错误，这里选择断开连接
+            break;
+        }
+    }
+    std::cout << "[DEBUG] group() 函数结束" << std::endl;
+}
 void synchronize(int fd, User &user) {
     Redis redis;
     redis.connect();
@@ -43,18 +101,7 @@ void start_chat(int fd, User &user) {
     //收历史记录索引
     recvMsg(fd, records_index);
     int num = redis.llen(records_index);
-    
-    
-    // if (num <= 10) {
-    //     //发送历史记录数
-    //     sendMsg(fd, to_string(num));
-    // } else {
-    //     //最多显示x条
-    //     num = x;
-    //     sendMsg(fd, "x");
-    // }
-
-    //发送所有
+    //发
     sendMsg(fd, to_string(num));
 
 
@@ -166,31 +213,13 @@ void start_chat(int fd, User &user) {
     }
 }
 
-void history(int fd, User &user) {
-    Redis redis;
-    redis.connect();
-    string UID;
-    //接收客户端发送的好友UID查找历史记录
-    recvMsg(fd, UID);
-    string temp = UID + user.getUID();
-    cout << temp << endl;
-    int num = redis.llen(temp);
-    //发送历史记录数量
-    sendMsg(fd, to_string(num));
-    redisReply **arr = redis.lrange(temp);
-    //倒序遍历，先发送最新的聊天记录
-    for (int i = num - 1; i >= 0; i--) {
-        //循环发送历史记录
-        sendMsg(fd, arr[i]->str);
-        freeReplyObject(arr[i]);
-    }
-}
+
 
 void list_friend(int fd, User &user) {
     Redis redis;
     redis.connect();
     string temp;
-
+    cout << "[DEBUG] listfriend 开始"  << endl;
     //收
     recvMsg(fd, temp);
     int num = stoi(temp);
@@ -338,64 +367,7 @@ void unblocked(int fd, User &user) {
 }
 
 
-void group(int fd, User &user) {
-    std::cout << "[DEBUG] group() 函数开始" << std::endl;
-    Redis redis;
-    redis.connect();
-    GroupChat groupChat(fd, user);
-  
-    string choice;
-    
-    int ret;
-    while (true) {
-        groupChat.sync();
-        std::cout << "[DEBUG] 等待接收客户端选择..." << std::endl;
-        ret = recvMsg(fd, choice);
-        std::cout << "[DEBUG] 接收到客户端选择: '" << choice << "', ret=" << ret << std::endl;
 
-        if (ret == 0) {
-            std::cout << "[DEBUG] 客户端断开连接" << std::endl;
-            redis.hdel("is_online", user.getUID());
-            break;
-        }
-        if (choice == BACK) {
-            std::cout << "[DEBUG] 客户端选择退出" << std::endl;
-            break;
-        }
-        try {
-            int option = stoi(choice);
-            std::cout << "[DEBUG] 解析选择为数字: " << option << std::endl;
-            //是在开始聊天那里发送的1
-            if (option == 1) {
-                groupChat.startChat();
-            } else if (option == 2) {
-                groupChat.createGroup();
-            } else if (option == 3) {
-                groupChat.joinGroup();
-            } else if (option == 4) {
-                groupChat.groupHistory();
-            } else if (option == 5) {
-                groupChat.managedGroup();
-            } else if (option == 6) {
-                groupChat.managedCreatedGroup();
-            } else if (option == 7) {
-                groupChat.showMembers();
-            } else if (option == 8) {
-                groupChat.quit();
-            } else {
-                // 处理无效选项，这里选择继续循环等待有效输入
-                std::cout << "[DEBUG] 无效选择: " << option << "，继续等待有效输入" << std::endl;
-                continue;
-            }
-        } catch (const std::exception& e) {
-            std::cout << "[ERROR] 解析选择失败: " << e.what() << std::endl;
-            std::cout << "[ERROR] 选择内容: '" << choice << "'" << std::endl;
-            // 如果解析失败，通常意味着输入格式错误，这里选择断开连接
-            break;
-        }
-    }
-    std::cout << "[DEBUG] group() 函数结束" << std::endl;
-}
 
 
 
