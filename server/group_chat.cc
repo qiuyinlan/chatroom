@@ -237,7 +237,7 @@ void GroupChat::createGroup() {
     string group_info;
 
     recvMsg(fd, group_info);        
-    if (group_info == "BACK") {
+    if (group_info == BACK) {
         return;
     }
 
@@ -257,7 +257,7 @@ void GroupChat::joinGroup() {
     string groupName;
     //接收客户端发送的群聊名称
     recvMsg(fd, groupName);
-    if (groupName == "BACK") {
+    if (groupName == BACK) {
         return;
     }
     // 通过群名查找群UID
@@ -287,13 +287,6 @@ void GroupChat::joinGroup() {
 }
 
 
-void G_chat::ownerMenu() {
-    cout << "[1]设置管理员" << endl;
-    cout << "[2]撤销管理员" << endl;
-    cout << "[3]解散群聊" << endl;
-    cout << "[0]返回" << endl;
-}
-
 void GroupChat::managedGroup() const {
     Redis redis;
     redis.connect();
@@ -301,25 +294,37 @@ void GroupChat::managedGroup() const {
     string group_info;
 
     recvMsg(fd, group_info);
-    if (group_info == "BACK") {
+    if (group_info == BACK) {
         return;
     }
     group.json_parse(group_info);
     string choice;
     int ret;
     while (true) {
-
         ret = recvMsg(fd, choice);
+    cout << "managedGroup() choice=" << choice << endl;
         if (ret == 0) {
             redis.hdel("is_online", user.getUID());
+            return;
         }
         if (choice == BACK) {
-            break;
+            return;
         }
         if (choice == "1") {
             approve(group);
         } else if (choice == "2") {
             remove(group);
+        } else if (choice == "3") {
+             //设置管理员
+            appointAdmin(group);
+        } else if (choice == "4") {
+             //撤销管理员
+             revokeAdmin(group);
+           
+        } else if (choice == "5") {
+           //解散群聊
+           deleteGroup(group);
+            break;
         }
     }
 }
@@ -331,6 +336,7 @@ void GroupChat::approve(Group &group) const {
 
     sendMsg(fd, to_string(num));
     if (num == 0) {
+    cout << "暂无入群申请" << endl;
         return;
     }
     redisReply **arr = redis.smembers("if_add" + group.getGroupUid());

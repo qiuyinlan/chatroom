@@ -29,6 +29,7 @@ void group(int fd, User &user) {
     
     int ret;
     while (true) {
+  cout << "chonglai" << endl;
         groupChat.sync();
         std::cout << "[DEBUG] 等待接收客户端选择..." << std::endl;
         ret = recvMsg(fd, choice);
