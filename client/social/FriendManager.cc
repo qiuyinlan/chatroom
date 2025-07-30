@@ -54,7 +54,7 @@ void FriendManager::addFriend(vector<pair<string, User>> &my_friends) const {
     string user_info;
     recvMsg(fd, user_info);
     her.json_parse(user_info);
-    cout << "您已成功发出好友申请，等待" << her.getUsername() << "的同意" << endl;
+    cout << "你已成功发出好友申请，等待" << her.getUsername() << "的同意" << endl;
 }
 
 void FriendManager::findRequest(vector<pair<string, User>> &my_friends) const {
@@ -103,7 +103,7 @@ void FriendManager::findRequest(vector<pair<string, User>> &my_friends) const {
             newFriend.json_parse(request_info);
             my_friends.emplace_back(request_info, newFriend);
         } else {
-            cout << "您拒绝了" << friendRequestName << "的请求" << endl;
+            cout << "你拒绝了" << friendRequestName << "的请求" << endl;
         }
     }
 }
@@ -169,7 +169,7 @@ void FriendManager::delFriend(vector<pair<string, User>> &my_friends) {
 void FriendManager::blockedLists(vector<pair<string, User>> &my_friends) const {
     string temp;
     if (my_friends.empty()) {
-        cout << "您当前没有好友捏... 请按任意键退出" << endl;
+        cout << "你当前没有好友捏... 请按任意键退出" << endl;
         getline(cin, temp);
         if (cin.eof()) {
             cout << "读到文件结尾" << endl;
@@ -204,7 +204,7 @@ void FriendManager::blockedLists(vector<pair<string, User>> &my_friends) const {
     sendMsg(fd, BLOCKED_LISTS);
     who--;
     sendMsg(fd, my_friends[who].second.getUID());
-    cout << "您已成功屏蔽" << my_friends[who].second.getUsername() << ", 按任意键退出" << endl;
+    cout << "你已成功屏蔽" << my_friends[who].second.getUsername() << ", 按任意键退出" << endl;
     getline(cin, temp);
     if (cin.eof()) {
         cout << "读到文件结尾" << endl;
@@ -220,7 +220,7 @@ void FriendManager::unblocked(vector<pair<string, User>> &my_friends) const {
     int num = stoi(nums);
     if (num == 0) {
         string temp;
-        cout << "您的屏蔽列表为空" << endl;
+        cout << "你的屏蔽列表为空" << endl;
         cout << "请按任意键退出" << endl;
         getline(cin, temp);
         if (cin.eof()) {
@@ -259,7 +259,7 @@ void FriendManager::unblocked(vector<pair<string, User>> &my_friends) const {
     //向服务器发送解除屏蔽的UID
     who--;
     sendMsg(fd, blocked_users[who].getUID());
-    cout << "您已经成功解除了对" << blocked_users[who].getUsername() << "的屏蔽，请按任意键退出" << endl;
+    cout << "你已经成功解除了对" << blocked_users[who].getUsername() << "的屏蔽，请按任意键退出" << endl;
     getline(cin, blocked_info);
     if (cin.eof()) {
         cout << "读到文件结尾" << endl;

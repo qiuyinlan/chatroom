@@ -137,7 +137,7 @@ void start_chat(int fd, User &user) {
 
         //客户端退出聊天
         if (msg == EXIT) {
-            sendMsg(fd, EXIT);  // 向客户端发送EXIT确认
+            // sendMsg(fd, EXIT);  // 向客户端发送EXIT确认
             redis.srem("is_chat", user.getUID());
             return;
         }
@@ -395,12 +395,12 @@ void send_file(int fd, User &user) {
 
     recvMsg(fd, fileName);
     cout << "传输文件名: " << fileName << endl;
-    filePath = "./fileBuffer/" + fileName;
+    filePath = "./fileBuffer_send/" + fileName;
     //最后一个groupName填了文件名，接收的时候会显示
     Message message(user.getUsername(), user.getUID(), _friend.getUID(), fileName);
     message.setContent(filePath);
-    if (!filesystem::exists("./fileBuffer")) {
-        filesystem::create_directories("./fileBuffer");
+    if (!filesystem::exists("./fileBuffer_send")) {
+        filesystem::create_directories("./fileBuffer_send");
     }
     ofstream ofs(filePath, ios::binary);
     if (!ofs.is_open()) {
@@ -411,9 +411,11 @@ void send_file(int fd, User &user) {
 
     recvMsg(fd, ssize);
     off_t size = stoll(ssize);
+    off_t originalSize = size;  // 保存原始文件大小
     off_t sum = 0;
     int n;
     char buf[BUFSIZ];
+    int progressCounter = 0;  // 进度计数器
     while (size > 0) {
         if (size > sizeof(buf)) {
             n = read_n(fd, buf, sizeof(buf));
@@ -423,7 +425,7 @@ void send_file(int fd, User &user) {
         if (n < 0) {
             continue;
         }
-        cout << "剩余文件大小: " << size << endl;
+        // cout << "剩余文件大小: " << size << endl;  // 调试信息已注释
         size -= n;
         sum += n;
         ofs.write(buf, n);
@@ -463,6 +465,7 @@ void receive_file(int fd, User &user) {
         string reply;
 
         int _ret = recvMsg(fd, reply);
+    cout<< "reply:  "<<reply << endl;
         if (_ret == 0) {
             redis.hdel("is_online", user.getUID());
         }
@@ -485,7 +488,7 @@ void receive_file(int fd, User &user) {
                 cout << "文件传输成功" << buf << endl;
                 break;
             } else if (ret > 0) {
-                cout << ret << endl;
+             //   cout << ret << endl;
                 sum -= ret;
                 size += ret;
             }

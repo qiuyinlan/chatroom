@@ -304,27 +304,32 @@ void GroupChat::managedGroup() const {
         ret = recvMsg(fd, choice);
     cout << "managedGroup() choice=" << choice << endl;
         if (ret == 0) {
-            redis.hdel("is_online", user.getUID());
-            return;
+               redis.hdel("is_online", user.getUID());
+              return;
         }
         if (choice == BACK) {
-            return;
+               return;
         }
         if (choice == "1") {
-            approve(group);
+                approve(group);
+                return;
         } else if (choice == "2") {
-            remove(group);
+                 remove(group);
+                 return;
         } else if (choice == "3") {
              //设置管理员
-            appointAdmin(group);
+                appointAdmin(group);
+                return;
         } else if (choice == "4") {
              //撤销管理员
-             revokeAdmin(group);
+               revokeAdmin(group);
+                return ;
            
         } else if (choice == "5") {
            //解散群聊
-           deleteGroup(group);
-            break;
+                deleteGroup(group);
+                return;
+            
         }
     }
 }
@@ -350,6 +355,7 @@ void GroupChat::approve(Group &group) const {
         sendMsg(fd, member.getUsername());
 
         int ret = recvMsg(fd, choice);
+cout << "approve() choice=" << choice << endl;
         if (ret == 0) {
             redis.hdel("is_online", user.getUID());
         }

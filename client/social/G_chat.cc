@@ -20,7 +20,7 @@ void G_chat::groupMenu() {
     cout << "[1] 创建群聊                   [2] 加入群聊" << endl;
     cout << "[3] 管理我的群                 [4] 查看群成员" << endl;
     cout << "[5] 退出群聊                   [0] 返回" << endl;
-    cout << "请输入您的选择" << endl;
+    cout << "请输入你的选择" << endl;
 
 }
 
@@ -263,7 +263,7 @@ void G_chat::createGroup() {
     sendMsg(fd, "1");
     string groupName;
     while (true) {
-        cout << "您要创建的群聊名称是什么" << endl;
+        cout << "你要创建的群聊名称是什么" << endl;
         return_last();
         getline(cin, groupName);
         if(groupName.empty()){
@@ -332,7 +332,7 @@ void G_chat::joinGroup() const {
     if (response == "-1") {
         cout << "该群不存在" << endl;
     } else if (response == "-2") {
-        cout << "您已经是该群成员" << endl;
+        cout << "你已经是该群成员" << endl;
     }
     cout << "请求已经发出，等待同意" << endl;
     string temp;
@@ -367,7 +367,7 @@ void G_chat::managed_Group(vector<Group> &managedGroup) const {
     sendMsg(fd, "3");
     string temp;
     if (managedGroup.empty()) {
-        cout << "您当前还没有可以管理的群... 按任意键退出" << endl;
+        cout << "你当前还没有可以管理的群... 按任意键退出" << endl;
         sendMsg(fd, BACK);
         getline(cin, temp);
         return;
@@ -602,7 +602,7 @@ void G_chat::appointAdmin(Group &createdGroup) const {
     }
     int who;
     while (true) {
-        cout << "您要任命谁为管理员" << endl;
+        cout << "你要任命谁为管理员" << endl;
         while (!(cin >> who) || who < 0 || who > arr.size()) {
             if (cin.eof()) {
                 cout << "读到文件结尾" << endl;
@@ -703,7 +703,7 @@ void G_chat::showMembers(std::vector<Group> &group) {
     //传入的是加入的群的数组——joinedgroup
     string temp;
     if (group.empty()) {
-        cout << "您当前还没有加入任何群聊... 按任意键退出" << endl;
+        cout << "你当前还没有加入任何群聊... 按任意键退出" << endl;
         sendMsg(fd,BACK);
         getline(cin, temp);
         return;
@@ -759,7 +759,7 @@ void G_chat::showMembers(std::vector<Group> &group) {
 void G_chat::quit(vector<Group> &joinedGroup) {
     string temp;
     if (joinedGroup.empty()) {
-        cout << "您当前没有加入任何群聊" << endl;
+        cout << "你当前没有加入任何群聊" << endl;
         cout << "按任意键返回" << endl;
         getline(cin, temp);
         if (cin.eof()) {
@@ -797,7 +797,7 @@ void G_chat::quit(vector<Group> &joinedGroup) {
         cin.ignore(INT32_MAX, '\n');
         which--;
         if (joinedGroup[which].getOwnerUid() == user.getUID()) {
-            cout << "您是该群群主，不能退出" << endl;
+            cout << "你是该群群主，不能退出" << endl;
             continue;
         }
         break;
@@ -805,7 +805,7 @@ void G_chat::quit(vector<Group> &joinedGroup) {
     sendMsg(fd, "5");
 
     sendMsg(fd, joinedGroup[which].to_json());
-    cout << "您已退出该群，按任意键退出" << endl;
+    cout << "你已退出该群，按任意键退出" << endl;
     getline(cin, temp);
     if (cin.eof()) {
         cout << "读到文件结尾" << endl;

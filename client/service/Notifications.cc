@@ -14,7 +14,7 @@ void announce(string UID) {
     Connect(announce_fd, IP, PORT);
     string buf;
     int num;
-    // 改进方案：使用消息类型标识，不再依赖固定顺序
+
     while (true) {
         this_thread::sleep_for(chrono::milliseconds(500));  // 0.5秒，保持实时性
 
@@ -42,17 +42,17 @@ void announce(string UID) {
 
             // 根据消息类型前缀处理不同的通知
             if (buf == REQUEST_NOTIFICATION) {
-                cout << "您收到一条好友添加申请" << endl;
+                cout << "你收到一条好友添加申请" << endl;
             } else if (buf == GROUP_REQUEST) {
-                cout << "您收到一条群聊添加申请" << endl;
+                cout << "你收到一条群聊添加申请" << endl;
             } else if (buf.find("MESSAGE:") == 0) {
                 cout << "收到一条来自" << buf.substr(8) << "的消息" << endl;  //群聊和私聊都可以显示
             } else if (buf.find("DELETED:") == 0) {
-                cout << "您已经被" << buf.substr(8) << "删除" << endl;
+                cout << "你已经被" << buf.substr(8) << "删除" << endl;
             } else if (buf.find("ADMIN_ADD:") == 0) {
-                cout << "您已经被设为" << buf.substr(10) << "的管理员" << endl;
+                cout << "你已经被设为" << buf.substr(10) << "的管理员" << endl;
             } else if (buf.find("ADMIN_REMOVE:") == 0) {
-                cout << "您已被取消" << buf.substr(13) << "的管理权限" << endl;
+                cout << "你已被取消" << buf.substr(13) << "的管理权限" << endl;
             } else if (buf.find("FILE:") == 0) {
                 cout << "收到" << buf.substr(5) << "发送的文件" << endl;
             }
@@ -71,8 +71,8 @@ bool isNumericString(const std::string &str) {
     return true;
 }
 
-//私聊，接收对方发送的消息
 void chatReceived(int fd, string UID) {
+    //将好友uid传进来，用来判断————从而显示
     Message message;
     string json_msg;
 
@@ -111,41 +111,33 @@ void chatReceived(int fd, string UID) {
                 continue;
             }
 
-            // try {
-            //     message.json_parse(json_msg);
-            //     //对方私发给我
-            //     if (message.getGroupName() == "1") {
-            //         //如果此时我处于和对方一样的聊天框
-            //         if (message.getUidFrom() == UID) {
-            //             cout << message.getUsername() << ": " << message.getContent() << endl;
-            //         } else {
-            //             cout << "\033[1m\033[31m"
-            //             << "           "
-            //             << "收到一条来自" << message.getUsername() << "的一条消息"
-            //             << "\033[0m" << endl;
-            //         }
+            try {
+                //私法
+                message.json_parse(json_msg);
+                if (message.getGroupName() == "1") { //对方私发给我
+                    if (message.getUidFrom() == UID) { //如果此时我处于和对方一样的聊天框
+                        cout << message.getUsername() << ": " << message.getContent() << endl;
+                    } else {
+                        cout << "收到一条来自" << message.getUsername() << "的一条消息" <<  endl;//对方不在聊天框
+                    }
 
-            //         continue;
-            //     }
-            //     //###群发,逻辑有问题
-            //     if (message.getUidFrom() == UID) {
-            //         cout << message.getUsername() << ": " << message.getContent() << endl;
-            //     } else {
-            //         cout << "\033[1m\033[31m"
-            //              << "           "
-            //              << "收到一条来自" << message.getUsername() << "的一条消息"
-            //              << "\033[0m" << endl;
-            //     }
-            // } catch (const exception& e) {
-            //     // JSON解析失败，跳过这条消息
-            //     continue;
-            // }
+                    continue;
+                }
+                //群发
+                else {
+                    cout << "收到一条来自" << message.getGroupName() << "的一条消息" <<  endl;
+                }
+            } catch (const exception& e) {
+                // JSON解析失败，跳过这条消息
+                continue;
+            }
 
     }
 }
+
 //群聊接收线程函数
 void groupChatReceived(int fd, const string& groupUid) {
-    //### 待完善————如果被踢了，要显示，你无法在被踢的群聊中发送消息
+    //### 待完善————如果被踢了，要显示，你无法在被踢的群聊中发送消息，首先先保证解散群聊的时候，群聊还在！！！然后再改groupchat,while循环里面，被解散了不能发消息
     string buf;
     while (true) {
         int ret = recvMsg(fd, buf);
@@ -172,3 +164,6 @@ void groupChatReceived(int fd, const string& groupUid) {
         }
     }
 }
+
+
+

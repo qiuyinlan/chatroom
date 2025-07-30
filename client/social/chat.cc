@@ -102,7 +102,7 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
         if (cin.eof()) {
             cout << "输入结束，退出群聊" << endl;
             sendMsg(fd, EXIT);
-            return;
+            return ;
         }
         
         if (msg == "0") {

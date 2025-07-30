@@ -277,7 +277,7 @@ bool sendMail(const std::string& to_email, const std::string& code, bool is_find
         std::string subject = "Subject: 验证码\r\n";
         std::string mimeVersion = "MIME-Version: 1.0\r\n";
         std::string contentType = "Content-Type: text/plain; charset=utf-8\r\n";
-        std::string body = "您好，\r\n\r\n您的验证码是：" + code + "\r\n请在 5 分钟内使用此验证码完成验证。\r\n\r\n感谢您的使用！";
+        std::string body = "你好，\r\n\r\n你的验证码是：" + code + "\r\n请在 5 分钟内使用此验证码完成验证。\r\n\r\n感谢你的使用！";
 
         std::string full_mail_payload = from + to + subject + mimeVersion + contentType + "\r\n" + body;
 
@@ -543,7 +543,7 @@ void findPasswordWithCode(int epfd, int fd) {
         return;
     }
     string password = user_json["password"].get<string>();
-    sendMsg(fd, "您的密码是: " + password);
+    sendMsg(fd, "你的密码是: " + password);
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
 }
 

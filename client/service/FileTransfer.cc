@@ -15,9 +15,8 @@ using namespace std;
 FileTransfer::FileTransfer(int fd, User user) : fd(fd), user(std::move(user)) {}
 
 void FileTransfer::sendFile(vector<pair<string, User>> &my_friends) const {
-    system("clear");
     if (my_friends.empty()) {
-        cout << "您当前还没有好友" << endl;
+        cout << "你当前还没有好友" << endl;
         cout << "按任意键退出" << endl;
         string temp;
         getline(cin, temp);
@@ -108,7 +107,6 @@ void FileTransfer::sendFile(vector<pair<string, User>> &my_friends) const {
         cout << "读到文件结尾" << endl;
         return;
     }
-    system("clear");
 }
 
 void FileTransfer::receiveFile(vector<pair<string, User>> &my_friends) const {
@@ -120,7 +118,7 @@ void FileTransfer::receiveFile(vector<pair<string, User>> &my_friends) const {
     //先接收服务器发来的文件数
     recvMsg(fd, nums);
     int num = stoi(nums);
-    cout << "您有" << num << "个文件待接收" << endl;
+    cout << "你有" << num << "个文件待接收" << endl;
     string file_info;
     for (int i = 0; i < num; i++) {
         recvMsg(fd, file_info);
@@ -148,7 +146,7 @@ void FileTransfer::receiveFile(vector<pair<string, User>> &my_friends) const {
         sendMsg(fd, reply);
         if (choice == 0) {
             string temp;
-            cout << "您拒绝接收了该文件, 按任意键返回" << endl;
+            cout << "你拒绝接收了该文件, 按任意键返回" << endl;
             getline(cin, temp);
             if (cin.eof()) {
                 cout << "读到文件结尾" << endl;
@@ -157,9 +155,9 @@ void FileTransfer::receiveFile(vector<pair<string, User>> &my_friends) const {
             return;
         }
         fileName = message.getGroupName();
-        filePath = "./fileBuffer/" + fileName;
-        if (!filesystem::exists("./fileBuffer")) {
-            filesystem::create_directories("./fileBuffer");
+        filePath = "./fileBuffer_recv/" + fileName;
+        if (!filesystem::exists("./fileBuffer_recv/")) {
+            filesystem::create_directories("./fileBuffer_recv/");
         }
         ofstream ofs(filePath);
         string ssize;
@@ -186,5 +184,4 @@ void FileTransfer::receiveFile(vector<pair<string, User>> &my_friends) const {
         cout << "按任意键返回" << endl;
         return;
     }
-    system("clear");
 } 

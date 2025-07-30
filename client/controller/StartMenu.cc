@@ -59,7 +59,7 @@ int login(int fd, User &user) {
     string email;
     string passwd;
     while (true) {
-        std::cout << "请输入您的邮箱：" << std::endl;
+        std::cout << "请输入你的邮箱：" << std::endl;
         getline(cin, email);
         if (email.empty()) {
             cout << "邮箱不能为空，请重新输入。" << endl;
@@ -72,7 +72,7 @@ int login(int fd, User &user) {
         break;
     }
     while (true) {
-        get_password("请输入您的密码: ", passwd);
+        get_password("请输入你的密码: ", passwd);
         if (passwd.empty()) {
             cout << "密码不能为空，请重新输入。" << endl;
             continue;
@@ -116,7 +116,6 @@ int login(int fd, User &user) {
         return 0;
     } else if (buf == "1") {
         cout << "登录成功!" << endl;
-       // system("clear");
         string user_info;
         recvMsg(fd, user_info);
         user.json_parse(user_info);
@@ -128,7 +127,7 @@ int login(int fd, User &user) {
 
 int email_register(int fd) {
     string email, code, username, password, password2, server_reply;
-    string prompt = "请输入您的邮箱: ";
+    string prompt = "请输入你的邮箱: ";
     while(true){
         cout << prompt << endl;
         std::getline(std::cin, email);
@@ -153,7 +152,7 @@ int email_register(int fd) {
         break;
 
     }
-    prompt = "请输入您的用户名: ";
+    prompt = "请输入你的用户名: ";
     while(true){
         cout << prompt << endl;
         getline(cin, username);
@@ -197,14 +196,14 @@ int email_register(int fd) {
     }
     
 
-    get_password("请输入您的密码: ", password);
+    get_password("请输入你的密码: ", password);
     while (true) {
        
-        get_password("请再次输入您的密码: ", password2);
+        get_password("请再次输入你的密码: ", password2);
         if (password != password2) {
             cout << "两次密码不一致！请重新输入。" << endl;
           
-            get_password("请输入您的密码: ", password);
+            get_password("请输入你的密码: ", password);
             continue;
         }
         break;
@@ -227,7 +226,7 @@ int email_register(int fd) {
 
 int email_reset_password(int fd) {
     string email, code, password, password2, server_reply;
-    cout << "请输入您的邮箱: ";
+    cout << "请输入你的邮箱: ";
     getline(cin, email);
     if (email.empty()) {
         cout << "邮箱不能为空！" << endl;
@@ -276,7 +275,7 @@ int email_find_password(int fd) {
     
    
     while (true) {
-        cout << "请输入您的邮箱: ";
+        cout << "请输入你的邮箱: ";
         getline(cin, email);
         if (email.empty()) {
             cout << "邮箱不能为空！" << endl;
