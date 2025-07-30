@@ -5,7 +5,7 @@
 
 void announce(string UID);
 
-void chatReceived(int fd, string UID);
+void chatReceived(int fd, const string&UID);
 
 bool isNumericString(const std::string &str);
 

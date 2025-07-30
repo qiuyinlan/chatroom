@@ -56,8 +56,7 @@ void announce(string UID) {
             } else if (buf.find("FILE:") == 0) {
                 cout << "收到" << buf.substr(5) << "发送的文件" << endl;
             }
-            //chat
-            // else if 
+            
         }
     }
 }
@@ -71,8 +70,9 @@ bool isNumericString(const std::string &str) {
     return true;
 }
 
-void chatReceived(int fd, string UID) {
-    //将好友uid传进来，用来判断————从而显示
+//群聊和私聊接收线程
+void chatReceived(int fd, const string&UID) {
+    //群/好友uid传进来，用来判断————从而显示
     Message message;
     string json_msg;
 
@@ -90,7 +90,7 @@ void chatReceived(int fd, string UID) {
             }
 
             if (json_msg == EXIT) {
-                break;
+                return;
             }
 
             // 处理特殊响应
@@ -112,9 +112,10 @@ void chatReceived(int fd, string UID) {
             }
 
             try {
-                //私法
+                
                 message.json_parse(json_msg);
-                if (message.getGroupName() == "1") { //对方私发给我
+                //私发
+                if (message.getGroupName() == "1") { 
                     if (message.getUidFrom() == UID) { //如果此时我处于和对方一样的聊天框
                         cout << message.getUsername() << ": " << message.getContent() << endl;
                     } else {
@@ -124,46 +125,24 @@ void chatReceived(int fd, string UID) {
                     continue;
                 }
                 //群发
+                 //### 待完善————如果被踢了，要显示，你无法在被踢的群聊中发送消息，首先先保证解散群聊的时候，群聊还在！！！然后再改groupchat,while循环里面，被解散了不能发消息
                 else {
-                    cout << "收到一条来自" << message.getGroupName() << "的一条消息" <<  endl;
+                    if (UID == message.getUidTo()){ //如果我在群聊里（群聊uid==uidto）
+                        cout << "[" << message.getGroupName() << "] "
+                        << message.getUsername() << ": "
+                        << message.getContent() << endl;
+                    }else {
+                        cout << "收到一条来自" << message.getGroupName() << "的一条消息" <<  endl;
+                    }
                 }
             } catch (const exception& e) {
                 // JSON解析失败，跳过这条消息
+                cout << "一条消息解析失败，跳过" << endl;
+                cout << "跳过的消息为：" << message.getContent() << endl;
                 continue;
             }
 
     }
 }
-
-//群聊接收线程函数
-void groupChatReceived(int fd, const string& groupUid) {
-    //### 待完善————如果被踢了，要显示，你无法在被踢的群聊中发送消息，首先先保证解散群聊的时候，群聊还在！！！然后再改groupchat,while循环里面，被解散了不能发消息
-    string buf;
-    while (true) {
-        int ret = recvMsg(fd, buf);
-        if (ret <= 0) {
-            cout << "群聊连接断开，退出接收线程" << endl;
-            return ;
-        }
-
-        if (buf == EXIT) {
-            return;
-        }
-
-        try {
-            Message message;
-            message.json_parse(buf);
-
-            // 显示群聊消息
-            cout << "[" << message.getGroupName() << "] "
-                 << message.getUsername() << ": "
-                 << message.getContent() << endl;
-        } catch (const exception& e) {
-            // 跳过无效消息
-            continue;
-        }
-    }
-}
-
 
 

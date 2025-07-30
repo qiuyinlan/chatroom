@@ -90,7 +90,7 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
     message.setGroupName(selectedGroup.getGroupName());
     
     // 开启接收线程
-    thread receiveThread(groupChatReceived, fd, selectedGroup.getGroupUid());
+    thread receiveThread(chatReceived, fd, selectedGroup.getGroupUid());
     receiveThread.detach();
     
     // 消息发送循环
@@ -208,7 +208,8 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
     // 根据选择分发到不同的聊天函数
     //私聊
     if (who <= my_friends.size()) {
-        cout << "好友：" << my_friends[who-1].second.getUsername() << endl;
+        cout << "--------------------------------------" << endl;
+        cout << "【好友：" << my_friends[who-1].second.getUsername() << "】"<< endl;
         // 发送好友聊天协议
         sendMsg(fd, START_CHAT);
         string records_index = user.getUID() + my_friends[who-1].second.getUID();

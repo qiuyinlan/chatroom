@@ -102,6 +102,8 @@ void Message::setGroupName(const string &groupName) {
     group_name = groupName;
 }
 
+
+
 [[nodiscard]] string Message::getTime() const {
     return timeStamp;
 }

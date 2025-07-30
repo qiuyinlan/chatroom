@@ -137,7 +137,7 @@ void start_chat(int fd, User &user) {
 
         //客户端退出聊天
         if (msg == EXIT) {
-            // sendMsg(fd, EXIT);  // 向客户端发送EXIT确认
+            sendMsg(fd, EXIT);  
             redis.srem("is_chat", user.getUID());
             return;
         }

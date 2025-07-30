@@ -75,29 +75,37 @@ public:
     Message();
 
     Message(string username, string UID_from, string UID_to, string groupName = "1");
-
+     //名字
     [[nodiscard]] string getUsername() const;
 
     void setUsername(const string &name);
 
     [[nodiscard]] const string &getUidFrom() const;
 
+    //来源uid
     void setUidFrom(const string &uidFrom);
 
     [[nodiscard]] const string &getUidTo() const;
 
+    //去uid
     void setUidTo(const string &uidTo);
 
     [[nodiscard]] string getContent() const;
 
+    //设置内容
     void setContent(const string &msg);
 
     [[nodiscard]] const string &getGroupName() const;
 
+    //得到群聊名字
     void setGroupName(const string &groupName);
 
     [[nodiscard]] string getTime() const;
 
+   //如果是群聊，那to就是群聊名
+
+  
+    //设置时间
     void setTime(const string &t);
 
     static string get_time();
