@@ -234,13 +234,23 @@ string GroupChat::findGroupUidByName(Redis& redis, const string& groupName) {
 void GroupChat::createGroup() {
     Redis redis;
     redis.connect();
-    string group_info;
-
-    recvMsg(fd, group_info);        
-    if (group_info == BACK) {
-        return;
+    string group_info,groupName;
+    while(true){
+       recvMsg(fd, groupName);        
+        if (groupName == BACK) {
+            return;
+        }
+        if (redis.sismember("group_Name", groupName)) {
+            sendMsg(fd, "已存在");
+            continue;
+        }else {
+            sendMsg(fd,"0");
+            break;
+        }
     }
+    
 
+    recvMsg(fd, group_info);
     Group group;
     group.json_parse(group_info);
     redis.hset("group_info", group.getGroupUid(), group_info);
@@ -249,6 +259,9 @@ void GroupChat::createGroup() {
     redis.sadd(created, group.getGroupUid());
     redis.sadd(group.getMembers(), user.getUID());
     redis.sadd(group.getAdmins(), user.getUID());
+
+    //名字不重复
+    redis.sadd("group_Name", groupName);
 }
 
 void GroupChat::joinGroup() {

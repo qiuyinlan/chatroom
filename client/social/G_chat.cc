@@ -262,6 +262,7 @@ void G_chat::sync(vector<Group> &createdGroup, vector<Group> &managedGroup, vect
 void G_chat::createGroup() {
     sendMsg(fd, "1");
     string groupName;
+     string reply;
     while (true) {
         cout << "你要创建的群聊名称是什么" << endl;
         return_last();
@@ -283,8 +284,18 @@ void G_chat::createGroup() {
             cout << "群聊名称不能出现空格" << endl;
             continue;
         }
-        break;
+        //发名字
+        sendMsg(fd,groupName);
+        recvMsg(fd,reply);
+        if(reply == "已存在"){
+            cout << "该群名已存在，请重新输入" << endl;
+            continue;
+        }else{
+             break;
+        }
     }
+   
+    
     Group group(groupName, user.getUID());
 
     sendMsg(fd, group.to_json());

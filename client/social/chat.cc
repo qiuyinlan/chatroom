@@ -86,7 +86,7 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
     cout << YELLOW << "-----------------------以上为历史消息-----------------------" << RESET << endl;
     
     // 创建消息对象
-    Message message(user.getUsername(), user.getUID(), selectedGroup.getGroupUid());
+    Message message(user.getUsername(), user.getUID(), selectedGroup.getGroupUid(),"1");
     message.setGroupName(selectedGroup.getGroupName());
     
     // 开启接收线程
@@ -268,7 +268,7 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
         cout << YELLOW << "-------------------以上为历史消息-------------------" << RESET << endl;
 
         
-        Message message(user.getUsername(), user.getUID(), my_friends[who-1].second.getUID());
+        Message message(user.getUsername(), user.getUID(), my_friends[who-1].second.getUID(),"1");
         string friend_UID = my_friends[who-1].second.getUID();
 
         
