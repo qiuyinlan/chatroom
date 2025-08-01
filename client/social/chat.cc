@@ -87,38 +87,54 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
     cout << YELLOW << "-----------------------以上为历史消息-----------------------" << RESET << endl;
     
     // 创建消息对象
-    Message message(user.getUsername(), user.getUID(), selectedGroup.getGroupUid(),"1");
-    message.setGroupName(selectedGroup.getGroupName());
+    Message message(user.getUsername(), user.getUID(), selectedGroup.getGroupUid(), selectedGroup.getGroupName());
     
-    // 开启接收线程
-    thread receiveThread(chatReceived, fd, selectedGroup.getGroupUid());
-    receiveThread.detach();
-    
+    // 进入群聊状态，通知统一接收线程
+    ClientState::enterChat(selectedGroup.getGroupUid());
+
     // 消息发送循环
     string msg;
      std::cout << "\033[90m输入【send】发送文件，【recv】接收文件，【0】退出聊天\033[0m" << std::endl;
 
     while (true) {
         getline(cin, msg);
-        
+        cout << "[DEBUG] 群聊中接收到输入: '" << msg << "'" << endl;
+
         if (cin.eof()) {
             cout << "输入结束，退出群聊" << endl;
             sendMsg(fd, EXIT);
             return ;
         }
-        
+
         if (msg == "0") {
+            // 退出群聊状态
+            ClientState::exitChat();
             sendMsg(fd, EXIT);
             return;
         }
-        
+
+        // 群聊文件传输
+        if (msg == "send") {
+            cout << "[DEBUG] 识别到send命令，开始文件传输" << endl;
+            FileTransfer fileTransfer;
+            fileTransfer.sendFile_Group(fd, selectedGroup, user);
+            continue;
+        }
+        if (msg == "recv") {
+            FileTransfer fileTransfer;
+            fileTransfer.recvFile_Group(fd, user);
+            continue;
+        }
+
         if (msg.empty()) {
             cout << "不能发送空白消息" << endl;
             continue;
         }
+        cout << "[DEBUG] 准备发送普通消息: " << msg << endl;
         cout << "你：" << msg << endl;
         message.setContent(msg);
         string jsonMsg = message.to_json();
+        cout << "[DEBUG] 发送JSON消息: " << jsonMsg << endl;
         sendMsg(fd, jsonMsg);
 
     }
@@ -276,11 +292,10 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
         
         sendMsg(fd, friend_UID);
 
-        //实时接收对方消息
-        thread work(chatReceived, fd, friend_UID);
+        // 进入聊天状态，通知统一接收线程
+        ClientState::enterChat(friend_UID);
 
-        // 立即detach，避免线程管理问题
-        work.detach();
+       
         string msg, json;
 
         //真正开始聊天
@@ -295,18 +310,20 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
                 return;
             }
             if (msg == "0") {
+                // 退出聊天状态
+                ClientState::exitChat();
                 sendMsg(fd, EXIT);
                 return;
             }
-      //发文件
-            FileTransfer fileTransfer_friend(fd, my_friends[who-1].second);  
+            // 文件传输
             if(msg == "send"){
-                //传好友信息
-                fileTransfer_friend.sendFile_Friend(my_friends[who-1].second);
+                FileTransfer fileTransfer;
+                fileTransfer.sendFile_Friend(fd, my_friends[who-1].second, user);
                 continue;
             }
             if(msg == "recv"){
-                fileTransfer_friend.recvFile_Friend();
+                FileTransfer fileTransfer;
+                fileTransfer.recvFile_Friend(fd, user);
                 continue;
             }
             else if(msg.empty()){

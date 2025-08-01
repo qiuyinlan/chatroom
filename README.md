@@ -41,6 +41,44 @@ This repository contains the source code for a Chatroom application developed in
 3. **扩展性**: 支持邮箱变更而不影响用户身份标识
 4. **兼容性**: 同时支持邮箱和UID两种查找方式
 
+## 功能模块详解
+
+### 文件传输功能
+
+#### 接收文件功能 (选项11)
+**功能描述**: 允许用户接收其他用户发送的文件
+
+**工作流程**:
+1. **客户端发起请求**: 用户选择"接收文件"选项，客户端发送`RECEIVE_FILE`协议
+2. **服务器查询待接收文件**: 服务器从Redis中查询该用户是否有待接收的文件
+3. **文件信息展示**: 服务器返回待接收文件的数量和详细信息
+4. **用户选择**: 客户端显示每个文件的发送者和文件名，用户可以选择接收或拒绝
+5. **文件传输**: 如果用户选择接收，服务器使用`sendfile`系统调用高效传输文件
+6. **文件存储**: 接收的文件保存在`./fileBuffer_recv/`目录下
+
+**Redis数据结构**:
+- **recv + UID**: Set集合，存储待接收文件的消息信息
+  ```
+  recvUID123: [
+    "{\"username\":\"发送者用户名\",\"UID_from\":\"发送者UID\",\"UID_to\":\"接收者UID\",\"groupName\":\"文件名\",\"content\":\"文件路径\"}"
+  ]
+  ```
+
+**文件存储结构**:
+- 服务器端: `./fileBuffer/` - 临时存储发送的文件
+- 客户端: `./fileBuffer_recv/` - 存储接收到的文件
+
+**技术特点**:
+- 使用`sendfile`系统调用实现零拷贝文件传输
+- 支持大文件传输，使用缓冲区分批处理
+- 文件传输过程中有进度显示
+- 支持用户拒绝接收文件
+
+**使用场景**:
+- 好友之间分享文档、图片等文件
+- 群聊中的文件共享
+- 离线文件传输（用户不在线时文件存储在服务器）
+
 ## Features
 
 - **User Authentication:** Users can register and log in securely using email.
@@ -49,6 +87,51 @@ This repository contains the source code for a Chatroom application developed in
 - **Real-time Notifications:** The application provides real-time notifications for new messages and updates.
 - **File Upload:** Users can upload and share files within the chat.
 - **Multithreading:** Efficiently handles multiple connections using epoll and multithreading.
+
+## 项目结构详解
+
+### 核心文件说明
+
+#### 客户端文件
+- `client/client.cc`: 客户端主程序入口
+- `client/controller/OperationMenu.cc`: 操作菜单控制器，处理用户选择的功能
+- `client/service/FileTransfer.cc`: 文件传输服务，实现发送和接收文件功能
+- `client/social/FriendManager.cc`: 好友管理功能
+- `client/social/chat.cc`: 私聊功能实现
+
+#### 服务器端文件
+- `server/server.cc`: 服务器主程序入口
+- `server/LoginHandler.cc`: 登录处理模块，包含登录、注册、验证码等功能
+- `server/Transaction.cc`: 业务逻辑处理，包含聊天、好友管理、文件传输等核心功能
+- `server/Redis.cc`: Redis数据库操作封装
+- `server/group_chat.cc`: 群聊功能实现
+
+#### 工具类文件
+- `utils/proto.h`: 协议定义，包含所有通信协议常量
+- `utils/IO.cc`: 网络IO操作封装
+- `utils/User.cc`: 用户类定义和操作
+- `utils/Message.cc`: 消息类定义和操作
+
+### 已完成的开发
+- ✅ 用户注册登录系统（支持邮箱验证码）
+- ✅ 好友管理功能（添加、删除、屏蔽）
+- ✅ 私聊功能（实时消息、历史记录）
+- ✅ 群聊功能（创建群组、群聊、群管理）
+- ✅ 文件传输功能（发送和接收文件）
+- ✅ 实时通知系统
+- ✅ UID主键架构重构
+- ✅ 线程池模块整合
+
+### 进行中的开发
+- 🔄 系统性能优化和压力测试
+- 🔄 文件传输功能的稳定性改进
+- 🔄 群聊功能的UID主键化改造
+
+### 未完成的开发
+- ⏳ 文件传输的断点续传功能
+- ⏳ 群聊文件的批量传输
+- ⏳ 系统监控和日志记录
+- ⏳ 移动端适配
 
 ## Getting Started
 

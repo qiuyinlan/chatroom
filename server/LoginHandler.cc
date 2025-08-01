@@ -14,6 +14,7 @@
 #include <random>
 #include <ctime>
 #include <atomic>
+#include <vector>
 #include "./group_chat.h"
 #include "../client/service/Notifications.h"
 
@@ -165,6 +166,7 @@ void serverOperation(int fd, User &user) {
 
     // close(fd);
     redis.hdel("is_online", user.getUID());
+    redis.hdel("unified_receiver", user.getUID());  // 清理统一接收连接记录
 }
 
 void notify(int fd, const string &UID) {
@@ -198,6 +200,53 @@ void notify(int fd, const string &UID) {
         }
     }
 
+    // 检查文件通知
+    int fileNum = redis.scard("file" + UID);
+    if (fileNum != 0) {
+        redisReply **fileArr = redis.smembers("file" + UID);
+        for (int i = 0; i < fileNum; i++) {
+            sendMsg(fd, "FILE:" + string(fileArr[i]->str));
+            redis.srem("file" + UID, fileArr[i]->str);
+            freeReplyObject(fileArr[i]);
+        }
+    }
+
+    // 检查离线文件通知
+    if (redis.hexists("offline_file_notify", UID)) {
+        string sender = redis.hget("offline_file_notify", UID);
+        sendMsg(fd, "FILE:" + sender);
+        redis.hdel("offline_file_notify", UID);  // 清除离线通知
+    }
+
+    // 检查离线消息通知
+    int offlineMsgNum = redis.llen("offline_message_notify" + UID);
+    if (offlineMsgNum != 0) {
+        redisReply **offlineMsgArr = redis.lrange("offline_message_notify" + UID, "0", to_string(offlineMsgNum - 1));
+
+        // 统计每个用户的消息数量
+        map<string, int> senderCount;
+        for (int i = 0; i < offlineMsgNum; i++) {
+            string sender = string(offlineMsgArr[i]->str);
+            senderCount[sender]++;
+            freeReplyObject(offlineMsgArr[i]);
+        }
+
+        // 发送合并后的通知
+        for (const auto& pair : senderCount) {
+            string sender = pair.first;
+            int count = pair.second;
+            if (count == 1) {
+                sendMsg(fd, "MESSAGE:" + sender);
+            } else {
+                sendMsg(fd, "MESSAGE:" + sender + "(" + to_string(count) + "条)");
+            }
+        }
+
+        // 清空整个离线消息列表
+        redis.del("offline_message_notify" + UID);
+        cout << "[DEBUG] 已推送 " << senderCount.size() << " 个用户的 " << offlineMsgNum << " 条离线消息通知给用户 " << UID << endl;
+    }
+
     //被取消管理员权限
     num = redis.scard("revoke_admin" + UID);
     if (num != 0) {
@@ -209,19 +258,40 @@ void notify(int fd, const string &UID) {
         }
     }
 
-    //文件消息提醒
-    num = redis.scard("file" + UID);
-    if (num != 0) {
-        redisReply **arr = redis.smembers("file" + UID);
-        for (int i = 0; i < num; i++) {
-            sendMsg(fd, "FILE:" + string(arr[i]->str));
-            redis.srem("file" + UID, arr[i]->str);
-            freeReplyObject(arr[i]);
-        }
-    }
+    // 重复的文件消息提醒已删除（上面已经处理过了）
 
     // 发送结束标志
     sendMsg(fd, "END");
+}
+
+// 处理统一接收线程连接
+void handleUnifiedReceiver(int epfd, int fd) {
+    cout << "[DEBUG] 处理统一接收线程连接，fd: " << fd << endl;
+
+    Redis redis;
+    redis.connect();
+
+    string UID;
+    int ret = recvMsg(fd, UID);
+    if (ret <= 0) {
+        cout << "[ERROR] 接收UID失败，关闭连接" << endl;
+        close(fd);
+        return;
+    }
+
+    cout << "[DEBUG] 统一接收线程连接建立，UID: " << UID << ", fd: " << fd << endl;
+
+    // 将此连接标记为统一接收连接
+    redis.hset("unified_receiver", UID, to_string(fd));
+
+    // 重新加入epoll监听
+    epoll_event event;
+    event.events = EPOLLIN;
+    event.data.fd = fd;
+    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event);
+
+    // 立即发送一次通知检查
+    notify(fd, UID);
 }
 
 

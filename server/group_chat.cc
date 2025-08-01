@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include "Group.h"
 #include "proto.h"
+#include "Transaction.h"
 
 #include <iostream>
 
@@ -150,18 +151,41 @@ void GroupChat::startChat() {
     Message message;
     while (true) {
         int ret = recvMsg(fd, msg);
+        cout << "[DEBUG] 群聊中接收到消息: '" << msg << "', 长度: " << msg.length() << endl;
+
         if (msg == EXIT || ret == 0) {
-            sendMsg(fd, EXIT);
+
             if (ret == 0) {
                 cout << "[DEBUG] 群聊中检测到连接断开" << endl;
             }
             redis.srem("group_chat", user.getUID());
 
             // 注意：只有在真正连接断开时才删除在线状态
-           
+
             return;
         }
-        message.json_parse(msg);
+
+        // 处理群聊文件传输协议
+        if (msg == SENDFILE_G) {
+            cout << "[DEBUG] 群聊中收到 SENDFILE_G 协议" << endl;
+            sendFile_Group(fd, user);
+            continue;
+        }
+
+        if (msg == RECVFILE_G) {
+            cout << "[DEBUG] 群聊中收到 RECVFILE_G 协议" << endl;
+            recvFile_Group(fd, user);
+            continue;
+        }
+
+        // 尝试解析为JSON消息
+        try {
+            message.json_parse(msg);
+        } catch (const exception& e) {
+            cout << "[ERROR] 群聊消息JSON解析失败: " << e.what() << endl;
+            cout << "[ERROR] 原始消息: " << msg << endl;
+            continue;  // 跳过无效消息，继续处理
+        }
         int len = redis.scard(group.getMembers());
         if (len == 0) {
             return;
@@ -183,16 +207,23 @@ void GroupChat::startChat() {
                 freeReplyObject(arr[i]);
                 continue;
             }
-            //### 逻辑问题，待思考
+            //不在群聊中，发送通知
             if (!redis.sismember("group_chat", UIDto)) {
-                redis.hset("chat", UIDto, group.getGroupName());
+                // 使用统一接收连接发送通知
+                if (redis.hexists("unified_receiver", UIDto)) {
+                    string receiver_fd_str = redis.hget("unified_receiver", UIDto);
+                    int receiver_fd = stoi(receiver_fd_str);
+                    sendMsg(receiver_fd, "MESSAGE:" + group.getGroupName());
+                }
                 freeReplyObject(arr[i]);
                 continue;
             }
-            string s_fd = redis.hget("is_online", UIDto);
-            int _fd = stoi(s_fd);
-            //可以直接发
-            sendMsg(_fd, msg);
+            // 在群聊中，使用统一接收连接发送实时消息
+            if (redis.hexists("unified_receiver", UIDto)) {
+                string receiver_fd_str = redis.hget("unified_receiver", UIDto);
+                int receiver_fd = stoi(receiver_fd_str);
+                sendMsg(receiver_fd, msg);
+            }
             freeReplyObject(arr[i]);
         }
 

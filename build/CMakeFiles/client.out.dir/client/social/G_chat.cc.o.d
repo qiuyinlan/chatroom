@@ -194,4 +194,6 @@ CMakeFiles/client.out.dir/client/social/G_chat.cc.o: \
  /usr/include/c++/13/bits/stl_multimap.h \
  /home/xuzichun/chatroom/messengertest/client/service/Notifications.h \
  /usr/include/c++/13/atomic /usr/include/c++/13/bits/atomic_base.h \
- /usr/include/c++/13/bits/atomic_lockfree_defines.h
+ /usr/include/c++/13/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/13/mutex /usr/include/c++/13/bits/std_mutex.h \
+ /usr/include/c++/13/bits/unique_lock.h

@@ -161,10 +161,14 @@ int main(int argc, char *argv[]) {
                 if (msg == LOGIN) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ serverLogin(epfd, fd); });
-                } else if (msg == NOTIFY) {
-                    string uid;
-                    recvMsg(fd, uid);  // 接收用户UID
-                    notify(fd, uid);   // 传递fd和uid参数
+                } else if (msg == UNIFIED_RECEIVER) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ handleUnifiedReceiver(epfd, fd); });
+                // 删除NOTIFY轮询处理，改为主动推送
+                // } else if (msg == NOTIFY) {
+                //     string uid;
+                //     recvMsg(fd, uid);  // 接收用户UID
+                //     notify(fd, uid);   // 传递fd和uid参数
                 } else if (msg == REQUEST_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);//发验证码，发前检查邮箱
                     pool.addTask([=](){ handleRequestCode(epfd, fd); });

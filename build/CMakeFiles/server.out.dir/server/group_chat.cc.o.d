@@ -297,4 +297,6 @@ CMakeFiles/server.out.dir/server/group_chat.cc.o: \
  /usr/include/nlohmann/detail/macro_unscope.hpp \
  /usr/include/nlohmann/thirdparty/hedley/hedley_undef.hpp \
  /home/xuzichun/chatroom/messengertest/utils/proto.h \
+ /home/xuzichun/chatroom/messengertest/server/Transaction.h \
+ /home/xuzichun/chatroom/messengertest/server/../utils/User.h \
  /usr/include/c++/13/iostream

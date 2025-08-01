@@ -13,6 +13,7 @@ const string RECVFILE_G = "RECVFILE_G";
 
 const string LOGIN = "1";
 const string NOTIFY = "3";
+const string UNIFIED_RECEIVER = "25";  // 统一接收线程协议
 //客户端子线程进行实时通知，私聊，群聊
 //transaction
 const string START_CHAT = "4";

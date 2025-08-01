@@ -8,6 +8,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <nlohmann/json.hpp>
+#include "../service/Notifications.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -119,7 +120,8 @@ int login(int fd, User &user) {
         string user_info;
         recvMsg(fd, user_info);
         user.json_parse(user_info);
-        cout <<  user.getUsername() <<  endl;
+        cout << "用户：【" <<user.getUsername()<<"】" <<  endl;
+
         return 1;
     }
     return 0;

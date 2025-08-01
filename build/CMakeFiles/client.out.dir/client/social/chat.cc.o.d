@@ -180,4 +180,7 @@ CMakeFiles/client.out.dir/client/social/chat.cc.o: \
  /home/xuzichun/chatroom/messengertest/utils/User.h \
  /usr/include/c++/13/atomic /usr/include/c++/13/bits/atomic_base.h \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
- /home/xuzichun/chatroom/messengertest/server/../client/service/FileTransfer.h
+ /usr/include/c++/13/mutex /usr/include/c++/13/bits/std_mutex.h \
+ /usr/include/c++/13/bits/unique_lock.h \
+ /home/xuzichun/chatroom/messengertest/server/../client/service/FileTransfer.h \
+ /home/xuzichun/chatroom/messengertest/utils/Group.h

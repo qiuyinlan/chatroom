@@ -9,6 +9,10 @@
 
 void recvFile_Friend(int fd, User &user);
 
+void sendFile_Group(int fd, User &user);
+
+void recvFile_Group(int fd, User &user);
+
 void synchronize(int fd, User &user);
 
 void start_chat(int fd, User &user);

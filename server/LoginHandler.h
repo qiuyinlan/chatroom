@@ -12,6 +12,8 @@ void serverOperation(int fd, User &user);
 
 void notify(int fd, const std::string &UID);
 
+void handleUnifiedReceiver(int epfd, int fd);
+
 //以下是注册登陆函数
 
 void handleRequestCode(int epfd, int fd);   //检查重复，发送验证码

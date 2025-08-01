@@ -1,4 +1,4 @@
-#include "OperationMenu.h"
+                                       #include "OperationMenu.h"
 #include <unistd.h>
 #include "FriendManager.h"
 #include "chat.h"
@@ -20,8 +20,7 @@ void operationMenu() {
     cout << "[1]开始聊天                  [2]添加好友" << endl;
     cout << "[3]查看添加好友请求          [4]删除好友" << endl;
     cout << "[5]屏蔽好友                  [6]解除屏蔽" << endl;
-    cout << "[7]群聊                      [8]发送文件" << endl;
-    cout << "[9]接收文件" << endl;
+    cout << "[7]群聊" << endl;
     cout << "按[0]退出登陆" << endl;
     cout << "请输入你的选择" << endl;
 }
@@ -42,14 +41,14 @@ void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) 
          cout << "服务器连接已断开，无法获取好友信息" << endl;
         return ;
     }
-
+cout << friend_num << endl;
     int num;
     try {
         num = stoi(friend_num);
 
     } catch (const exception& e) {
         cout << "[ERROR] 解析好友数量失败: " << e.what() << ", 内容: '" << friend_num << "'" << endl;
-        return ;
+        return;
     }
 
     User myfriend;
@@ -57,14 +56,20 @@ void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) 
    
     for (int i = 0; i < num; i++) {
          //收好友详细信息
+        cout << "[DEBUG] 正在接收第 " << (i+1) << "/" << num << " 个好友信息..." << endl;
         int recv_ret2 = recvMsg(fd, friend_info);
         if (recv_ret2 <= 0) {
             cout << "服务器连接已断开，好友信息同步中断" << endl;
             return ;
         }
+        cout << "[DEBUG] 接收到好友信息: " << friend_info.substr(0, 50) << "..." << endl;
+        try {
             myfriend.json_parse(friend_info);
             my_friends.emplace_back(my_uid, myfriend);
-
+        } catch (const exception& e) {
+            cout << "[ERROR] 解析好友信息失败: " << e.what() << endl;
+            cout << "[ERROR] 原始数据: " << friend_info << endl;
+        }
     }
     return ;
 }
@@ -78,9 +83,11 @@ void clientOperation(int fd, User &user) {
     ChatSession chatSession(fd, user);
     G_chat gChat(fd, user);
     FileTransfer fileTransfer(fd, user);
-    // 启用通知线程，接收实时通知
-    thread work(announce, user.getUID());
-    work.detach();
+    // 启动统一消息接收线程（替代轮询）
+    thread unifiedReceiver(unifiedMessageReceiver, fd, user.getUID());
+    unifiedReceiver.detach();
+
+    // 离线消息现在由统一接收线程立即显示，不需要额外处理
 
     while (true) {
         operationMenu();
@@ -143,10 +150,6 @@ void clientOperation(int fd, User &user) {
             friendManager.unblocked(my_friends);
         } else if (opt == 7) {
             gChat.groupctrl(my_friends);
-        } else if (opt == 8) {
-            fileTransfer.sendFile(my_friends);
-        } else if (opt == 9) {
-            fileTransfer.receiveFile(my_friends);
         } else {
             cout << "没有这个选项，请重新输入" << endl;
         }
