@@ -1,4 +1,4 @@
-                                       #include "OperationMenu.h"
+#include "OperationMenu.h"
 #include <unistd.h>
 #include "FriendManager.h"
 #include "chat.h"

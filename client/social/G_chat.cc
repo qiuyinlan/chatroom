@@ -556,7 +556,8 @@ void G_chat::remove(Group &group) const {
         }
     }
     while (true) {
-        cout << "你要踢谁（输入1-" << arr.size() << "），按[0]返回" << endl;
+        cout << "tip:不能踢群主和自己哦" << endl;
+        cout << "你要踢谁" << endl;
         int who;
         while (!(cin >> who) || who < 0 || who > (int)arr.size()) {
             if (cin.eof()) {
@@ -577,7 +578,10 @@ void G_chat::remove(Group &group) const {
             cout << "该用户是群主，你不能踢！" << endl;
             continue;
         }
-
+        if (arr[who].getUID() == user.getUID()) {
+            cout << "你不能踢自己哦" << endl;
+            continue;
+        }
         sendMsg(fd, arr[who].to_json());
         cout << "删除成功，按任意键返回" << endl;
         getline(cin, buf);
@@ -585,6 +589,7 @@ void G_chat::remove(Group &group) const {
             cout << "读到文件结尾" << endl;
             return;
         }
+        break;
     }
 }
 
@@ -788,6 +793,7 @@ void G_chat::quit(vector<Group> &joinedGroup) {
     cout << "-------------------------------------------" << endl;
     int which;
     while (true) {
+        cout << "tip:群主不能退出群聊哦" << endl;
         cout << "输入你要退出的群" << endl;
         return_last();
         while (!(cin >> which) || which < 0 || which > joinedGroup.size()) {

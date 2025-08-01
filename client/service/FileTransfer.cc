@@ -118,6 +118,7 @@ void FileTransfer::recvFile_Friend(int fd, const User& myUser) const {
         return;
     }
     cout << "你有" << num << "个文件待接收" << endl;
+    cout << "\033[90m可以继续聊天（输入消息后按enter发送）\033[0m" << endl;
     string file_info;
     for (int i = 0; i < num; i++) {
         recvMsg(fd, file_info);

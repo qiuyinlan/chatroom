@@ -92,6 +92,7 @@ void unifiedMessageReceiver(int mainFd, string UID) {
         // 检查是否还在初始化阶段（前3秒）
         auto now = chrono::steady_clock::now();
         auto elapsed = chrono::duration_cast<chrono::seconds>(now - startTime).count();
+        //大于三秒，就显示所有离线消息
         if (initializationPhase && elapsed >= 3) {
             initializationPhase = false;
             cout << "[DEBUG] 初始化阶段结束，显示离线消息" << endl;
@@ -99,7 +100,7 @@ void unifiedMessageReceiver(int mainFd, string UID) {
             ClientState::printOfflineMessages();
         }
 
-        // 处理不同类型的消息
+        //处理不同类型的消息
         processUnifiedMessage(receivedMsg, initializationPhase);
     }
 
@@ -116,26 +117,19 @@ void processUnifiedMessage(const string& msg, bool isInitializationPhase) {
         return;
     }
 
-    // 处理特殊系统响应
-    if (msg == "FRIEND_VERIFICATION_NEEDED" ||
-        msg.find("VERIFICATION_NEEDED") != string::npos ||
-        msg.find("ND_VERIFICATION_NEEDED") != string::npos) {
+    // 处理特殊系统响应,删除和屏蔽不需要保存到离线！！！只是一个提示提示完就消失了
+    if (msg == "FRIEND_VERIFICATION_NEEDED") {
         string notifyMsg = "系统提示：对方开启了好友验证，你还不是他（她）朋友，请先发送朋友验证请求，对方验证通过后，才能聊天。";
-        if (ClientState::inChat) {
-            ClientState::addOfflineMessage(notifyMsg);
-        } else {
             cout << YELLOW << notifyMsg << RESET << endl;
-        }
+        
         return;
     }
 
     if (msg == "BLOCKED_MESSAGE") {
         string notifyMsg = "系统提示：消息已发出，但被对方拒收了。";
-        if (ClientState::inChat) {
-            ClientState::addOfflineMessage(notifyMsg);
-        } else {
+       
             cout << YELLOW << notifyMsg << RESET << endl;
-        }
+        
         return;
     }
 
@@ -147,8 +141,11 @@ void processUnifiedMessage(const string& msg, bool isInitializationPhase) {
     // 处理通知消息
     if (msg == REQUEST_NOTIFICATION) {
         string notifyMsg = "你收到一条好友添加申请";
-        // 所有通知都在主菜单显示，不在聊天中显示
-        cout << notifyMsg << endl;
+        if (ClientState::inChat) {
+            ClientState::addOfflineMessage(notifyMsg);
+        } else {
+            cout << notifyMsg << endl;
+        }
     }
     else if (msg == GROUP_REQUEST) {
         string notifyMsg = "你收到一条群聊添加申请";
@@ -182,6 +179,7 @@ void processUnifiedMessage(const string& msg, bool isInitializationPhase) {
             cout << notifyMsg << endl;
         }
     }
+    //不在聊天框的普通信息
     else if (msg.find("MESSAGE:") == 0) {
         string senderInfo = msg.substr(8);
         string notifyMsg;
@@ -204,6 +202,7 @@ void processUnifiedMessage(const string& msg, bool isInitializationPhase) {
             cout << notifyMsg << endl;
         }
     }
+    //不在聊天框的文件通知
     else if (msg.find("FILE:") == 0) {
         string sender = msg.substr(5);
         string notifyMsg = sender + "给你发了一个文件";

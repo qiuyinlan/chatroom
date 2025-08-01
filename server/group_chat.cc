@@ -326,7 +326,18 @@ void GroupChat::joinGroup() {
     int num = redis.scard(group.getAdmins());
     redisReply **arr = redis.smembers(group.getAdmins());
     for (int i = 0; i < num; i++) {
-        redis.sadd("add_group", arr[i]->str);
+        string adminUID = arr[i]->str;
+        redis.sadd("add_group", adminUID);
+
+        // 如果管理员在线，立即推送群聊申请通知
+        if (redis.hexists("unified_receiver", adminUID)) {
+            string receiver_fd_str = redis.hget("unified_receiver", adminUID);
+            int receiver_fd = stoi(receiver_fd_str);
+            sendMsg(receiver_fd, GROUP_REQUEST);
+            cout << "[DEBUG] 已推送群聊申请通知给在线管理员: " << adminUID << endl;
+        }
+
+        freeReplyObject(arr[i]);
     }
 }
 

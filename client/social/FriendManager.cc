@@ -47,6 +47,9 @@ void FriendManager::addFriend(vector<pair<string, User>> &my_friends) const {
         } else if (temp == "-4") {
             cout << "无法添加该用户，可能被对方屏蔽" << endl;
             return;
+        } else if (temp == "-5") {
+            cout << "你已经发送过好友申请，请等待对方处理" << endl;
+            return;
         }
         break;
     }

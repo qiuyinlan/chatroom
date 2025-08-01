@@ -199,18 +199,26 @@ void start_chat(int fd, User &user) {
         }
         string UID = message.getUidTo();
         
-        // 检查是否被对方删除（
+        // 检查是否被对方删除,删除和屏蔽的逻辑就是==对方发消息给我，且我在聊天框  UID是对方的uid,我的uid是user.getUID()
         if (!redis.sismember(UID, user.getUID())) {
             // 消息保存到发送者的历史记录中
             string me = user.getUID() + UID;
             redis.lpush(me, msg);
-            sendMsg(fd, "FRIEND_VERIFICATION_NEEDED");
+
+            string receiver_fd_str = redis.hget("unified_receiver", user.getUID());
+            int receiver_fd = stoi(receiver_fd_str);
+            sendMsg(receiver_fd, "FRIEND_VERIFICATION_NEEDED");
             continue; 
         }
         
         // 检查对方是否屏蔽了我
         if (redis.sismember("blocked" + UID, user.getUID())) {
-            sendMsg(fd, "BLOCKED_MESSAGE");
+            string me = user.getUID() + UID;
+            redis.lpush(me, msg);
+
+            string receiver_fd_str = redis.hget("unified_receiver", user.getUID());//是给原客户端的通知线程发，不是UID,是GETUID()
+            int receiver_fd = stoi(receiver_fd_str);
+            sendMsg(receiver_fd, "BLOCKED_MESSAGE");
             continue;
         }
         
@@ -338,13 +346,29 @@ void add_friend(int fd, User &user) {
         sendMsg(fd, "-4"); // 被屏蔽，无法添加
         return;
     }
-    
+
+    // 检查是否已经发送过好友申请
+    if (redis.sismember(UID + "add_friend", user.getUID())) {
+        sendMsg(fd, "-5"); // 已经发送过申请，等待对方处理
+        return;
+    }
+
     sendMsg(fd, "1");
     redis.sadd("add_friend", UID);
     redis.sadd(UID + "add_friend", user.getUID());
 
     // 设置好友申请通知标记
     redis.hset("friend_request_notify", UID, "1");
+
+    // 如果目标用户在线，立即推送好友申请通知
+    if (redis.hexists("unified_receiver", UID)) {
+        string receiver_fd_str = redis.hget("unified_receiver", UID);
+        int receiver_fd = stoi(receiver_fd_str);
+        sendMsg(receiver_fd, REQUEST_NOTIFICATION);
+        cout << "[DEBUG] 已推送好友申请通知给在线用户: " << UID << endl;
+        // 清除通知标记，因为已经推送了
+        redis.hdel("friend_request_notify", UID);
+    }
 
     string user_info = redis.hget("user_info", UID);
     sendMsg(fd, user_info);
