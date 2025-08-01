@@ -31,6 +31,7 @@ add_executable(
         utils/IO.cc
         utils/proto.cc
         utils/Group.cc
+        client/service/Notifications.cc
 )
 
 add_executable(

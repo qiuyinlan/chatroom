@@ -3,6 +3,8 @@
 #include <map>
 #include <cstdint>
 #include <csignal>
+#include <atomic>
+#include <mutex>
 #include "client.h"
 #include "../utils/TCP.h"
 #include "StartMenu.h"
@@ -12,6 +14,9 @@
 using namespace std;
 
 
+
+    //全局变量——当前聊天对象
+    
 void signalHandler(int signum) {
     cout << "\n接收到信号 " << signum << "，客户端正在退出..." << endl;
     cout << "再见！" << endl;

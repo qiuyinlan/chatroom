@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/xuzichun/chatroom/messengertest/client/service/Notifications.cc" "CMakeFiles/server.out.dir/client/service/Notifications.cc.o" "gcc" "CMakeFiles/server.out.dir/client/service/Notifications.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/server/LoginHandler.cc" "CMakeFiles/server.out.dir/server/LoginHandler.cc.o" "gcc" "CMakeFiles/server.out.dir/server/LoginHandler.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/server/Redis.cc" "CMakeFiles/server.out.dir/server/Redis.cc.o" "gcc" "CMakeFiles/server.out.dir/server/Redis.cc.o.d"
   "/home/xuzichun/chatroom/messengertest/server/Threadpool.cpp" "CMakeFiles/server.out.dir/server/Threadpool.cpp.o" "gcc" "CMakeFiles/server.out.dir/server/Threadpool.cpp.o.d"

@@ -3,10 +3,16 @@
 
 #include "User.h"
 
+#pragma once
+#include <atomic>
+extern std::atomic<bool> stopNotify;
+
 void announce(string UID);
 
 void chatReceived(int fd, const string&UID);
 
 bool isNumericString(const std::string &str);
+
+
 
 #endif //CHATROOM_NOTIFICATIONS_H

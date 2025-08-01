@@ -13,10 +13,14 @@
 #include <nlohmann/json.hpp>
 #include <random>
 #include <ctime>
+#include <atomic>
 #include "./group_chat.h"
+#include "../client/service/Notifications.h"
 
 using namespace std;
 using json = nlohmann::json;
+
+
 
 //登陆
 
@@ -117,7 +121,9 @@ void serverOperation(int fd, User &user) {
         //接收用户输入的操作
         ret = recvMsg(fd, temp);
 
-        if (temp == BACK || ret == 0) {
+        if (temp == BACK || ret == 0) {\
+            cout << "收到客户端在主页退出，成功" << endl ;
+            stopNotify = true;
             break;
         }
 
@@ -156,13 +162,17 @@ void serverOperation(int fd, User &user) {
             continue;
         }
     }
-    close(fd);
+
+    // close(fd);
     redis.hdel("is_online", user.getUID());
 }
 
 void notify(int fd, const string &UID) {
     Redis redis;
     redis.connect();
+    // if (stopNotify) {
+    //     sendMsg(fd,"STOP");
+    // }
 
     // 检查好友申请通知（使用单独的通知标记）
     if (redis.hexists("friend_request_notify", UID)) {

@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/server.out.dir/client/service/Notifications.cc.o"
+  "CMakeFiles/server.out.dir/client/service/Notifications.cc.o.d"
   "CMakeFiles/server.out.dir/server/LoginHandler.cc.o"
   "CMakeFiles/server.out.dir/server/LoginHandler.cc.o.d"
   "CMakeFiles/server.out.dir/server/Redis.cc.o"

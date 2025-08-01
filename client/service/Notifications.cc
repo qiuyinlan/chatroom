@@ -7,6 +7,9 @@
 
 using namespace std;
 
+
+std::atomic<bool> stopNotify{false};
+
 //实时通知
 void announce(string UID) {
     int announce_fd = Socket();
@@ -31,14 +34,21 @@ void announce(string UID) {
 
         // 循环接收所有通知消息，直到收到 END 标志
         while (true) {
-            if (recvMsg(announce_fd, buf) <= 0) {
+            if (recvMsg(announce_fd, buf) <= 0) {//一直阻塞，知道收到消息——打印，0.5s后继续发，阻塞
                 cout << "通知服务连接断开，退出通知线程" << endl;
                 return;
             }
 
+            // if (buf == "STOP") {
+            //     return;
+            // }
+
+
             if (buf == "END") {
                 break;  // 结束标志，退出内层循环
             }
+
+            
 
             // 根据消息类型前缀处理不同的通知
             if (buf == REQUEST_NOTIFICATION) {

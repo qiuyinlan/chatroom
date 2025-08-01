@@ -192,4 +192,6 @@ CMakeFiles/client.out.dir/client/social/G_chat.cc.o: \
  /usr/include/c++/13/bits/stl_tempbuf.h /usr/include/c++/13/map \
  /usr/include/c++/13/bits/stl_tree.h /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /home/xuzichun/chatroom/messengertest/client/service/Notifications.h
+ /home/xuzichun/chatroom/messengertest/client/service/Notifications.h \
+ /usr/include/c++/13/atomic /usr/include/c++/13/bits/atomic_base.h \
+ /usr/include/c++/13/bits/atomic_lockfree_defines.h

@@ -81,7 +81,6 @@ G_chat::G_chat(int fd, const User &user) : fd(fd), user(user) {
 }
 
 void G_chat::syncGL(std::vector<Group> &joinedGroup) {
-    cout << "syncGL同步群聊列表" << endl;
     joinedGroup.clear();
     // 发送群聊列表获取请求
     int ret = sendMsg(fd, SYNCGL);
@@ -93,7 +92,6 @@ void G_chat::syncGL(std::vector<Group> &joinedGroup) {
 
     //接受群聊数量
     int recv_ret = recvMsg(fd, nums);
-cout << "接收群聊数量" << nums << endl;
     if (recv_ret <= 0) {
         cerr << "[ERROR] 接收群聊数量失败，连接可能断开" << endl;
         return;

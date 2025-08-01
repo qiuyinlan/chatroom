@@ -9,6 +9,7 @@
 #include "../utils/IO.h"
 #include "Notifications.h"
 #include "../utils/User.h"
+#include "../client/service/FileTransfer.h"
 
 using namespace std;
 
@@ -95,7 +96,8 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
     
     // 消息发送循环
     string msg;
-    return_last();
+     std::cout << "\033[90m输入【send】发送文件，【recv】接收文件，【0】退出聊天\033[0m" << std::endl;
+
     while (true) {
         getline(cin, msg);
         
@@ -282,7 +284,8 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
         string msg, json;
 
         //真正开始聊天
-        return_last();
+        std::cout << "\033[90m输入【send】发送文件，【recv】接收文件，【0】退出聊天\033[0m" << std::endl;
+
         while (true) {
             getline(cin,msg);
             if (cin.eof()) {
@@ -294,6 +297,17 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
             if (msg == "0") {
                 sendMsg(fd, EXIT);
                 return;
+            }
+      //发文件
+            FileTransfer fileTransfer_friend(fd, my_friends[who-1].second);  
+            if(msg == "send"){
+                //传好友信息
+                fileTransfer_friend.sendFile_Friend(my_friends[who-1].second);
+                continue;
+            }
+            if(msg == "recv"){
+                fileTransfer_friend.recvFile_Friend();
+                continue;
             }
             else if(msg.empty()){
                 cout << "不能发送空白消息" << endl;

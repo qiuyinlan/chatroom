@@ -5,6 +5,11 @@
 
 using std::string;
 
+//文件
+const string SENDFILE_F = "SENDFILE_F";
+const string RECVFILE_F = "RECVFILE_F";
+const string SENDFILE_G = "SENDFILE_G";
+const string RECVFILE_G = "RECVFILE_G";
 
 const string LOGIN = "1";
 const string NOTIFY = "3";

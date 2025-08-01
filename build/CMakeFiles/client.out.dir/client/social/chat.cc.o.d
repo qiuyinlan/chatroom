@@ -177,4 +177,7 @@ CMakeFiles/client.out.dir/client/social/chat.cc.o: \
  /home/xuzichun/chatroom/messengertest/server/../utils/proto.h \
  /home/xuzichun/chatroom/messengertest/server/../utils/IO.h \
  /home/xuzichun/chatroom/messengertest/client/service/Notifications.h \
- /home/xuzichun/chatroom/messengertest/utils/User.h
+ /home/xuzichun/chatroom/messengertest/utils/User.h \
+ /usr/include/c++/13/atomic /usr/include/c++/13/bits/atomic_base.h \
+ /usr/include/c++/13/bits/atomic_lockfree_defines.h \
+ /home/xuzichun/chatroom/messengertest/server/../client/service/FileTransfer.h

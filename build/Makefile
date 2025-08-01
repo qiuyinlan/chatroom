@@ -256,6 +256,7 @@ client/service/Notifications.o: client/service/Notifications.cc.o
 
 # target to build an object file
 client/service/Notifications.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.out.dir/build.make CMakeFiles/server.out.dir/client/service/Notifications.cc.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/Notifications.cc.o
 .PHONY : client/service/Notifications.cc.o
 
@@ -264,6 +265,7 @@ client/service/Notifications.i: client/service/Notifications.cc.i
 
 # target to preprocess a source file
 client/service/Notifications.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.out.dir/build.make CMakeFiles/server.out.dir/client/service/Notifications.cc.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/Notifications.cc.i
 .PHONY : client/service/Notifications.cc.i
 
@@ -272,6 +274,7 @@ client/service/Notifications.s: client/service/Notifications.cc.s
 
 # target to generate assembly for a file
 client/service/Notifications.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.out.dir/build.make CMakeFiles/server.out.dir/client/service/Notifications.cc.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.out.dir/build.make CMakeFiles/client.out.dir/client/service/Notifications.cc.s
 .PHONY : client/service/Notifications.cc.s
 

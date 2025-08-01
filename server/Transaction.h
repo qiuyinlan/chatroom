@@ -5,6 +5,10 @@
 
 //业务处理函数，对应实现的所有功能
 
+ void sendFile_Friend(int fd, User &user) ;
+
+void recvFile_Friend(int fd, User &user);
+
 void synchronize(int fd, User &user);
 
 void start_chat(int fd, User &user);

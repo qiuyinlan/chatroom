@@ -16,6 +16,7 @@
 using namespace std;
 
 void operationMenu() {
+   std::cout << "\033[1;34m--------------------------------------\033[0m" << std::endl;
     cout << "[1]开始聊天                  [2]添加好友" << endl;
     cout << "[3]查看添加好友请求          [4]删除好友" << endl;
     cout << "[5]屏蔽好友                  [6]解除屏蔽" << endl;
@@ -94,6 +95,7 @@ void clientOperation(int fd, User &user) {
             cout << "输入错误" << endl;
             continue;
         }
+        //0退出登陆
         if (option == "0") {
             if (sendMsg(fd, BACK) <= 0) {
                 cout << "服务器连接已断开，客户端退出" << endl;
