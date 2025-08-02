@@ -122,7 +122,7 @@ void serverOperation(int fd, User &user) {
     string temp;
     int ret;
     while (true) {
-    
+        //接收用户输入的操作
         ret = recvMsg(fd, temp);
 
         if (temp == BACK ) {
@@ -130,7 +130,8 @@ void serverOperation(int fd, User &user) {
 
             break;
         }
-        
+
+        // 使用宏定义的if-else分发，清晰易懂
         if (temp == START_CHAT) {
             start_chat(fd, user);
         } else if (temp == LIST_FRIENDS) {
@@ -146,7 +147,8 @@ void serverOperation(int fd, User &user) {
         } else if (temp == UNBLOCKED) {
             unblocked(fd, user);
         } else if (temp == GROUP) {
-            group(fd, user);
+            GroupChat groupChat(fd, user);
+            groupChat.group(fd, user);
         } else if (temp == SEND_FILE) {
             send_file(fd, user);
         } else if (temp == RECEIVE_FILE) {
@@ -168,7 +170,7 @@ void serverOperation(int fd, User &user) {
         }
     }
     redis.hdel("is_online", user.getUID());
-    redis.hdel("unified_receiver", user.getUID());  
+    redis.hdel("unified_receiver", user.getUID());  // 清理统一接收连接记录
 }
 
 void notify(int fd, const string &UID) {
@@ -248,9 +250,9 @@ void notify(int fd, const string &UID) {
     }
 
     // 检查离线消息通知
-    int offlineMsgNum = redis.llen("offline_message_notify" + UID);
+    int offlineMsgNum = redis.llen("off_msg" + UID);
     if (offlineMsgNum != 0) {
-        redisReply **offlineMsgArr = redis.lrange("offline_message_notify" + UID, "0", to_string(offlineMsgNum - 1));
+        redisReply **offlineMsgArr = redis.lrange("off_msg" + UID, "0", to_string(offlineMsgNum - 1));
 
         // 统计每个用户的消息数量
         map<string, int> senderCount;
@@ -274,7 +276,7 @@ void notify(int fd, const string &UID) {
         }
 
         // 清空整个离线消息列表
-        redis.del("offline_message_notify" + UID);
+        redis.del("off_msg" + UID);
         cout << "[DEBUG] 已推送 " << senderCount.size() << " 个用户的 " << offlineMsgNum << " 条离线消息通知给用户 " << UID << endl;
     }
 

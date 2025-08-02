@@ -102,10 +102,6 @@ void processUnifiedMessage(const string& msg) {
         return;
     }
 
-    if (msg == "MESSAGE_SENT") {
-        // 消息发送成功，不需要特殊处理
-        return;
-    }
 
     // 处理通知消息
     if (msg == REQUEST_NOTIFICATION) {

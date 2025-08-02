@@ -11,7 +11,7 @@
 using namespace std;
 
 
-void group(int fd, User &user) {
+void GroupChat::group(int fd, User &user) {
     std::cout << "[DEBUG] group() 函数开始" << std::endl;
     Redis redis;
     redis.connect();
@@ -266,14 +266,14 @@ void GroupChat::startChat() {
             if (!redis.hexists("is_online", UIDto)) {
                 redis.hset("chat", UIDto, group.getGroupName());
                 // 同时保存到离线消息队列
-                redis.lpush("offline_message_notify" + UIDto, group.getGroupName());
+                redis.lpush("off_msg" + UIDto, group.getGroupName());
                 freeReplyObject(arr[i]);
                 continue;
             }
             //不在群聊中，发送通知
             if (!redis.sismember("group_chat", UIDto)) {
                 // 保存到离线消息队列
-                redis.lpush("offline_message_notify" + UIDto, group.getGroupName());
+                redis.lpush("off_msg" + UIDto, group.getGroupName());
                 // 使用统一接收连接发送通知
                 if (redis.hexists("unified_receiver", UIDto)) {
                     string receiver_fd_str = redis.hget("unified_receiver", UIDto);
@@ -391,11 +391,11 @@ cout << "收到客户端发送的群聊名称" << groupName << endl;
     //群聊实时通知
     int num = redis.scard(group.getAdmins());
     redisReply **arr = redis.smembers(group.getAdmins());
-    if (arr != nullptr) {
+     if (arr != nullptr) {
         for (int i = 0; i < num; i++) {
             string adminUID = arr[i]->str;//遍历每个管理
            
-            
+     cout << "管理员UID" << adminUID << endl;
             redis.sadd("add_group", adminUID);
             redis.hset("group_request_info", adminUID, group.getGroupName());
 
@@ -411,7 +411,7 @@ cout << "收到客户端发送的群聊名称" << groupName << endl;
             }
 
             freeReplyObject(arr[i]);
-        }
+         }
     }
 }
 

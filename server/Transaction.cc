@@ -180,22 +180,24 @@ void start_chat(int fd, User &user) {
             continue;
         }
         
-        // 正常发送消息的逻辑
-        // 注意：MESSAGE_SENT 应该在消息真正发送后才发送
 
         //对方不在线
         if (!redis.hexists("is_online", UID)) {
-            // 保存消息到历史记录
+            //历史
+            
             string me = message.getUidFrom() + message.getUidTo();
             string her = message.getUidTo() + message.getUidFrom();
             redis.lpush(me, msg);
             redis.lpush(her, msg);
 
-            // 保存离线消息通知（使用list保存多条）
-            redis.lpush("offline_message_notify" + UID, message.getUsername());
+            // 离线
+            redis.lpush("off_msg" + UID, message.getUsername());
             cout << "[DEBUG] 用户 " << UID << " 离线，保存消息通知: " << message.getUsername() << endl;
             continue;
         }
+
+
+        //下列都是在线
         
         // 检查我是否屏蔽了对方（我屏蔽对方，对方的消息我收不到）
         if (!redis.sismember("blocked" + user.getUID(), UID)) {
@@ -216,7 +218,7 @@ void start_chat(int fd, User &user) {
                         cout << "[DEBUG] JSON消息已发送到聊天窗口" << endl;
                     } else {
                         // 接收方不在聊天中，保存到离线消息并发送通知
-                        redis.lpush("offline_message_notify" + UID, message.getUsername());
+                        redis.lpush("off_msg" + UID, message.getUsername());
                         sendMsg(receiver_fd, "MESSAGE:" + message.getUsername());
                         cout << "[DEBUG] 消息已保存到离线消息，通知已发送到主菜单" << endl;
                     }
@@ -416,7 +418,6 @@ void unblocked(int fd, User &user) {
 
 
  void sendFile_Friend(int fd, User &user) {
-        cout << "[DEBUG] sendFile_Friend 开始，用户: " << user.getUsername() << endl;
         Redis redis;
         redis.connect();
         string friend_info;
@@ -550,6 +551,8 @@ void unblocked(int fd, User &user) {
         }
 
         ofs.close();
+
+        cout << "[DEBUG] 文件发送完成" << endl;
  }
 
 // 群聊发送文件
