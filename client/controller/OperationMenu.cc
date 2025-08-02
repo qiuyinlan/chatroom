@@ -20,9 +20,9 @@ void operationMenu() {
     cout << "[1]开始聊天                  [2]添加好友" << endl;
     cout << "[3]查看添加好友请求          [4]删除好友" << endl;
     cout << "[5]屏蔽好友                  [6]解除屏蔽" << endl;
-    cout << "[7]群聊" << endl;
+    cout << "[7]群聊                      [8]注销账户" << endl;
     cout << "按[0]退出登陆" << endl;
-    cout << "请输入你的选择" << endl;
+    cout << BLUE << "请输入你的选择" << RESET << endl;
 }
 
 void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) {
@@ -41,7 +41,6 @@ void syncFriends(int fd, string my_uid, vector<pair<string, User>> &my_friends) 
          cout << "服务器连接已断开，无法获取好友信息" << endl;
         return ;
     }
-cout << friend_num << endl;
     int num;
     try {
         num = stoi(friend_num);
@@ -56,13 +55,11 @@ cout << friend_num << endl;
    
     for (int i = 0; i < num; i++) {
          //收好友详细信息
-        cout << "[DEBUG] 正在接收第 " << (i+1) << "/" << num << " 个好友信息..." << endl;
-        int recv_ret2 = recvMsg(fd, friend_info);
+       int recv_ret2 = recvMsg(fd, friend_info);
         if (recv_ret2 <= 0) {
             cout << "服务器连接已断开，好友信息同步中断" << endl;
             return ;
         }
-        cout << "[DEBUG] 接收到好友信息: " << friend_info.substr(0, 50) << "..." << endl;
         try {
             myfriend.json_parse(friend_info);
             my_friends.emplace_back(my_uid, myfriend);
@@ -124,6 +121,7 @@ void clientOperation(int fd, User &user) {
             continue;
         }
         // 同步好友列表，宏定义17
+        //输入选项之后，会同步好友列表
         syncFriends(fd, my_uid, my_friends);
 
         // if-else分发
@@ -150,9 +148,39 @@ void clientOperation(int fd, User &user) {
             friendManager.unblocked(my_friends);
         } else if (opt == 7) {
             gChat.groupctrl(my_friends);
+            return;
+        } else if (opt == 8) {
+            deactivateAccount(fd, user);
+            return;
         } else {
             cout << "没有这个选项，请重新输入" << endl;
         }
+    }
+}
+
+// 注销账户
+void deactivateAccount(int fd, User &user) {
+    cout << "\n=== 账户注销 ===" << endl;
+    cout << "警告：注销后您将无法再次使用此用户名，也无法使用此邮箱登录！" << endl;
+    cout << "您的账户信息将被保留，但无法接收消息与登陆。" << endl;
+    cout << "确定要注销账户吗？(y/n): ";
+    
+    string choice;
+    getline(cin, choice);
+    
+    if (choice == "y" || choice == "Y" || choice == "yes" || choice == "YES") {
+        // 发送注销协议
+        sendMsg(fd, DEACTIVATE_ACCOUNT);
+        
+    
+            cout << "账户已成功注销！" << endl;
+            cout << "您将退出登录..." << endl;
+            // 发送退出登录协议
+            sendMsg(fd, BACK);
+            return;
+        
+    } else {
+        cout << "取消注销操作" << endl;
     }
 }
 

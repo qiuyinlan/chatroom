@@ -115,7 +115,7 @@ int login(int fd, User &user) {
     } else if (buf == "-3") {
         cout << "该用户已经登录" << endl;
         return 0;
-    } else if (buf == "1") {
+    }  else if (buf == "1") {
         cout << "登录成功!" << endl;
         string user_info;
         recvMsg(fd, user_info);

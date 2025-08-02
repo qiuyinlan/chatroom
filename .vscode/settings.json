@@ -75,5 +75,6 @@
         "cinttypes": "cpp",
         "valarray": "cpp",
         "variant": "cpp"
-    }
+    },
+    "kiroAgent.configureMCP": "Disabled"
 }

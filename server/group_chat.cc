@@ -11,6 +11,65 @@
 using namespace std;
 
 
+void group(int fd, User &user) {
+    std::cout << "[DEBUG] group() 函数开始" << std::endl;
+    Redis redis;
+    redis.connect();
+    GroupChat groupChat(fd, user);
+  
+    string choice;
+    
+    int ret;
+    while (true) {
+        groupChat.sync();
+        std::cout << "[DEBUG] 等待接收客户端选择..." << std::endl;
+        ret = recvMsg(fd, choice);
+        std::cout << "[DEBUG] 接收到客户端选择: '" << choice << "', ret=" << ret << std::endl;
+
+        if (ret == 0) {
+            std::cout << "[DEBUG] 客户端断开连接" << std::endl;
+            redis.hdel("is_online", user.getUID());
+            break;
+        }
+        if (choice == BACK) {
+            std::cout << "[DEBUG] 客户端选择退出" << std::endl;
+            break;
+        }
+        try {
+            int option = stoi(choice);
+            std::cout << "[DEBUG] 解析选择为数字: " << option << std::endl;
+             
+            if (option == 1) {
+                groupChat.createGroup();
+                continue;
+            } else if (option == 2) {
+                groupChat.joinGroup();
+                continue;
+            }  else if (option == 3) {
+                groupChat.managedGroup();
+                continue;
+            } else if (option == 4) {
+                groupChat.showMembers();
+                continue;
+            } else if (option == 5) {
+                groupChat.quit();
+                continue;
+            } else {
+                // 处理无效选项，这里选择继续循环等待有效输入
+                std::cout << "[DEBUG] 无效选择: " << option << "，继续等待有效输入" << std::endl;
+                continue;
+            }
+        } catch (const std::exception& e) {
+            std::cout << "[ERROR] 解析选择失败: " << e.what() << std::endl;
+            std::cout << "[ERROR] 选择内容: '" << choice << "'" << std::endl;
+            // 如果解析失败，通常意味着输入格式错误，这里选择断开连接
+            break;
+        }
+    }
+    std::cout << "[DEBUG] group() 函数结束" << std::endl;
+}
+
+
 GroupChat::GroupChat(int fd, const User &user) : fd(fd), user(user) {
     joined = "joined" + user.getUID();
     created = "created" + user.getUID();
@@ -29,23 +88,25 @@ void GroupChat::synchronizeGL(int fd, User &user) {
     //发送群info
     if (num != 0) {
         redisReply **arr = redis.smembers(joined);
+        if (arr != nullptr) {
+            for (int i = 0; i < num; i++) {
+                // 先检查群是否存在
+                if (!redis.hexists("group_info", arr[i]->str)) {
+                    redis.srem(joined, arr[i]->str);
+                    continue;
+                }
 
-        for (int i = 0; i < num; i++) {
-            // 先检查群是否存在
-            if (!redis.hexists("group_info", arr[i]->str)) {
-                redis.srem(joined, arr[i]->str);
-                continue;
+                group_info = redis.hget("group_info", arr[i]->str);
+                sendMsg(fd, group_info);
+                freeReplyObject(arr[i]);
             }
-
-            group_info = redis.hget("group_info", arr[i]->str);
-            sendMsg(fd, group_info);
-            freeReplyObject(arr[i]);
         }
     }
    cout << "synchronizeGL同步群聊列表结束" << endl;
     
 }    
 
+//同步群数量
 void GroupChat::sync() {
     Redis redis;
     redis.connect();
@@ -204,11 +265,15 @@ void GroupChat::startChat() {
             //不在线，就把用户和群聊名存到chat表里
             if (!redis.hexists("is_online", UIDto)) {
                 redis.hset("chat", UIDto, group.getGroupName());
+                // 同时保存到离线消息队列
+                redis.lpush("offline_message_notify" + UIDto, group.getGroupName());
                 freeReplyObject(arr[i]);
                 continue;
             }
             //不在群聊中，发送通知
             if (!redis.sismember("group_chat", UIDto)) {
+                // 保存到离线消息队列
+                redis.lpush("offline_message_notify" + UIDto, group.getGroupName());
                 // 使用统一接收连接发送通知
                 if (redis.hexists("unified_receiver", UIDto)) {
                     string receiver_fd_str = redis.hget("unified_receiver", UIDto);
@@ -301,6 +366,7 @@ void GroupChat::joinGroup() {
     string groupName;
     //接收客户端发送的群聊名称
     recvMsg(fd, groupName);
+cout << "收到客户端发送的群聊名称" << groupName << endl;
     if (groupName == BACK) {
         return;
     }
@@ -325,19 +391,27 @@ void GroupChat::joinGroup() {
     //群聊实时通知
     int num = redis.scard(group.getAdmins());
     redisReply **arr = redis.smembers(group.getAdmins());
-    for (int i = 0; i < num; i++) {
-        string adminUID = arr[i]->str;
-        redis.sadd("add_group", adminUID);
+    if (arr != nullptr) {
+        for (int i = 0; i < num; i++) {
+            string adminUID = arr[i]->str;//遍历每个管理
+           
+            
+            redis.sadd("add_group", adminUID);
+            redis.hset("group_request_info", adminUID, group.getGroupName());
 
-        // 如果管理员在线，立即推送群聊申请通知
-        if (redis.hexists("unified_receiver", adminUID)) {
-            string receiver_fd_str = redis.hget("unified_receiver", adminUID);
-            int receiver_fd = stoi(receiver_fd_str);
-            sendMsg(receiver_fd, GROUP_REQUEST);
-            cout << "[DEBUG] 已推送群聊申请通知给在线管理员: " << adminUID << endl;
+            // 如果管理员在线，立即推送群聊申请通知
+            if (redis.hexists("unified_receiver", adminUID)) {
+                string receiver_fd_str = redis.hget("unified_receiver", adminUID);
+                int receiver_fd = stoi(receiver_fd_str);
+                sendMsg(receiver_fd, "GROUP_REQUEST:" + group.getGroupName());
+                cout << "[DEBUG] 已推送群聊申请通知给在线管理员: " << adminUID << "，群聊: " << group.getGroupName() << endl;
+            }
+            else{
+                cout << "buzaixian" << endl;
+            }
+
+            freeReplyObject(arr[i]);
         }
-
-        freeReplyObject(arr[i]);
     }
 }
 

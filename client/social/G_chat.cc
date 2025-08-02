@@ -342,8 +342,9 @@ void G_chat::joinGroup() const {
         cout << "该群不存在" << endl;
     } else if (response == "-2") {
         cout << "你已经是该群成员" << endl;
+    }else{
+        cout << "请求已经发出，等待同意" << endl;
     }
-    cout << "请求已经发出，等待同意" << endl;
     string temp;
     cout << "按任意键返回" << endl;
     getline(cin, temp);

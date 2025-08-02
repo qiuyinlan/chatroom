@@ -39,4 +39,6 @@ void send_file(int fd, User &user);
 void receive_file(int fd, User &user);
 
 
+void deactivateAccount(int fd, User &user);
+
 #endif //CHATROOM_TRANSACTION_H

@@ -22,6 +22,7 @@ void FriendManager::addFriend(vector<pair<string, User>> &my_friends) const {
             continue;
         }
         if (username == "0") {
+            sendMsg(fd,"0");
             return;
         }
         if (cin.eof()) {
@@ -44,11 +45,11 @@ void FriendManager::addFriend(vector<pair<string, User>> &my_friends) const {
         } else if (temp == "-3") {
             cout << "你不能添加自己为好友！" << endl;
             return;
-        } else if (temp == "-4") {
-            cout << "无法添加该用户，可能被对方屏蔽" << endl;
-            return;
         } else if (temp == "-5") {
             cout << "你已经发送过好友申请，请等待对方处理" << endl;
+            return;
+        } else if (temp == "-6") {
+            cout << "该用户已注销，无法添加" << endl;
             return;
         }
         break;
@@ -104,7 +105,8 @@ void FriendManager::findRequest(vector<pair<string, User>> &my_friends) const {
             User newFriend;
             recvMsg(fd, request_info);
             newFriend.json_parse(request_info);
-            my_friends.emplace_back(request_info, newFriend);
+            // 移除本地更新，让syncFriends从服务器获取最新数据
+            // my_friends.emplace_back(request_info, newFriend);
         } else {
             cout << "你拒绝了" << friendRequestName << "的请求" << endl;
         }

@@ -92,6 +92,9 @@ void serverLogin(int epfd, int fd) {
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
+    
+  
+    
     //用户已经登录检查
     if (redis.hexists("is_online", UID)) {
         cout << "[DEBUG] 用户 " << UID << " 已经在线，拒绝重复登录" << endl;
@@ -119,16 +122,15 @@ void serverOperation(int fd, User &user) {
     string temp;
     int ret;
     while (true) {
-        //接收用户输入的操作
+    
         ret = recvMsg(fd, temp);
 
-        if (temp == BACK || ret == 0) {\
+        if (temp == BACK ) {
             cout << "收到客户端在主页退出，成功" << endl ;
-            stopNotify = true;
+
             break;
         }
-
-        // 使用宏定义的if-else分发，清晰易懂
+        
         if (temp == START_CHAT) {
             start_chat(fd, user);
         } else if (temp == LIST_FRIENDS) {
@@ -157,35 +159,55 @@ void serverOperation(int fd, User &user) {
         }  else if ( temp == GROUPCHAT ) {
             GroupChat groupChat(fd, user);
             groupChat.startChat();
+        }  else if (temp == DEACTIVATE_ACCOUNT) {
+            deactivateAccount(fd, user);
         } else {
             cout << "[DEBUG] 收到未知协议: '" << temp << "' (长度: " << temp.length() << ")" << endl;
             cout << "没有这个选项，请重新输入: " << temp << endl;
             continue;
         }
     }
-
-    // close(fd);
     redis.hdel("is_online", user.getUID());
-    redis.hdel("unified_receiver", user.getUID());  // 清理统一接收连接记录
+    redis.hdel("unified_receiver", user.getUID());  
 }
 
 void notify(int fd, const string &UID) {
+    
+    bool msgnum=false;
     Redis redis;
     redis.connect();
-    // if (stopNotify) {
-    //     sendMsg(fd,"STOP");
-    // }
+   
 
     // 检查好友申请通知（使用单独的通知标记）
     if (redis.hexists("friend_request_notify", UID)) {
         sendMsg(fd, REQUEST_NOTIFICATION);
+        msgnum=true;
         redis.hdel("friend_request_notify", UID);  // 清除通知标记
+    }
+
+    // 检查群聊申请通知
+    if (redis.sismember("add_group", UID)) {
+        // 获取群聊名称
+        string groupName = redis.hget("group_request_info", UID);
+        if (!groupName.empty()) {
+            sendMsg(fd, "GROUP_REQUEST:" + groupName);
+            msgnum=true;
+            cout << "[DEBUG] 已推送群聊申请通知给用户: " << UID << "，群聊: " << groupName << endl;
+        } else {
+            // 如果没有群聊名称信息，发送默认通知
+            sendMsg(fd, GROUP_REQUEST);
+            msgnum=true;
+            cout << "[DEBUG] 已推送群聊申请通知给用户: " << UID << "（无群聊名称信息）" << endl;
+        }
+        redis.srem("add_group", UID);  // 清除通知标记
+        redis.hdel("group_request_info", UID);  // 清除群聊名称信息
     }
 
     // 检查消息通知，如果之前用户 A 给用户 B 发消息，B当时不在线，A 的 UID 就被记录进 "chat" 哈希中
     if (redis.hexists("chat", UID)) {
         string sender = redis.hget("chat", UID);
         sendMsg(fd, "MESSAGE:" + sender);
+        msgnum=true;
         redis.hdel("chat", UID);  // 清除通知标记
     }
 
@@ -193,10 +215,13 @@ void notify(int fd, const string &UID) {
     int num = redis.scard("appoint_admin" + UID);
     if (num != 0) {
         redisReply **arr = redis.smembers("appoint_admin" + UID);
-        for (int i = 0; i < num; i++) {
-            sendMsg(fd, "ADMIN_ADD:" + string(arr[i]->str));
-            redis.srem("appoint_admin" + UID, arr[i]->str);
-            freeReplyObject(arr[i]);
+        if (arr != nullptr) {
+            for (int i = 0; i < num; i++) {
+                sendMsg(fd, "ADMIN_ADD:" + string(arr[i]->str));
+                msgnum=true;
+                redis.srem("appoint_admin" + UID, arr[i]->str);
+                freeReplyObject(arr[i]);
+            }
         }
     }
 
@@ -204,10 +229,13 @@ void notify(int fd, const string &UID) {
     int fileNum = redis.scard("file" + UID);
     if (fileNum != 0) {
         redisReply **fileArr = redis.smembers("file" + UID);
-        for (int i = 0; i < fileNum; i++) {
-            sendMsg(fd, "FILE:" + string(fileArr[i]->str));
-            redis.srem("file" + UID, fileArr[i]->str);
-            freeReplyObject(fileArr[i]);
+        if (fileArr != nullptr) {
+            for (int i = 0; i < fileNum; i++) {
+                sendMsg(fd, "FILE:" + string(fileArr[i]->str));
+                msgnum=true;
+                redis.srem("file" + UID, fileArr[i]->str);
+                freeReplyObject(fileArr[i]);
+            }
         }
     }
 
@@ -215,6 +243,7 @@ void notify(int fd, const string &UID) {
     if (redis.hexists("offline_file_notify", UID)) {
         string sender = redis.hget("offline_file_notify", UID);
         sendMsg(fd, "FILE:" + sender);
+         msgnum=true;
         redis.hdel("offline_file_notify", UID);  // 清除离线通知
     }
 
@@ -237,8 +266,10 @@ void notify(int fd, const string &UID) {
             int count = pair.second;
             if (count == 1) {
                 sendMsg(fd, "MESSAGE:" + sender);
+                msgnum=true;
             } else {
                 sendMsg(fd, "MESSAGE:" + sender + "(" + to_string(count) + "条)");
+                msgnum=true;
             }
         }
 
@@ -251,17 +282,24 @@ void notify(int fd, const string &UID) {
     num = redis.scard("revoke_admin" + UID);
     if (num != 0) {
         redisReply **arr = redis.smembers("revoke_admin" + UID);
-        for (int i = 0; i < num; i++) {
-            sendMsg(fd, "ADMIN_REMOVE:" + string(arr[i]->str));
-            redis.srem("revoke_admin" + UID, arr[i]->str);
-            freeReplyObject(arr[i]);
+        if (arr != nullptr) {
+            for (int i = 0; i < num; i++) {
+                sendMsg(fd, "ADMIN_REMOVE:" + string(arr[i]->str));
+                msgnum=true;
+                redis.srem("revoke_admin" + UID, arr[i]->str);
+                freeReplyObject(arr[i]);
+            }
         }
     }
+
 
     // 重复的文件消息提醒已删除（上面已经处理过了）
 
     // 发送结束标志
-    sendMsg(fd, "END");
+    // sendMsg(fd, "END");
+    if(msgnum==false){
+        sendMsg(fd,"nomsg");
+    }
 }
 
 // 处理统一接收线程连接
@@ -500,6 +538,16 @@ void serverRegisterWithCode(int epfd, int fd) {
         sendMsg(fd, "服务器内部错误");
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
+    }
+
+    // 检查邮箱是否已被注销用户使用
+    if (redis.hexists("email_to_uid", email)) {
+        string existingUID = redis.hget("email_to_uid", email);
+        if (redis.sismember("deactivated_users", existingUID)) {
+            sendMsg(fd, "该邮箱已被注销用户使用，无法注册");
+            epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
+            return;
+        }
     }
 
     // 验证验证码

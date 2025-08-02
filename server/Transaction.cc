@@ -22,64 +22,9 @@ using namespace std;
 using json = nlohmann::json;
 
 
-void group(int fd, User &user) {
-    std::cout << "[DEBUG] group() 函数开始" << std::endl;
-    Redis redis;
-    redis.connect();
-    GroupChat groupChat(fd, user);
-  
-    string choice;
-    
-    int ret;
-    while (true) {
-  cout << "chonglai" << endl;
-        groupChat.sync();
-        std::cout << "[DEBUG] 等待接收客户端选择..." << std::endl;
-        ret = recvMsg(fd, choice);
-        std::cout << "[DEBUG] 接收到客户端选择: '" << choice << "', ret=" << ret << std::endl;
 
-        if (ret == 0) {
-            std::cout << "[DEBUG] 客户端断开连接" << std::endl;
-            redis.hdel("is_online", user.getUID());
-            break;
-        }
-        if (choice == BACK) {
-            std::cout << "[DEBUG] 客户端选择退出" << std::endl;
-            break;
-        }
-        try {
-            int option = stoi(choice);
-            std::cout << "[DEBUG] 解析选择为数字: " << option << std::endl;
-             
-            if (option == 1) {
-                groupChat.createGroup();
-                continue;
-            } else if (option == 2) {
-                groupChat.joinGroup();
-                continue;
-            }  else if (option == 3) {
-                groupChat.managedGroup();
-                continue;
-            } else if (option == 4) {
-                groupChat.showMembers();
-                continue;
-            } else if (option == 5) {
-                groupChat.quit();
-                continue;
-            } else {
-                // 处理无效选项，这里选择继续循环等待有效输入
-                std::cout << "[DEBUG] 无效选择: " << option << "，继续等待有效输入" << std::endl;
-                continue;
-            }
-        } catch (const std::exception& e) {
-            std::cout << "[ERROR] 解析选择失败: " << e.what() << std::endl;
-            std::cout << "[ERROR] 选择内容: '" << choice << "'" << std::endl;
-            // 如果解析失败，通常意味着输入格式错误，这里选择断开连接
-            break;
-        }
-    }
-    std::cout << "[DEBUG] group() 函数结束" << std::endl;
-}
+
+//同步好友 
 void synchronize(int fd, User &user) {
     Redis redis;
     redis.connect();
@@ -90,17 +35,19 @@ void synchronize(int fd, User &user) {
 
     // 先过滤有效好友，收集有效的好友信息
     vector<string> validFriendInfos;
-    for (int i = 0; i < num; i++) {
-        cout << "[DEBUG] 检查好友 " << (i+1) << "/" << num << ", UID: " << arr[i]->str << endl;
-        friend_info = redis.hget("user_info", arr[i]->str);
+    if (arr != nullptr) {
+        for (int i = 0; i < num; i++) {
+            cout << "[DEBUG] 检查好友 " << (i+1) << "/" << num << ", UID: " << arr[i]->str << endl;
+            friend_info = redis.hget("user_info", arr[i]->str);
 
-        if (friend_info.empty() || friend_info.length() < 10) {
-            cout << "[ERROR] 好友信息无效，跳过 UID: " << arr[i]->str << endl;
-        } else {
-            validFriendInfos.push_back(friend_info);
-            cout << "[DEBUG] 有效好友信息: " << friend_info.substr(0, 50) << "..." << endl;
+            if (friend_info.empty() || friend_info.length() < 10) {
+                cout << "[ERROR] 好友信息无效，跳过 UID: " << arr[i]->str << endl;
+            } else {
+                validFriendInfos.push_back(friend_info);
+                cout << "[DEBUG] 有效好友信息: " << friend_info.substr(0, 50) << "..." << endl;
+            }
+            freeReplyObject(arr[i]);
         }
-        freeReplyObject(arr[i]);
     }
 
     // 发送有效好友数量
@@ -222,6 +169,17 @@ void start_chat(int fd, User &user) {
             continue;
         }
         
+        // 检查对方是否已注销
+        if (redis.sismember("deactivated_users", UID)) {
+            string me = user.getUID() + UID;
+            redis.lpush(me, msg);
+
+            string receiver_fd_str = redis.hget("unified_receiver", user.getUID());
+            int receiver_fd = stoi(receiver_fd_str);
+            sendMsg(receiver_fd, "DEACTIVATED_MESSAGE");
+            continue;
+        }
+        
         // 正常发送消息的逻辑
         // 注意：MESSAGE_SENT 应该在消息真正发送后才发送
 
@@ -236,22 +194,6 @@ void start_chat(int fd, User &user) {
             // 保存离线消息通知（使用list保存多条）
             redis.lpush("offline_message_notify" + UID, message.getUsername());
             cout << "[DEBUG] 用户 " << UID << " 离线，保存消息通知: " << message.getUsername() << endl;
-            continue;
-        }
-        //对方不在聊天
-        if (!redis.sismember("is_chat", UID)) {
-            // 保存消息到历史记录
-            string me = message.getUidFrom() + message.getUidTo();
-            string her = message.getUidTo() + message.getUidFrom();
-            redis.lpush(me, msg);
-            redis.lpush(her, msg);
-
-            // 主动推送通知给在线用户（使用统一接收连接）
-            if (redis.hexists("unified_receiver", UID)) {
-                string receiver_fd_str = redis.hget("unified_receiver", UID);
-                int receiver_fd = stoi(receiver_fd_str);
-                sendMsg(receiver_fd, "MESSAGE:" + message.getUsername());
-            }
             continue;
         }
         
@@ -273,9 +215,10 @@ void start_chat(int fd, User &user) {
                         sendMsg(receiver_fd, msg);
                         cout << "[DEBUG] JSON消息已发送到聊天窗口" << endl;
                     } else {
-                        // 接收方不在聊天中，发送通知
+                        // 接收方不在聊天中，保存到离线消息并发送通知
+                        redis.lpush("offline_message_notify" + UID, message.getUsername());
                         sendMsg(receiver_fd, "MESSAGE:" + message.getUsername());
-                        cout << "[DEBUG] 消息通知已发送到主菜单" << endl;
+                        cout << "[DEBUG] 消息已保存到离线消息，通知已发送到主菜单" << endl;
                     }
                 } catch (const exception& e) {
                     cout << "[ERROR] 消息格式错误或统一接收连接无效，跳过发送: " << e.what() << endl;
@@ -285,6 +228,7 @@ void start_chat(int fd, User &user) {
             }
         }
         
+        // 保存消息到历史记录（无论是否发送成功）
         string me = message.getUidFrom() + message.getUidTo();
         string her = message.getUidTo() + message.getUidFrom();
         redis.lpush(me, msg);
@@ -322,6 +266,9 @@ void add_friend(int fd, User &user) {
 
     recvMsg(fd, username);
 
+    if (username == "0") {
+        return;
+    }
     cout << "[DEBUG] 添加好友请求: " << user.getUsername() << " 想添加 " << username << endl;
 
     if (!redis.hexists("username_to_uid", username)) {
@@ -340,10 +287,10 @@ void add_friend(int fd, User &user) {
         sendMsg(fd, "-3");
         return;
     }
-    
-    // 检查是否被对方屏蔽
-    if (redis.sismember("blocked" + UID, user.getUID())) {
-        sendMsg(fd, "-4"); // 被屏蔽，无法添加
+
+    // 检查对方是否已注销
+    if (redis.sismember("deactivated_users", UID)) {
+        sendMsg(fd, "-6"); // 对方已注销，无法添加
         return;
     }
 
@@ -354,18 +301,19 @@ void add_friend(int fd, User &user) {
     }
 
     sendMsg(fd, "1");
-    redis.sadd("add_friend", UID);
+    // redis.sadd("add_friend", UID);之前的好友实时通知集合
     redis.sadd(UID + "add_friend", user.getUID());
 
-    // 设置好友申请通知标记
+    // 不管在不在，先设置好友申请通知标记，在的话直接推
     redis.hset("friend_request_notify", UID, "1");
 
-    // 如果目标用户在线，立即推送好友申请通知
+
+    // 有对应的接收线程在，就是在，如果目标用户在线，立即推送好友申请通知
     if (redis.hexists("unified_receiver", UID)) {
         string receiver_fd_str = redis.hget("unified_receiver", UID);
         int receiver_fd = stoi(receiver_fd_str);
         sendMsg(receiver_fd, REQUEST_NOTIFICATION);
-        cout << "[DEBUG] 已推送好友申请通知给在线用户: " << UID << endl;
+     
         // 清除通知标记，因为已经推送了
         redis.hdel("friend_request_notify", UID);
     }
@@ -385,30 +333,33 @@ void findRequest(int fd, User &user) {
         return;
     }
     redisReply **arr = redis.smembers(user.getUID() + "add_friend");
-    string request_info;
-    User friendRequest;
-    for (int i = 0; i < num; i++) {
-        request_info = redis.hget("user_info", arr[i]->str);
-        friendRequest.json_parse(request_info);
+    if (arr != nullptr) {
+        string request_info;
+        User friendRequest;
+        for (int i = 0; i < num; i++) {
+            request_info = redis.hget("user_info", arr[i]->str);
+            friendRequest.json_parse(request_info);
 
-        sendMsg(fd, friendRequest.getUsername());
-        string reply;
+            sendMsg(fd, friendRequest.getUsername());
+            string reply;
 
-        recvMsg(fd, reply);
-        if (reply == "REFUSED") {
+            recvMsg(fd, reply);
+            if (reply == "REFUSED") {
+                redis.srem(user.getUID() + "add_friend", arr[i]->str);
+                freeReplyObject(arr[i]);
+                continue; // 继续处理下一个申请，而不是直接return
+            }
+            //这里才是真正的好友列表
+            //将对方加到我的好友列表中
+            redis.sadd(user.getUID(), arr[i]->str);
+            //将我加到对方的好友列表中
+            redis.sadd(arr[i]->str, user.getUID());
+            //将好友申请从缓冲区删除
             redis.srem(user.getUID() + "add_friend", arr[i]->str);
-            return;
-        }
-        //这里才是真正的好友列表
-        //将对方加到我的好友列表中
-        redis.sadd(user.getUID(), arr[i]->str);
-        //将我加到对方的好友列表中
-        redis.sadd(arr[i]->str, user.getUID());
-        //将好友申请从缓冲区删除
-        redis.srem(user.getUID() + "add_friend", arr[i]->str);
 
-        sendMsg(fd, request_info);
-        freeReplyObject(arr[i]);
+            sendMsg(fd, request_info);
+            freeReplyObject(arr[i]);
+        }
     }
 }
 
@@ -448,12 +399,14 @@ void unblocked(int fd, User &user) {
         return;
     }
     redisReply **arr = redis.smembers("blocked" + user.getUID());
-    string blocked_info;
-    for (int i = 0; i < num; ++i) {
-        blocked_info = redis.hget("user_info", arr[i]->str);
-        //循环发送屏蔽名单信息
-        sendMsg(fd, blocked_info);
-        freeReplyObject(arr[i]);
+    if (arr != nullptr) {
+        string blocked_info;
+        for (int i = 0; i < num; ++i) {
+            blocked_info = redis.hget("user_info", arr[i]->str);
+            //循环发送屏蔽名单信息
+            sendMsg(fd, blocked_info);
+            freeReplyObject(arr[i]);
+        }
     }
     //接收解除屏蔽的信息
     string UID;
@@ -1073,4 +1026,28 @@ void receive_file(int fd, User &user) {
         close(fp);
         freeReplyObject(arr[i]);
     }
+}
+
+// 注销账户
+void deactivateAccount(int fd, User &user) {
+    cout << "[DEBUG] deactivateAccount 开始，用户: " << user.getUsername() << endl;
+    Redis redis;
+    redis.connect();
+    
+    // 将用户添加到注销集合
+    redis.sadd("deactivated_users", user.getUID());
+
+    user.setEmail("");
+
+
+    
+    // 从在线状态中移除
+    redis.hdel("is_online", user.getUID());
+    redis.hdel("unified_receiver", user.getUID());
+    redis.srem("is_chat", user.getUID());
+
+
+    
+    cout << "[DEBUG] 用户 " << user.getUsername() << " 已注销" << endl;
+   
 }

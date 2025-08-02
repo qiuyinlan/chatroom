@@ -62,6 +62,10 @@ int Redis::scard(const string &key) {
 redisReply **Redis::smembers(const string &key) {
     string command = "SMEMBERS " + key;
     reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
+    if (reply == nullptr || reply->type != REDIS_REPLY_ARRAY) {
+        cout << "[REDIS ERROR] SMEMBERS command failed or returned wrong type" << endl;
+        return nullptr;
+    }
     return reply->element;
 }
 
@@ -75,7 +79,12 @@ string Redis::hget(const string &key, const string &field) {
     string command = "HGET " + key + " " + field;
     reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
   
-    string get_info = reply->str;
+    string get_info;
+    if (reply != nullptr && reply->str != nullptr) {
+        get_info = reply->str;
+    } else {
+        get_info = ""; // 返回空字符串而不是nullptr
+    }
     freeReplyObject(reply);
     return get_info;
 }
@@ -122,12 +131,20 @@ int Redis::llen(const string &key) {
 redisReply **Redis::lrange(const string &key, const string &start, const string &stop) {
     string command = "LRANGE " + key + " " + start + " " + stop;
     reply = static_cast<redisReply *>(redisCommand(context, command.data()));
+    if (reply == nullptr || reply->type != REDIS_REPLY_ARRAY) {
+        cout << "[REDIS ERROR] LRANGE command failed or returned wrong type" << endl;
+        return nullptr;
+    }
     return reply->element;
 }
 
 redisReply **Redis::lrange(const string &key) {
     string command = "LRANGE " + key + " 0" + " -1";
     reply = static_cast<redisReply *>(redisCommand(context, command.c_str()));
+    if (reply == nullptr || reply->type != REDIS_REPLY_ARRAY) {
+        cout << "[REDIS ERROR] LRANGE command failed or returned wrong type" << endl;
+        return nullptr;
+    }
     return reply->element;
 }
 

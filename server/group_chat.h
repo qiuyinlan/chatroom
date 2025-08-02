@@ -15,6 +15,8 @@ public:
 
     GroupChat(int fd, const User &user);
 
+    void group(int fd, User &user);
+    
     void synchronizeGL(int fd, User &user) ;
 
     void sync();

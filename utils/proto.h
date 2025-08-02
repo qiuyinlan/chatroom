@@ -33,9 +33,13 @@ const string EXIT = "18";
 const string BACK = "19";
 const string SYNCGL = "20";  // 获取群聊列表
 const string GROUPCHAT = "100";
+
+
+const string DEACTIVATE_ACCOUNT = "23";  // 注销账户
 #define BLOCKED_MESSAGE "BLOCKED_MESSAGE"
 #define FRIEND_VERIFICATION_NEEDED "FRIEND_VERIFICATION_NEEDED"
 #define MESSAGE_SENT "MESSAGE_SENT"
+#define DEACTIVATED_MESSAGE "DEACTIVATED_MESSAGE"
 /*\033[30m：黑色
 \033[31m：红色
 \033[32m：绿色
