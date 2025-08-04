@@ -30,7 +30,7 @@ void blockedLists(int fd, User &user);
 
 void unblocked(int fd, User &user);
 
-void group(int fd, User &user);
+
 
 // void synchronizeGL(int fd, User &user);
 

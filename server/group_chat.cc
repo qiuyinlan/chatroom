@@ -5,6 +5,7 @@
 #include "Group.h"
 #include "proto.h"
 #include "Transaction.h"
+#include "tools.h"
 
 #include <iostream>
 
@@ -33,7 +34,7 @@ void GroupChat::group(int fd, User &user) {
         }
         if (choice == BACK) {
             std::cout << "[DEBUG] 客户端选择退出" << std::endl;
-            break;
+            return;
         }
         try {
             int option = stoi(choice);
@@ -183,15 +184,13 @@ void GroupChat::startChat() {
     redis.sadd("group_chat", user.getUID());
     string group_info;
     redisReply **arr;
-
-    std::cout << "[DEBUG] 等待接收群聊信息..." << std::endl;
+    int ret;
     recvMsg(fd, group_info);
-    std::cout << "[DEBUG] 接收到群聊信息: " << group_info << std::endl;
-
+    
     Group group;
     try {
         group.json_parse(group_info);
-        std::cout << "[DEBUG] 群聊信息解析成功: " << group.getGroupName() << std::endl;
+        
     } catch (const std::exception& e) {
         std::cout << "[ERROR] 群聊信息解析失败: " << e.what() << std::endl;
         std::cout << "[ERROR] 问题JSON: " << group_info << std::endl;
@@ -211,13 +210,14 @@ void GroupChat::startChat() {
     string msg;
     Message message;
     while (true) {
-        int ret = recvMsg(fd, msg);
-        cout << "[DEBUG] 群聊中接收到消息: '" << msg << "', 长度: " << msg.length() << endl;
-
+         ret = recvMsg(fd, msg);
         if (msg == EXIT || ret == 0) {
 
             if (ret == 0) {
                 cout << "[DEBUG] 群聊中检测到连接断开" << endl;
+                if (!c_break(ret, fd, user)) {
+                    return;
+                }
             }
             redis.srem("group_chat", user.getUID());
 
@@ -331,8 +331,10 @@ void GroupChat::createGroup() {
     Redis redis;
     redis.connect();
     string group_info,groupName;
+    int ret;
     while(true){
-       recvMsg(fd, groupName);        
+       ret = recvMsg(fd, groupName);  
+       
         if (groupName == BACK) {
             return;
         }
@@ -364,8 +366,10 @@ void GroupChat::joinGroup() {
     Redis redis;
     redis.connect();
     string groupName;
+    int ret;
     //接收客户端发送的群聊名称
     recvMsg(fd, groupName);
+    
 cout << "收到客户端发送的群聊名称" << groupName << endl;
     if (groupName == BACK) {
         return;
@@ -484,7 +488,7 @@ void GroupChat::approve(Group &group) const {
         sendMsg(fd, member.getUsername());
 
         int ret = recvMsg(fd, choice);
-cout << "approve() choice=" << choice << endl;
+        
         if (ret == 0) {
             redis.hdel("is_online", user.getUID());
         }
@@ -571,6 +575,7 @@ void GroupChat::appointAdmin(Group &group) const {
 void GroupChat::revokeAdmin(Group &group) const {
     Redis redis;
     redis.connect();
+    int ret;
     int num = redis.scard(group.getAdmins());
 
     sendMsg(fd, to_string(num));
@@ -585,6 +590,7 @@ void GroupChat::revokeAdmin(Group &group) const {
     User admin;
 
     recvMsg(fd, admin_info);
+    
     admin.json_parse(admin_info);
     redis.srem(group.getAdmins(), admin.getUID());
     redis.srem("managed" + admin.getUID(), group.getGroupUid());

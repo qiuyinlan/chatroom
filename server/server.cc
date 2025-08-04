@@ -13,6 +13,7 @@
 #include "Redis.h"
 #include <curl/curl.h>
 #include <string>
+#include <User.h>
 
 
 
@@ -50,6 +51,7 @@ void signalHandler(int signum) {
 }
 
 
+
 int main(int argc, char *argv[]) {
     if (argc == 1) {
         IP = "10.30.0.146";
@@ -65,7 +67,7 @@ int main(int argc, char *argv[]) {
     signal(SIGPIPE, SIG_IGN);        // 忽略SIGPIPE信号，避免客户端断开导致服务器退出
     signal(SIGINT, signalHandler);   // 处理Ctrl+C
 
-    //signal(SIGTERM, signalHandler);  // 处理终止信号
+    
     
     //服务器启动时删除所有在线用户
     Redis redis;
@@ -73,20 +75,13 @@ int main(int argc, char *argv[]) {
         cout << "服务器启动，清理残留的在线状态..." << endl;
         redis.del("is_online");
         redis.del("is_chat");
-        cout << "在线状态清理完成" << endl;
-
-        // 额外检查：显示清理后的在线用户数
-        int online_count = redis.hlen("is_online");
-        cout << "当前在线用户数: " << online_count << endl;
-    } else {
-        cout << "Redis连接失败，无法清理在线状态" << endl;
     }
 
     int ret;
     int num = 0;
     char str[INET_ADDRSTRLEN];
     string msg;
-    //bug 这里在线程池里打断点的话，直接导致客户端无法连接
+    
     ThreadPool pool(16);
     int listenfd = Socket();
     int opt = 1;
@@ -96,7 +91,7 @@ int main(int argc, char *argv[]) {
     int epfd = epoll_create(1024);
 
     struct epoll_event temp, ep[1024];
-    //bug 之前写成temp.events=listenfd,导致if(ep[i].data.fd==listen)直接没有执行
+    
     //客户端不连还好，一连上直接触发大量IO操作
     temp.data.fd = listenfd;
     temp.events = EPOLLIN;

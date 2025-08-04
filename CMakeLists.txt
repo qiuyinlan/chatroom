@@ -26,12 +26,14 @@ add_executable(
         server/Redis.cc
         server/group_chat.cc
         server/Threadpool.cpp
+        server/tool.cc
         utils/User.cc
         utils/TCP.cc
         utils/IO.cc
         utils/proto.cc
         utils/Group.cc
         client/service/Notifications.cc
+
 )
 
 add_executable(

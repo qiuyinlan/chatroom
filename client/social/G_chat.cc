@@ -516,7 +516,6 @@ void G_chat::approve() const {
         cout << "收到" << buf << "的入群申请" << endl;
         cout << "[y]YES,[n]NO" << endl;
         string choice;
-        getline(cin, choice);
         while (!(cin >> choice) || (choice != "y" && choice != "n")) {
             cout << "输入格式错误，请输入y或n" << endl;
             cin.clear();
@@ -772,6 +771,8 @@ void G_chat::showMembers(std::vector<Group> &group) {
 }
 
 void G_chat::quit(vector<Group> &joinedGroup) {
+
+    sendMsg(fd, "5");
     string temp;
     if (joinedGroup.empty()) {
         cout << "你当前没有加入任何群聊" << endl;
@@ -818,7 +819,6 @@ void G_chat::quit(vector<Group> &joinedGroup) {
         }
         break;
     }
-    sendMsg(fd, "5");
 
     sendMsg(fd, joinedGroup[which].to_json());
     cout << "你已退出该群，按任意键退出" << endl;

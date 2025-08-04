@@ -17,6 +17,7 @@
 #include <vector>
 #include "./group_chat.h"
 #include "../client/service/Notifications.h"
+#include "tools.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -41,13 +42,14 @@ void serverLogin(int epfd, int fd) {
     string request;
 
     int recv_ret = recvMsg(fd, request);
-    if (recv_ret <= 0 || request.empty()) {
+    
+    if (recv_ret < 0 || request.empty()) {
         cout << "[ERROR] 接收登录请求失败或为空" << endl;
         sendMsg(fd, "-4"); // 服务器内部错误
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &temp);
         return;
     }
-
+    
     LoginRequest loginRequest;
     try {
         loginRequest.json_parse(request);
@@ -79,7 +81,7 @@ void serverLogin(int epfd, int fd) {
     }
 
     try {
-        user.json_parse(user_info);
+        user.json_parse(user_info);//向user存入所有相关信息
     } catch (const exception& e) {
         cout << "[ERROR] 用户信息JSON解析失败: " << e.what() << endl;
         cout << "[ERROR] 用户信息: " << user_info << endl;
@@ -124,14 +126,16 @@ void serverOperation(int fd, User &user) {
     while (true) {
         //接收用户输入的操作
         ret = recvMsg(fd, temp);
-
+        if (!c_break(ret, fd, user)) {
+            return;
+        }
         if (temp == BACK ) {
             cout << "收到客户端在主页退出，成功" << endl ;
 
             break;
         }
 
-        // 使用宏定义的if-else分发，清晰易懂
+        
         if (temp == START_CHAT) {
             start_chat(fd, user);
         } else if (temp == LIST_FRIENDS) {
@@ -146,16 +150,16 @@ void serverOperation(int fd, User &user) {
             blockedLists(fd, user);
         } else if (temp == UNBLOCKED) {
             unblocked(fd, user);
-        } else if (temp == GROUP) {
-            GroupChat groupChat(fd, user);
-            groupChat.group(fd, user);
         } else if (temp == SEND_FILE) {
             send_file(fd, user);
         } else if (temp == RECEIVE_FILE) {
             receive_file(fd, user);
         } else if (temp == SYNC) {
             synchronize(fd, user);
-        }  else if (temp == SYNCGL) {
+        }  else if (temp == GROUP) {
+            GroupChat groupChat(fd, user);
+            groupChat.group(fd, user);
+        } else if (temp == SYNCGL) {
             GroupChat groupChat(fd, user);
             groupChat.synchronizeGL(fd, user);
         }  else if ( temp == GROUPCHAT ) {

@@ -44,7 +44,7 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
     int recv_ret = recvMsg(fd, historyNum);
 
     if (recv_ret <= 0) {
-        cout << "接收群聊历史消息数量失败，连接可能已断开" << endl;
+        cout << "接收群聊历史消息数量失败，客户端连接断开" << endl;
         return;
     }
 
@@ -92,13 +92,12 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
     // 进入群聊状态，通知统一接收线程
     ClientState::enterChat(selectedGroup.getGroupUid());
 
-    // 消息发送循环
+    
     string msg;
      std::cout << "\033[90m输入【send】发送文件，【recv】接收文件，【0】退出聊天\033[0m" << std::endl;
 
     while (true) {
         getline(cin, msg);
-        cout << "[DEBUG] 群聊中接收到输入: '" << msg << "'" << endl;
 
         if (cin.eof()) {
             cout << "输入结束，退出群聊" << endl;
@@ -115,7 +114,7 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
 
         // 群聊文件传输
         if (msg == "send") {
-            cout << "[DEBUG] 识别到send命令，开始文件传输" << endl;
+            
             FileTransfer fileTransfer;
             fileTransfer.sendFile_Group(fd, selectedGroup, user);
             continue;
@@ -130,11 +129,11 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
             cout << "不能发送空白消息" << endl;
             continue;
         }
-        cout << "[DEBUG] 准备发送普通消息: " << msg << endl;
+        
         cout << "你：" << msg << endl;
         message.setContent(msg);
         string jsonMsg = message.to_json();
-        cout << "[DEBUG] 发送JSON消息: " << jsonMsg << endl;
+        
         sendMsg(fd, jsonMsg);
 
     }

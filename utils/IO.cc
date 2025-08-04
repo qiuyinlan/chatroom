@@ -7,15 +7,16 @@
 #include <csignal>
 #include <cstring>
 #include <string>
-#include "Redis.h"
+#include "User.h"
 
 using namespace std;
+
+//socket编程中，返回零，表示对端断开，关闭连接
 
 //通用返回按钮
 void return_last(){
     std::cout << "\033[90m输入【0】返回\033[0m" << std::endl;
 }
-int read_menu_option(int min, int max, const std::string& prompt);
 
 
 
@@ -144,3 +145,4 @@ int recvMsg(int fd, string &msg) {
     delete[] buffer;
     return len;
 }
+

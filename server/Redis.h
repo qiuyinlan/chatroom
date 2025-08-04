@@ -7,6 +7,8 @@
 
 using std::string;
 
+
+
 //使用前先启动redis-server
 class Redis {
 private:

@@ -33,18 +33,19 @@ void start_UI() {
 
 int main(int argc, char *argv[]) {
     if (argc == 1) {
-        IP = "10.30.0.202";
-        PORT = 8888;
+        IP = "10.30.0.146";
+        PORT = 8000;
     } else if (argc == 3) {
         IP = argv[1];
         PORT = stoi(argv[2]);
     } else {
-        // 错误情况
-        cerr << "Invalid number of arguments. Usage: program_name [IP] [port]" << endl;
+       cout << "请输入./client.out" << endl;
         return 1;
     }
     signal(SIGINT, signalHandler);
     User user;
+
+    // thread heartbeatThread(heartbeat, user);
 
     while (true) {
         start_UI();

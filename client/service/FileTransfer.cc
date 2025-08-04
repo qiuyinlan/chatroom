@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/sendfile.h>
 #include <fstream>
+#include <thread>
 using namespace std;
 
 // 默认构造函数
@@ -106,7 +107,8 @@ void FileTransfer::recvFile_Friend(int fd, const User& myUser) const {
     string filePath;
     string fileName;
     //先接收服务器发来的文件数
-    recvMsg(fd, nums);
+    int ret = recvMsg(fd, nums);
+    
     cout << "[DEBUG] 接收到文件数量字符串: '" << nums << "'" << endl;
 
     int num;
