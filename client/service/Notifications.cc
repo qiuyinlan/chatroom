@@ -40,7 +40,7 @@ mutex ClientState::messageMutex;
 
 
 //统一消息接收线程（使用独立连接）
-void unifiedMessageReceiver(int mainFd, string UID) {
+void unifiedMessageReceiver( string UID) {
     ClientState::myUID = UID;
 
     // 创建独立的接收连接

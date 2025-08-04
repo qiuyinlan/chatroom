@@ -227,17 +227,17 @@ void GroupChat::startChat() {
         }
 
         // 处理群聊文件传输协议
-        if (msg == SENDFILE_G) {
-            cout << "[DEBUG] 群聊中收到 SENDFILE_G 协议" << endl;
-            sendFile_Group(fd, user);
-            continue;
-        }
+        // if (msg == SENDFILE_G) {
+        //     cout << "[DEBUG] 群聊中收到 SENDFILE_G 协议" << endl;
+        //     sendFile_Group(fd, user);
+        //     continue;
+        // }
 
-        if (msg == RECVFILE_G) {
-            cout << "[DEBUG] 群聊中收到 RECVFILE_G 协议" << endl;
-            recvFile_Group(fd, user);
-            continue;
-        }
+        // if (msg == RECVFILE_G) {
+        //     cout << "[DEBUG] 群聊中收到 RECVFILE_G 协议" << endl;
+        //     recvFile_Group(fd, user);
+        //     continue;
+        // }
 
         // 尝试解析为JSON消息
         try {

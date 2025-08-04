@@ -116,7 +116,9 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
         if (msg == "send") {
             
             FileTransfer fileTransfer;
-            fileTransfer.sendFile_Group(fd, selectedGroup, user);
+            thread fileSender(&FileTransfer::sendFile_Group, &fileTransfer, fd, selectedGroup, user);
+            
+            // fileTransfer.sendFile_Group(fd, selectedGroup, user);
             continue;
         }
         if (msg == "recv") {
@@ -291,7 +293,7 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
         
         sendMsg(fd, friend_UID);
 
-        // 进入聊天状态，通知统一接收线程
+        // 通知统一接收线程
         ClientState::enterChat(friend_UID);
 
        
@@ -314,15 +316,22 @@ void ChatSession::startChat(vector<pair<string, User>> &my_friends,vector<Group>
                 sendMsg(fd, EXIT);
                 return;
             }
-            // 文件传输
+            // 文件
             if(msg == "send"){
+            
                 FileTransfer fileTransfer;
-                fileTransfer.sendFile_Friend(fd, my_friends[who-1].second, user);
+                // thread fileSender(&FileTransfer::sendFile_Friend, &fileTransfer, fd, my_friends[who-1].second, user);
+                // fileSender.detach();
+                 fileTransfer.sendFile_Friend(my_friends[who-1].second, user);
+                
+                 cout << "\033[90m可以继续聊天（输入消息后按enter发送）\033[0m" << endl;
+    
                 continue;
             }
             if(msg == "recv"){
                 FileTransfer fileTransfer;
-                fileTransfer.recvFile_Friend(fd, user);
+                fileTransfer.recvFile_Friend( user);
+                cout << "\033[90m可以继续聊天（输入消息后按enter发送）\033[0m" << endl;
                 continue;
             }
             else if(msg.empty()){

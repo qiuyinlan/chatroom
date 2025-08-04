@@ -5,13 +5,13 @@
 
 //业务处理函数，对应实现的所有功能
 
- void sendFile_Friend(int fd, User &user) ;
+void sendFile_Friend(int epfd, int fd);
 
-void recvFile_Friend(int fd, User &user);
+void recvFile_Friend(int epfd, int fd);
 
-void sendFile_Group(int fd, User &user);
+void sendFile_Group(int epfd, int fd);
 
-void recvFile_Group(int fd, User &user);
+void recvFile_Group(int epfd, int fd);
 
 void synchronize(int fd, User &user);
 

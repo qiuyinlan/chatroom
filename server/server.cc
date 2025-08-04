@@ -11,6 +11,7 @@
 #include "ThreadPool.hpp"
 #include "proto.h"
 #include "Redis.h"
+#include "Transaction.h"
 #include <curl/curl.h>
 #include <string>
 #include <User.h>
@@ -20,34 +21,18 @@
 using namespace std;
 
 void signalHandler(int signum) {
-    cout << "\n[服务器] 接收到信号 " << signum;
-
-    // 只处理用户主动退出的信号
-    if (signum == SIGINT) {
-        cout << " (Ctrl+C)" << endl;
-        cout << "[服务器] 正在清理资源..." << endl;
-
+    
         // 清理Redis中的在线状态
         Redis redis;
         if (redis.connect()) {
-            cout << "[服务器] 清理Redis中的在线状态..." << endl;
+            cout << "[服务器] 清理Redis中的在线状态,安全退出" << endl;
             redis.del("is_online");
             redis.del("is_chat");
-            cout << "[服务器] Redis清理完成" << endl;
         } else {
             cout << "[服务器] Redis连接失败，无法清理" << endl;
         }
-
-        cout << "[服务器] 服务器正常退出" << endl;
         exit(signum);
-    } else if (signum == SIGTERM) {
-        cout << " (终止信号)" << endl;
-        cout << "[服务器] 收到终止信号，正在退出..." << endl;
-        exit(signum);
-    } else {
-        cout << " (未处理的信号，忽略)" << endl;
-        // 其他信号不处理，让程序继续运行
-    }
+    
 }
 
 
@@ -92,7 +77,7 @@ int main(int argc, char *argv[]) {
 
     struct epoll_event temp, ep[1024];
     
-    //客户端不连还好，一连上直接触发大量IO操作
+    
     temp.data.fd = listenfd;
     temp.events = EPOLLIN;
     epoll_ctl(epfd, EPOLL_CTL_ADD, listenfd, &temp);
@@ -105,12 +90,15 @@ int main(int argc, char *argv[]) {
                 continue;
 
             int fd = ep[i].data.fd;
-            //控制连接
+            //正常客户端连接
             if (ep[i].data.fd == listenfd) {
                 struct sockaddr_in cli_addr;
                 memset(&cli_addr, 0, sizeof(cli_addr));
                 socklen_t cli_len = sizeof(cli_addr);
+
+                //accept
                 int connfd = Accept(listenfd, (struct sockaddr *) &cli_addr, &cli_len);
+
 
                 cout << "received from " << inet_ntop(AF_INET, &cli_addr.sin_addr.s_addr, str, sizeof(str))
                      << " at port " << ntohs(cli_addr.sin_port) << endl;
@@ -156,15 +144,26 @@ int main(int argc, char *argv[]) {
                 if (msg == LOGIN) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ serverLogin(epfd, fd); });
-                } else if (msg == UNIFIED_RECEIVER) {
+                } 
+                //额外的连接
+                else if (msg == UNIFIED_RECEIVER) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ handleUnifiedReceiver(epfd, fd); });
-                // 删除NOTIFY轮询处理，改为主动推送
-                // } else if (msg == NOTIFY) {
-                //     string uid;
-                //     recvMsg(fd, uid);  // 接收用户UID
-                //     notify(fd, uid);   // 传递fd和uid参数
-                } else if (msg == REQUEST_CODE) {
+                } else if (msg == SENDFILE_F) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ sendFile_Friend(epfd, fd); });
+                } else if (msg == RECVFILE_F) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ recvFile_Friend(epfd, fd); });
+                } else if (msg == SENDFILE_G) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ handleUnifiedReceiver(epfd, fd); });
+                } else if (msg == RECVFILE_G) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ handleUnifiedReceiver(epfd, fd); });
+                }
+                //正常请求
+                else if (msg == REQUEST_CODE) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);//发验证码，发前检查邮箱
                     pool.addTask([=](){ handleRequestCode(epfd, fd); });
                 } else if (msg == REGISTER_WITH_CODE) {

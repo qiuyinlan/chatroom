@@ -110,29 +110,18 @@ void start_chat(int fd, User &user) {
         }
 
  //发文件
-        if (msg == SENDFILE_F) {
-            sendFile_Friend(fd, user);
-            continue;
-        }
+        // if (msg == SENDFILE_F) {
 
-        if (msg == RECVFILE_F) {
-            cout << "[DEBUG] 收到 RECVFILE_F 协议，调用 recvFile_Friend" << endl;
-            recvFile_Friend(fd, user);
-            continue;
-        }
+        //     sendFile_Friend(fd, user);
+        //     continue;
+        // }
 
-        // 群聊文件传输
-        if (msg == SENDFILE_G) {
-            cout << "[DEBUG] 收到 SENDFILE_G 协议，调用 sendFile_Group" << endl;
-            sendFile_Group(fd, user);
-            continue;
-        }
+        // if (msg == RECVFILE_F) {
+        //     cout << "[DEBUG] 收到 RECVFILE_F 协议，调用 recvFile_Friend" << endl;
+        //     recvFile_Friend(fd, user);
+        //     continue;
+        // }
 
-        if (msg == RECVFILE_G) {
-            cout << "[DEBUG] 收到 RECVFILE_G 协议，调用 recvFile_Group" << endl;
-            recvFile_Group(fd, user);
-            continue;
-        }
 
         //正常消息
         cout << "[DEBUG] 尝试解析为JSON消息: " << msg << endl;
@@ -417,27 +406,14 @@ void unblocked(int fd, User &user) {
 }
 
 
- void sendFile_Friend(int fd, User &user) {
+ void sendFile_Friend(int epfd, int fd) {//新fd
         Redis redis;
         redis.connect();
-        string friend_info;
-        //接收发送文件的对象
-        User _friend;
-        int ret = recvMsg(fd, friend_info);
-        if (ret <= 0) {
-            cout << "[ERROR] 接收目标用户信息失败" << endl;
-            redis.hdel("is_online", user.getUID());
-            return;
-        }
 
-        cout << "[DEBUG] 接收到目标用户信息: " << friend_info << endl;
-        _friend.json_parse(friend_info);
         string filePath, fileName;
-
-        ret = recvMsg(fd, filePath);
+        int ret = recvMsg(fd, filePath);
         if (ret <= 0) {
             cout << "[ERROR] 接收文件路径失败" << endl;
-            redis.hdel("is_online", user.getUID());
             return;
         }
 
@@ -452,6 +428,30 @@ void unblocked(int fd, User &user) {
         recvMsg(fd, fileName);
         cout << "传输文件名: " << fileName << endl;
         filePath = "./fileBuffer_send/" + fileName;
+
+        //接收好友对象
+        string friend_info;
+        User _friend;
+        ret = recvMsg(fd, friend_info);
+        if (ret <= 0) {
+            cout << "[ERROR] 接收目标用户信息失败" << endl;
+            return;
+        }
+        _friend.json_parse(friend_info);
+
+        //接收自己
+        string my_info;
+        User user;
+        ret = recvMsg(fd, my_info);
+        if (ret <= 0) {
+            cout << "[ERROR] 接收发送方信息失败" << endl;
+            return;
+        }
+        user.json_parse(my_info);
+
+
+
+       
         //最后一个groupName填了文件名，接收的时候会显示
         Message message(user.getUsername(), user.getUID(), _friend.getUID(), fileName);
         message.setContent(filePath);
@@ -465,30 +465,44 @@ void unblocked(int fd, User &user) {
         }
         string ssize;
 
-        recvMsg(fd, ssize);
+        ret = recvMsg(fd, ssize);
+         if (ret <= 0) {
+            cout << "[ERROR] 接收发送方信息失败" << endl;
+            return;
+        }
+
         off_t size = stoll(ssize);
         off_t originalSize = size;  // 保存原始文件大小
         off_t sum = 0;
         int n;
         char buf[BUFSIZ];
         int progressCounter = 0;  // 进度计数器
+
+       string result ;
+   
+       
+
         while (size > 0) {
             if (size > sizeof(buf)) {
-                n = read_n(fd, buf, sizeof(buf));
+                 n = read_n(fd, buf, sizeof(buf));
             } else {
                 n = read_n(fd, buf, size);
             }
-            if (n < 0) {
-                continue;
+            if (n <= 0) {
+                sendMsg(fd, "no");
+                cout << "读取文件失败" << endl;
+                return;
             }
-            // cout << "剩余文件大小: " << size << endl;  // 调试信息已注释
+             cout << "剩余文件大小: " << size << endl;  // 调试信息已注释
             size -= n;
             sum += n;
             ofs.write(buf, n);
         }
+
+        sendMsg(fd, "ok");
         //文件发送实时通知缓冲区
         redis.sadd("file" + _friend.getUID(), user.getUsername());
-        // 注意：不保存原始消息，因为content是文件路径，稍后会保存格式化的文件消息
+        
 
         // 创建文件消息并保存到聊天历史记录
         Message fileMessage;
@@ -498,6 +512,7 @@ void unblocked(int fd, User &user) {
         fileMessage.setContent("[文件] " + fileName);
         fileMessage.setGroupName("1");  // 私聊标识
 
+        cout << "你：" << fileName << endl;
         // 保存到双方的聊天历史记录
         string senderHistory = user.getUID() + _friend.getUID();
         string receiverHistory = _friend.getUID() + user.getUID();
@@ -505,15 +520,10 @@ void unblocked(int fd, User &user) {
         redis.lpush(senderHistory, fileMessageJson);
         redis.lpush(receiverHistory, fileMessageJson);
 
-        // 保存到接收方的文件接收队列（使用原始消息，包含文件路径）
+        // 保存到接收方的文件接收队列
         redis.sadd("recv" + _friend.getUID(), message.to_json());
 
-        cout << "[DEBUG] 文件消息已保存到聊天历史记录和接收队列" << endl;
-
-        // 主动推送文件通知给在线用户（使用统一接收连接）
-        cout << "[DEBUG] 尝试推送文件通知给用户: " << _friend.getUID() << endl;
-
-        // 检查用户是否在线
+        // 在线
         if (!redis.hexists("is_online", _friend.getUID())) {
             // 用户离线，保存文件通知到离线消息
             redis.hset("offline_file_notify", _friend.getUID(), user.getUsername());
@@ -554,6 +564,106 @@ void unblocked(int fd, User &user) {
 
         cout << "[DEBUG] 文件发送完成" << endl;
  }
+
+
+
+void recvFile_Friend(int epfd, int fd) {
+    User user;
+    Redis redis;
+    redis.connect();
+    char buf[BUFSIZ];
+
+    //收user
+    string user_info;
+    recvMsg(fd, user_info);
+    user.json_parse(user_info);
+
+    int num = redis.scard("recv" + user.getUID());
+
+    cout << "[DEBUG] 用户 " << user.getUsername() << " 有 " << num << " 个文件待接收" << endl;
+    sendMsg(fd, to_string(num));
+    cout << "[DEBUG] 已发送文件数量: " << num << endl;
+    if (num == 0) {
+        return;
+    }
+    Message message;
+    string path;
+    
+    redisReply **arr = redis.smembers("recv" + user.getUID());
+    
+
+    sendMsg(fd, arr[0]->str);
+    message.json_parse(arr[0]->str);
+    path = message.getContent();
+    cout << "[DEBUG] 尝试访问文件路径: " << path << endl;
+
+    struct stat info;
+    if (stat(path.c_str(), &info) == -1) {
+        cout << "[ERROR] 文件不存在或无法访问: " << path << endl;
+        cout << "[ERROR] 错误原因: " << strerror(errno) << endl;
+
+        // 尝试检查文件是否存在
+        if (filesystem::exists(path)) {
+            cout << "[DEBUG] 文件存在但无法stat，可能是权限问题" << endl;
+        } else {
+            cout << "[DEBUG] 文件不存在" << endl;
+        }
+
+        // 跳过这个文件
+        sendMsg(fd, "FILE_NOT_FOUND");
+        redis.srem("recv" + user.getUID(), arr[0]->str);
+        freeReplyObject(arr[0]);
+        return;
+    }
+    string reply;
+
+    sendMsg(fd, "yes");
+
+    cout << "[DEBUG] 等待客户端回复是否接收文件..." << endl;
+    int _ret = recvMsg(fd, reply);
+    cout << "[DEBUG] 收到客户端回复: '" << reply << "', 长度: " << reply.length() << endl;
+
+    if (_ret <= 0) {
+        cout << "[ERROR] 接收客户端回复失败" << endl;
+        redis.hdel("is_online", user.getUID());
+        // redis.srem("recv" + user.getUID(), arr[0]->str);
+        freeReplyObject(arr[0]);
+        return;
+    }
+
+    if (reply == "NO") {
+        cout << "[DEBUG] 客户端拒绝接收文件" << endl;
+        redis.srem("recv" + user.getUID(), arr[0]->str);
+        freeReplyObject(arr[0]);
+        return;
+    }
+
+    cout << "[DEBUG] 客户端同意接收文件，开始传输" << endl;
+
+    int fp = open(path.c_str(), O_RDONLY);
+
+    sendMsg(fd, to_string(info.st_size));
+    off_t ret;
+    off_t sum = info.st_size;
+    off_t size = 0;
+    while (true) {
+        ret = sendfile(fd, fp, nullptr, info.st_size);
+        if (ret == 0) {
+            cout << "文件传输成功" << buf << endl;
+            break;
+        } else if (ret > 0) {
+            //   cout << ret << endl;
+            sum -= ret;
+            size += ret;
+        }
+    }
+    redis.srem("recv" + user.getUID(), arr[0]->str);
+    close(fp);
+    freeReplyObject(arr[0]);
+    
+}
+
+
 
 // 群聊发送文件
 void sendFile_Group(int fd, User &user) {
@@ -739,103 +849,6 @@ void recvFile_Group(int fd, User &user) {
             }
         }
 
-        redis.srem("recv" + user.getUID(), arr[i]->str);
-        close(fp);
-        freeReplyObject(arr[i]);
-    }
-}
-
-void recvFile_Friend(int fd, User &user) {
-    cout << "[DEBUG] recvFile_Friend 开始，用户: " << user.getUsername() << endl;
-    Redis redis;
-    redis.connect();
-    char buf[BUFSIZ];
-    int num = redis.scard("recv" + user.getUID());
-
-    cout << "[DEBUG] 用户 " << user.getUsername() << " 有 " << num << " 个文件待接收" << endl;
-    sendMsg(fd, to_string(num));
-    cout << "[DEBUG] 已发送文件数量: " << num << endl;
-    Message message;
-    string path;
-    if (num == 0) {
-        cout << "当前没有要接收的文件" << endl;
-        cout << "\033[90m可以继续聊天（输入消息后按enter发送）\033[0m" << endl;
-
-        return;
-    }
-
-    redisReply **arr = redis.smembers("recv" + user.getUID());
-    for (int i = 0; i < num; i++) {
-
-        sendMsg(fd, arr[i]->str);
-        message.json_parse(arr[i]->str);
-        path = message.getContent();
-        cout << "[DEBUG] 尝试访问文件路径: " << path << endl;
-
-        struct stat info;
-        if (stat(path.c_str(), &info) == -1) {
-            cout << "[ERROR] 文件不存在或无法访问: " << path << endl;
-            cout << "[ERROR] 错误原因: " << strerror(errno) << endl;
-
-            // 尝试检查文件是否存在
-            if (filesystem::exists(path)) {
-                cout << "[DEBUG] 文件存在但无法stat，可能是权限问题" << endl;
-            } else {
-                cout << "[DEBUG] 文件不存在" << endl;
-            }
-
-            // 不要直接返回，而是跳过这个文件
-            redis.srem("recv" + user.getUID(), arr[i]->str);
-            freeReplyObject(arr[i]);
-            continue;
-        }
-        string reply;
-
-        cout << "[DEBUG] 等待客户端回复是否接收文件..." << endl;
-        int _ret = recvMsg(fd, reply);
-        cout << "[DEBUG] 收到客户端回复: '" << reply << "', 长度: " << reply.length() << endl;
-
-        if (_ret <= 0) {
-            cout << "[ERROR] 接收客户端回复失败" << endl;
-            redis.hdel("is_online", user.getUID());
-            redis.srem("recv" + user.getUID(), arr[i]->str);
-            freeReplyObject(arr[i]);
-            continue;
-        }
-
-        if (reply == "NO") {
-            cout << "[DEBUG] 客户端拒绝接收文件" << endl;
-            redis.srem("recv" + user.getUID(), arr[i]->str);
-            freeReplyObject(arr[i]);
-            continue;
-        }
-
-        if (reply != "YES") {
-            cout << "[ERROR] 收到意外的回复: " << reply << ", 跳过此文件" << endl;
-            redis.srem("recv" + user.getUID(), arr[i]->str);
-            freeReplyObject(arr[i]);
-            continue;
-        }
-
-        cout << "[DEBUG] 客户端同意接收文件，开始传输" << endl;
-
-        int fp = open(path.c_str(), O_RDONLY);
-
-        sendMsg(fd, to_string(info.st_size));
-        off_t ret;
-        off_t sum = info.st_size;
-        off_t size = 0;
-        while (true) {
-            ret = sendfile(fd, fp, nullptr, info.st_size);
-            if (ret == 0) {
-                cout << "文件传输成功" << buf << endl;
-                break;
-            } else if (ret > 0) {
-             //   cout << ret << endl;
-                sum -= ret;
-                size += ret;
-            }
-        }
         redis.srem("recv" + user.getUID(), arr[i]->str);
         close(fp);
         freeReplyObject(arr[i]);

@@ -81,7 +81,7 @@ void clientOperation(int fd, User &user) {
     G_chat gChat(fd, user);
     FileTransfer fileTransfer(fd, user);
     // 启动统一消息接收线程（替代轮询）
-    thread unifiedRecver(unifiedMessageReceiver, fd, user.getUID());
+    thread unifiedRecver(unifiedMessageReceiver, user.getUID());
     unifiedRecver.detach();
 
     // 离线消息现在由统一接收线程立即显示，不需要额外处理

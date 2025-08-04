@@ -178,13 +178,14 @@ void serverOperation(int fd, User &user) {
 }
 
 void notify(int fd, const string &UID) {
+    //处理离线通知
     
     bool msgnum=false;
     Redis redis;
     redis.connect();
    
 
-    // 检查好友申请通知（使用单独的通知标记）
+    // 检查好友申请通知
     if (redis.hexists("friend_request_notify", UID)) {
         sendMsg(fd, REQUEST_NOTIFICATION);
         msgnum=true;
@@ -322,8 +323,6 @@ void handleUnifiedReceiver(int epfd, int fd) {
         close(fd);
         return;
     }
-
-    cout << "[DEBUG] 统一接收线程连接建立，UID: " << UID << ", fd: " << fd << endl;
 
     // 将此连接标记为统一接收连接
     redis.hset("unified_receiver", UID, to_string(fd));

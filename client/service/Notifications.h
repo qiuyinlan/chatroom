@@ -15,7 +15,7 @@ extern std::atomic<bool> stopNotify;
 bool isNumericString(const std::string &str);
 
 // 新的统一消息处理
-void unifiedMessageReceiver(int fd, string UID);
+void unifiedMessageReceiver(string UID);
 void processUnifiedMessage(const string& msg);
 // 全局状态管理类完整定义
 class ClientState {
