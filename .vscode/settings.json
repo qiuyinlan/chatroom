@@ -78,7 +78,9 @@
         "variant": "cpp",
         "version": "cpp",
         "*.inc": "cpp",
-        "*.def": "cpp"
+        "*.def": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp"
     },
     "kiroAgent.configureMCP": "Disabled"
 }

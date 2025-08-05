@@ -10,6 +10,8 @@
 #include "StartMenu.h"
 #include "../utils/proto.h"
 #include "OperationMenu.h"
+#include "../service/Notifications.h"
+#include <thread>
 
 using namespace std;
 
@@ -45,7 +47,6 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, signalHandler);
     User user;
 
-    // thread heartbeatThread(heartbeat, user);
 
     while (true) {
         start_UI();

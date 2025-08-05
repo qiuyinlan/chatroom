@@ -80,7 +80,9 @@ void clientOperation(int fd, User &user) {
     ChatSession chatSession(fd, user);
     G_chat gChat(fd, user);
     FileTransfer fileTransfer(fd, user);
-    // 启动统一消息接收线程（替代轮询）
+    
+
+    thread heartbeatThread(heartbeat, user.getUID());
     thread unifiedRecver(unifiedMessageReceiver, user.getUID());
     unifiedRecver.detach();
 

@@ -15,6 +15,7 @@
 #include <curl/curl.h>
 #include <string>
 #include <User.h>
+#include <thread>
 
 
 
@@ -36,7 +37,44 @@ void signalHandler(int signum) {
 }
 
 
+void hearbeat(int epfd,int fd){
+    Redis redis;
+    redis.connect();
 
+    int receiver_fd;
+    string UID;
+    recvMsg(fd, UID);
+    if (redis.hexists("unified_receiver", UID)) {
+                string receiver_fd_str = redis.hget("unified_receiver", UID);
+                int receiver_fd = stoi(receiver_fd_str);
+                
+            }
+
+
+    // 给 socket 设置了接收数据的最大阻塞时间为 20 秒
+    struct timeval timeout;
+    timeout.tv_sec = 20;//s
+    timeout.tv_usec = 0;//ms
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
+
+    while (true) {
+        string buf;
+        int len = recvMsg(fd, buf);
+        if (buf == "HEARTBEAT") {
+            cout << RED << "心跳" << RESET << endl;
+        } else if (errno == EWOULDBLOCK || errno == EAGAIN || errno == EINTR || errno == ETIMEDOUT) {//可能阻塞了，但是还是活着
+            cout << "[超时] fd=" << fd << " 20秒无数据，断开" << endl;
+            break;
+        } else if (len <= 0) {
+            cout << "[ERROR] 心跳检测接收失败，fd=" << fd << " 连接断开" << endl;
+            break;
+        } 
+    }
+    close(receiver_fd);
+    close(fd);
+
+
+}
 int main(int argc, char *argv[]) {
     if (argc == 1) {
         IP = "10.30.0.146";
@@ -52,7 +90,7 @@ int main(int argc, char *argv[]) {
     signal(SIGPIPE, SIG_IGN);        // 忽略SIGPIPE信号，避免客户端断开导致服务器退出
     signal(SIGINT, signalHandler);   // 处理Ctrl+C
 
-    
+  
     
     //服务器启动时删除所有在线用户
     Redis redis;
@@ -146,6 +184,10 @@ int main(int argc, char *argv[]) {
                     pool.addTask([=](){ serverLogin(epfd, fd); });
                 } 
                 //额外的连接
+                else if (msg == "HEARTBEAT") {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
+                    pool.addTask([=](){ hearbeat(epfd, fd); });
+                }
                 else if (msg == UNIFIED_RECEIVER) {
                     epoll_ctl(epfd, EPOLL_CTL_DEL, ep[i].data.fd, nullptr);
                     pool.addTask([=](){ handleUnifiedReceiver(epfd, fd); });

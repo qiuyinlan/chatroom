@@ -211,9 +211,15 @@ void processUnifiedMessage(const string& msg) {
 }
 
 // 心跳
-void heartbeatChecker(int fd) {
+void heartbeat(string UID) {
+    int fd = Socket();
+    Connect(fd, IP, PORT);
+
+    sendMsg(fd, "HEARTBEAT");
+   
+    sendMsg(fd, UID);
     while (true) {
-        this_thread::sleep_for(chrono::seconds(5));  // 秒检测一次
+        this_thread::sleep_for(chrono::seconds(10));  // 秒检测一次
 
         // 发送心跳包
         if (sendMsg(fd, "HEARTBEAT") <= 0) {
@@ -223,11 +229,3 @@ void heartbeatChecker(int fd) {
     }
 }
 
-bool isNumericString(const std::string &str) {
-    for (char c: str) {
-        if (!std::isdigit(c)) {
-            return false;
-        }
-    }
-    return true;
-}
