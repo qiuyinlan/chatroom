@@ -116,9 +116,9 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
         if (msg == "send") {
             
             FileTransfer fileTransfer;
-            thread fileSender(&FileTransfer::sendFile_Group, &fileTransfer, fd, selectedGroup, user);
+            //thread fileSender(&FileTransfer::sendFile_Group, &fileTransfer, fd, selectedGroup, user);
             
-            // fileTransfer.sendFile_Group(fd, selectedGroup, user);
+             fileTransfer.sendFile_Group(fd, selectedGroup, user);
             continue;
         }
         if (msg == "recv") {

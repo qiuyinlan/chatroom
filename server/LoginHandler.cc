@@ -150,11 +150,7 @@ void serverOperation(int fd, User &user) {
             blockedLists(fd, user);
         } else if (temp == UNBLOCKED) {
             unblocked(fd, user);
-        } else if (temp == SEND_FILE) {
-            send_file(fd, user);
-        } else if (temp == RECEIVE_FILE) {
-            receive_file(fd, user);
-        } else if (temp == SYNC) {
+        }  else if (temp == SYNC) {
             synchronize(fd, user);
         }  else if (temp == GROUP) {
             GroupChat groupChat(fd, user);
@@ -177,49 +173,69 @@ void serverOperation(int fd, User &user) {
     redis.hdel("unified_receiver", user.getUID());  // 清理统一接收连接记录
 }
 
-void notify(int fd, const string &UID) {
-    //处理离线通知
+void notify(int fd, const string &UID) {//离线通知
     
-    bool msgnum=false;
+    
+    bool msgnum=false;//是否有离线消息
     Redis redis;
     redis.connect();
    
 
-    // 检查好友申请通知
-    if (redis.hexists("friend_request_notify", UID)) {
-        sendMsg(fd, REQUEST_NOTIFICATION);
-        msgnum=true;
-        redis.hdel("friend_request_notify", UID);  // 清除通知标记
-    }
-
-    // 检查群聊申请通知
-    if (redis.sismember("add_group", UID)) {
-        // 获取群聊名称
-        string groupName = redis.hget("group_request_info", UID);
-        if (!groupName.empty()) {
-            sendMsg(fd, "GROUP_REQUEST:" + groupName);
-            msgnum=true;
-            cout << "[DEBUG] 已推送群聊申请通知给用户: " << UID << "，群聊: " << groupName << endl;
-        } else {
-            // 如果没有群聊名称信息，发送默认通知
-            sendMsg(fd, GROUP_REQUEST);
-            msgnum=true;
-            cout << "[DEBUG] 已推送群聊申请通知给用户: " << UID << "（无群聊名称信息）" << endl;
+    //疏漏:消息推送没设循环，只能发一条,已修改
+    // 好友申请ok
+    int num = redis.scard(UID +"add_f_notify");
+     if (num != 0) {
+        redisReply **arr = redis.smembers(UID +"add_f_notify");
+        if (arr != nullptr) {
+            for (int i = 0; i < num; i++) {
+                sendMsg(fd, REQUEST_NOTIFICATION);
+                msgnum=true;
+                redis.srem(UID +"add_f_notify", arr[i]->str);
+                freeReplyObject(arr[i]);
+            }
         }
-        redis.srem("add_group", UID);  // 清除通知标记
-        redis.hdel("group_request_info", UID);  // 清除群聊名称信息
     }
+    
 
-    // 检查消息通知，如果之前用户 A 给用户 B 发消息，B当时不在线，A 的 UID 就被记录进 "chat" 哈希中
-    if (redis.hexists("chat", UID)) {
-        string sender = redis.hget("chat", UID);
-        sendMsg(fd, "MESSAGE:" + sender);
-        msgnum=true;
-        redis.hdel("chat", UID);  // 清除通知标记
+    // 群聊申请ok
+     num = redis.scard(UID+"add_group");
+     if (num != 0) {
+         string groupName = redis.hget("group_request_info", UID);
+        redisReply **arr = redis.smembers(UID +"add_group");
+        if (arr != nullptr) {
+            for (int i = 0; i < num; i++) {
+                sendMsg(fd, "GROUP_REQUEST:" + groupName);
+                msgnum=true;
+                redis.srem(UID +"add_group", arr[i]->str);
+                freeReplyObject(arr[i]);
+            }
+        }
+        redis.hdel("group_request_info", UID);  
     }
+    
+
+    // //入群通知，先不搞了，被踢告知一下就行
+    // num = redis.scard("approve" + UID);
+    //  if (num != 0) {
+    //     redisReply **arr = redis.smembers("approve" + UID);
+    //     if (arr != nullptr) {
+    //         for (int i = 0; i < num; i++) {
+
+    //             sendMsg(fd, "GROUP_REQUEST:" + groupName);
+    //             msgnum=true;
+    //             redis.srem(UID +"add_group", arr[i]->str);
+    //             freeReplyObject(arr[i]);
+    //         }
+    //     }
+    //     redis.hdel("group_request_info", UID);  
+    // }
+
+
+
+
 
     //被设置为管理员
-    int num = redis.scard("appoint_admin" + UID);
+     num = redis.scard("appoint_admin" + UID);
     if (num != 0) {
         redisReply **arr = redis.smembers("appoint_admin" + UID);
         if (arr != nullptr) {
@@ -231,30 +247,26 @@ void notify(int fd, const string &UID) {
             }
         }
     }
+    //被踢出群聊
 
-    // 检查文件通知
-    int fileNum = redis.scard("file" + UID);
-    if (fileNum != 0) {
-        redisReply **fileArr = redis.smembers("file" + UID);
-        if (fileArr != nullptr) {
-            for (int i = 0; i < fileNum; i++) {
-                sendMsg(fd, "FILE:" + string(fileArr[i]->str));
+ 
+    // 检查离线文件通知,arr[i]->str 是一个 char* 指针  ok
+     num = redis.scard(UID+"file_notify");//里面是要存名字！！！
+     if (num != 0) {
+        redisReply **arr = redis.smembers(UID +"file_notify");
+        if (arr != nullptr) {
+            for (int i = 0; i < num; i++) {
+                sendMsg(fd, "FILE:" + string(arr[i]->str) );
                 msgnum=true;
-                redis.srem("file" + UID, fileArr[i]->str);
-                freeReplyObject(fileArr[i]);
+                redis.srem(UID+"file_notify",arr[i]->str); 
+                freeReplyObject(arr[i]);
             }
-        }
+        } 
     }
 
-    // 检查离线文件通知
-    if (redis.hexists("offline_file_notify", UID)) {
-        string sender = redis.hget("offline_file_notify", UID);
-        sendMsg(fd, "FILE:" + sender);
-         msgnum=true;
-        redis.hdel("offline_file_notify", UID);  // 清除离线通知
-    }
 
-    // 检查离线消息通知
+
+    // 离线消息ok
     int offlineMsgNum = redis.llen("off_msg" + UID);
     if (offlineMsgNum != 0) {
         redisReply **offlineMsgArr = redis.lrange("off_msg" + UID, "0", to_string(offlineMsgNum - 1));

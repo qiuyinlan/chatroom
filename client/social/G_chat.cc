@@ -342,6 +342,8 @@ void G_chat::joinGroup() const {
         cout << "该群不存在" << endl;
     } else if (response == "-2") {
         cout << "你已经是该群成员" << endl;
+    }else if (response == "-3"){
+        cout << "你已经向该群发送了入群请求,等待同意" << endl;
     }else{
         cout << "请求已经发出，等待同意" << endl;
     }
@@ -358,13 +360,13 @@ void G_chat::joinGroup() const {
 
 void G_chat::managedMenu() {
     cout << "[1]处理入群申请" << endl;
-    cout << "[2]处理群用户" << endl;
+    cout << "[2]踢出群用户" << endl;
     cout << "[0]返回" << endl;
 }
 
 void G_chat::ownerMenu() {
     cout << "[1]处理入群申请" << endl;
-    cout << "[2]处理群用户" << endl;
+    cout << "[2]踢出群用户" << endl;
     cout << "[3]设置管理员" << endl;
     cout << "[4]撤销管理员" << endl;
     cout << "[5]解散群聊" << endl;

@@ -186,7 +186,7 @@ void GroupChat::startChat() {
     redisReply **arr;
     int ret;
     recvMsg(fd, group_info);
-    
+cout << group_info << endl;
     Group group;
     try {
         group.json_parse(group_info);
@@ -226,18 +226,18 @@ void GroupChat::startChat() {
             return;
         }
 
-        // 处理群聊文件传输协议
-        // if (msg == SENDFILE_G) {
-        //     cout << "[DEBUG] 群聊中收到 SENDFILE_G 协议" << endl;
-        //     sendFile_Group(fd, user);
-        //     continue;
-        // }
+        //处理群聊文件传输协议
+        if (msg == SENDFILE_G) {
+            cout << "[DEBUG] 群聊中收到 SENDFILE_G 协议" << endl;
+            sendFile_Group(fd, user);
+            continue;
+        }
 
-        // if (msg == RECVFILE_G) {
-        //     cout << "[DEBUG] 群聊中收到 RECVFILE_G 协议" << endl;
-        //     recvFile_Group(fd, user);
-        //     continue;
-        // }
+        if (msg == RECVFILE_G) {
+            cout << "[DEBUG] 群聊中收到 RECVFILE_G 协议" << endl;
+            recvFile_Group(fd, user);
+            continue;
+        }
 
         // 尝试解析为JSON消息
         try {
@@ -389,6 +389,10 @@ cout << "收到客户端发送的群聊名称" << groupName << endl;
         sendMsg(fd, "-2");
         return;
     }
+    if (redis.sismember("if_add" + groupUid, user.getUID())) {
+        sendMsg(fd, "-3");
+        return;
+    }
 
     sendMsg(fd, "1");
     redis.sadd("if_add" + groupUid, user.getUID());
@@ -398,12 +402,10 @@ cout << "收到客户端发送的群聊名称" << groupName << endl;
      if (arr != nullptr) {
         for (int i = 0; i < num; i++) {
             string adminUID = arr[i]->str;//遍历每个管理
-           
-     cout << "管理员UID" << adminUID << endl;
-            redis.sadd("add_group", adminUID);
+         
             redis.hset("group_request_info", adminUID, group.getGroupName());
 
-            // 如果管理员在线，立即推送群聊申请通知
+            // 管理员在线
             if (redis.hexists("unified_receiver", adminUID)) {
                 string receiver_fd_str = redis.hget("unified_receiver", adminUID);
                 int receiver_fd = stoi(receiver_fd_str);
@@ -411,7 +413,7 @@ cout << "收到客户端发送的群聊名称" << groupName << endl;
                 cout << "[DEBUG] 已推送群聊申请通知给在线管理员: " << adminUID << "，群聊: " << group.getGroupName() << endl;
             }
             else{
-                cout << "buzaixian" << endl;
+                  redis.sadd(adminUID+"add_group", groupUid);
             }
 
             freeReplyObject(arr[i]);
@@ -498,8 +500,16 @@ void GroupChat::approve(Group &group) const {
         } else {
             redis.sadd("joined" + member.getUID(), group.getGroupUid());
             redis.sadd(group.getMembers(), member.getUID());
-            //删除缓冲区
             redis.srem("if_add" + group.getGroupUid(), member.getUID());
+            // //对方在线
+            // if (redis.hexists("unified_receiver", member.getUID())) {
+            //     string receiver_fd_str = redis.hget("unified_receiver", member.getUID());
+            //     int receiver_fd = stoi(receiver_fd_str);
+                
+                
+            // }
+            // redis.sadd("approve_notify" + member.getUID(), group.getGroupUid());
+            // sendMsg()
         }
         freeReplyObject(arr[i]);
     }

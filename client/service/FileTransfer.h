@@ -10,9 +10,6 @@ public:
     FileTransfer() ;  // 添加默认构造函数
     FileTransfer(int fd, User user);
 
-    void sendFile(std::vector<std::pair<std::string, User>> &my_friends) const;
-    void receiveFile(std::vector<std::pair<std::string, User>> &my_friends) const;
-
     // 私聊文件传输
     void sendFile_Friend(const User& targetUser, const User& myUser) const;
     void recvFile_Friend( User& myUser) const;

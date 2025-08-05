@@ -153,8 +153,9 @@ void processUnifiedMessage(const string& msg) {
     }
     //不在聊天框的文件通知
     else if (msg.find("FILE:") == 0) {
+        //发的时候，搞这个格式，后面跟好友名/群名即可
         string sender = msg.substr(5);
-        string notifyMsg = sender + "给你发了一个文件";
+        string notifyMsg = sender + "给你发了文件";
 
             cout << notifyMsg << endl;
             return;
@@ -190,7 +191,7 @@ void processUnifiedMessage(const string& msg) {
     }
 }
 
-// 真正的心跳检测（检测连接是否还活着）
+// 心跳
 void heartbeatChecker(int fd) {
     while (true) {
         this_thread::sleep_for(chrono::seconds(5));  // 秒检测一次

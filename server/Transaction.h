@@ -9,9 +9,9 @@ void sendFile_Friend(int epfd, int fd);
 
 void recvFile_Friend(int epfd, int fd);
 
-void sendFile_Group(int epfd, int fd);
+void sendFile_Group(int fd, User &user);
 
-void recvFile_Group(int epfd, int fd);
+void recvFile_Group(int fd, User &user);
 
 void synchronize(int fd, User &user);
 
@@ -34,9 +34,6 @@ void unblocked(int fd, User &user);
 
 // void synchronizeGL(int fd, User &user);
 
-void send_file(int fd, User &user);
-
-void receive_file(int fd, User &user);
 
 
 void deactivateAccount(int fd, User &user);

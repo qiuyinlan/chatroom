@@ -24,8 +24,7 @@ const string DEL_FRIEND = "9";
 const string BLOCKED_LISTS = "10";
 const string UNBLOCKED = "11";
 const string GROUP = "12";
-const string SEND_FILE = "13";
-const string RECEIVE_FILE = "14";
+
 const string REQUEST_NOTIFICATION = "15";
 const string GROUP_REQUEST = "16";
 const string SYNC = "17";
