@@ -101,12 +101,31 @@ void processUnifiedMessage(const string& msg) {
         
         return;
     }
-
+    if (msg == "NO_IN_GROUP") {
+       string notifyMsg = "系统提示：你已被移出群聊，无法发送与接收消息。";
+       cout << YELLOW << notifyMsg << RESET << endl;
+        return;
+    }
+   
 
     // 处理通知消息
     if (msg == REQUEST_NOTIFICATION) {
         string notifyMsg = "你收到一条好友添加申请";
             cout << notifyMsg << endl;
+            return;
+    }
+    else if ( msg.find("REMOVE:") == 0) {
+        string groupName = msg.substr(7);
+        string notifyMsg = "你被移除群聊[" + groupName + "]";
+    
+            cout << RED <<notifyMsg <<RESET << endl;
+            return;
+    }
+     else if ( msg.find("DELETE:") == 0) {
+        string groupName = msg.substr(7);
+        string notifyMsg = "群聊[" + groupName + "]已被解散";
+    
+            cout << RED <<notifyMsg <<RESET << endl;
             return;
     }
     else if (msg == GROUP_REQUEST) {
@@ -115,7 +134,7 @@ void processUnifiedMessage(const string& msg) {
             cout << notifyMsg << endl;
             return;
     }
-    else if (msg.find("GROUP_REQUEST:") == 0) {
+    else if (msg.find("GROUP_REQUEST:") == 0) { // 第一个字符的索引位置
         string groupName = msg.substr(14); // 去掉"GROUP_REQUEST:"前缀
         string notifyMsg = "[" + groupName + "]你收到一条群聊添加申请";
         

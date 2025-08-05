@@ -11,6 +11,8 @@ const string RECVFILE_F = "RECVFILE_F";
 const string SENDFILE_G = "SENDFILE_G";
 const string RECVFILE_G = "RECVFILE_G";
 
+const string REMOVE = "REMOVE"; // 踢出群聊
+
 const string LOGIN = "1";
 const string NOTIFY = "3";
 const string UNIFIED_RECEIVER = "25";  // 统一接收线程协议
@@ -106,7 +108,7 @@ public:
 
     [[nodiscard]] const string &getGroupName() const;
 
-    //得到群聊名字
+    //群聊名字
     void setGroupName(const string &groupName);
 
     [[nodiscard]] string getTime() const;

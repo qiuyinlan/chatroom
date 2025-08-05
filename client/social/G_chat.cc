@@ -585,6 +585,7 @@ void G_chat::remove(Group &group) const {
             continue;
         }
         sendMsg(fd, arr[who].to_json());
+
         cout << "删除成功，按任意键返回" << endl;
         getline(cin, buf);
         if (cin.eof()) {
@@ -668,14 +669,14 @@ void G_chat::revokeAdmin(Group &createdGroup) const {
         admin.json_parse(admin_info);
         arr.push_back(admin);
         if (admin.getUID() == createdGroup.getOwnerUid()) {
-            cout << i + 1 << admin.getUsername() << "群主" << endl;
+            cout << i + 1 << "." << admin.getUsername() << "(群主)" << endl;
         } else {
-            cout << i + 1 << admin.getUsername() << endl;
+            cout << i + 1 << "." << admin.getUsername() << endl;
         }
     }
     int who;
     while (true) {
-        cout << "选择你要取消的人" << endl;
+        cout << "选择你要取消的人,tip：不能取消群主你自己的管理权限哦" << endl;
         while (!(cin >> who) || who < 0 || who > arr.size()) {
             if (cin.eof()) {
                 cout << "读到文件结尾" << endl;

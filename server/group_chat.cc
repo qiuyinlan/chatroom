@@ -186,7 +186,7 @@ void GroupChat::startChat() {
     redisReply **arr;
     int ret;
     recvMsg(fd, group_info);
-cout << group_info << endl;
+    
     Group group;
     try {
         group.json_parse(group_info);
@@ -199,6 +199,9 @@ cout << group_info << endl;
     int num = redis.llen(group.getGroupUid() + "history");
     
     sendMsg(fd, to_string(num));
+
+    //加群时间
+    sendMsg(fd,redis.hget("user_join_time",group.getGroupUid()+user.getUID()));
     if (num != 0) {
         arr = redis.lrange(group.getGroupUid() + "history", "0", to_string(num - 1));
     }
@@ -239,6 +242,14 @@ cout << group_info << endl;
             continue;
         }
 
+        if (!redis.sismember(group.getMembers(), user.getUID())) {
+
+             string receiver_fd_str = redis.hget("unified_receiver", user.getUID());
+            int receiver_fd = stoi(receiver_fd_str);
+            sendMsg(receiver_fd, "NO_IN_GROUP");
+            continue;
+        }
+
         // 尝试解析为JSON消息
         try {
             message.json_parse(msg);
@@ -251,29 +262,27 @@ cout << group_info << endl;
         if (len == 0) {
             return;
         }
-
+        //先存到历史记录里面
         redis.lpush(group.getGroupUid() + "history", msg);
         message.setUidTo(group.getGroupUid());
         arr = redis.smembers(group.getMembers());
         string UIDto;
+
+        //消息实时通知
         for (int i = 0; i < len; i++) {
             UIDto = arr[i]->str;
             if (UIDto == user.getUID()) {
                 freeReplyObject(arr[i]);
                 continue;
             }
-            //不在线，就把用户和群聊名存到chat表里
+            //不在线
             if (!redis.hexists("is_online", UIDto)) {
-                redis.hset("chat", UIDto, group.getGroupName());
-                // 同时保存到离线消息队列
                 redis.lpush("off_msg" + UIDto, group.getGroupName());
                 freeReplyObject(arr[i]);
                 continue;
             }
             //不在群聊中，发送通知
             if (!redis.sismember("group_chat", UIDto)) {
-                // 保存到离线消息队列
-                redis.lpush("off_msg" + UIDto, group.getGroupName());
                 // 使用统一接收连接发送通知
                 if (redis.hexists("unified_receiver", UIDto)) {
                     string receiver_fd_str = redis.hget("unified_receiver", UIDto);
@@ -374,9 +383,9 @@ cout << "收到客户端发送的群聊名称" << groupName << endl;
     if (groupName == BACK) {
         return;
     }
-    // 通过群名查找群UID
     string groupUid = findGroupUidByName(redis, groupName);
-    if (groupUid.empty()) {
+    // 通过群名查找群UID
+    if(!redis.sismember("group_Name",groupName)){
         sendMsg(fd, "-1");  // 群不存在
         return;
     }
@@ -498,10 +507,11 @@ void GroupChat::approve(Group &group) const {
             //删除缓冲区
             redis.srem("if_add" + group.getGroupUid(), member.getUID());
         } else {
+            redis.hset("user_join_time", group.getGroupUid()+member.getUID(), member.get_time());
             redis.sadd("joined" + member.getUID(), group.getGroupUid());
             redis.sadd(group.getMembers(), member.getUID());
             redis.srem("if_add" + group.getGroupUid(), member.getUID());
-            // //对方在线
+            // //先不通知了。对方在线
             // if (redis.hexists("unified_receiver", member.getUID())) {
             //     string receiver_fd_str = redis.hget("unified_receiver", member.getUID());
             //     int receiver_fd = stoi(receiver_fd_str);
@@ -515,7 +525,7 @@ void GroupChat::approve(Group &group) const {
     }
 }
 
-void GroupChat::remove(Group &group) const {
+void GroupChat::remove(Group &group) const {//踢人
     Redis redis;
     redis.connect();
     int num = redis.scard(group.getMembers());
@@ -535,9 +545,9 @@ void GroupChat::remove(Group &group) const {
 
     recvMsg(fd, remove_info);
     if (remove_info == "0") {
-        return;
+        return; //返回
     }
-    member.json_parse(remove_info);
+    member.json_parse(remove_info);//解析了之后，信息存进member里！！！
     GroupChat groupChat(0, member);
     redis.srem(groupChat.joined, group.getGroupUid());
     redis.srem(groupChat.managed, group.getGroupUid());
@@ -545,6 +555,21 @@ void GroupChat::remove(Group &group) const {
     redis.srem(group.getAdmins(), member.getUID());
 
     redis.sadd(member.getUID() + "del", group.getGroupName());
+
+
+     // 离线
+        if (!redis.hexists("is_online", member.getUID())) {
+            // 用户离线，保存文件通知到离线消息
+            redis.sadd( "REMOVE" + member.getUID()  , group.getGroupName());
+            return;
+        }
+    //在
+        if (redis.hexists("unified_receiver", member.getUID())) {
+            string receiver_fd_str = redis.hget("unified_receiver", member.getUID());
+            int receiver_fd = stoi(receiver_fd_str);
+            sendMsg(receiver_fd, "REMOVE:" + group.getGroupName());
+        }
+
 }
 
 
@@ -614,7 +639,33 @@ void GroupChat::deleteGroup(Group &group) {
     int num = redis.scard(group.getMembers());
     redisReply **arr = redis.smembers(group.getMembers());
     string UID;
-    for (int i = 0; i < num; i++) {
+
+     //通知,bug一定要先通知再解散！！！不然群成员数量已经是0了！！！！！
+     int len = redis.scard(group.getMembers());
+     arr = redis.smembers(group.getMembers());
+     string UIDto;
+    //消息实时通知
+    for (int i = 0; i < len; i++) {
+        
+        UIDto = string(arr[i]->str);
+        if (UIDto == group.getOwnerUid()) {
+            continue;
+        }
+        //不在线
+        if (!redis.hexists("is_online", UIDto)) {
+            redis.lpush("DELETE" + UIDto, group.getGroupName());
+            continue;
+        }
+        //发送通知
+       
+        string receiver_fd_str = redis.hget("unified_receiver", UIDto);
+        int receiver_fd = stoi(receiver_fd_str);
+        sendMsg(receiver_fd, "DELETE:" + group.getGroupName());
+    
+    }
+
+
+    for (int i = 0; i < len; i++) {
         UID = arr[i]->str;
         redis.srem("joined" + UID, group.getGroupUid());
         redis.srem("created" + UID, group.getGroupUid());
@@ -624,7 +675,10 @@ void GroupChat::deleteGroup(Group &group) {
     redis.del(group.getMembers());
     redis.del(group.getAdmins());
     redis.del(group.getGroupUid() + "history");
-}
+    redis.srem("group_Name", group.getGroupName());
+
+ }
+
 
 void GroupChat::showMembers() const {
     Redis redis;

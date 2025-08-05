@@ -43,6 +43,10 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
     string historyNum;
     int recv_ret = recvMsg(fd, historyNum);
 
+    string timestamp;
+    recvMsg(fd,timestamp);
+
+
     if (recv_ret <= 0) {
         cout << "接收群聊历史消息数量失败，客户端连接断开" << endl;
         return;
@@ -74,7 +78,12 @@ void ChatSession::startGroupChat(int groupIndex, const vector<Group>& joinedGrou
         if (historyMsg.empty()) {
             continue;
         }
+        //消息不显示！！！
         message.json_parse(historyMsg);
+        if (message.getTime() < timestamp) {
+            // 如果消息时间戳小于指定时间戳，则跳过该消息
+            continue;
+        }
         if (message.getUsername() == user.getUsername()) {
             cout << "你：" << message.getContent() << endl;
             cout << "\t\t\t\t" << message.getTime() << endl;

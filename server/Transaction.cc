@@ -73,8 +73,6 @@ void start_chat(int fd, User &user) {
     //发
     sendMsg(fd, to_string(num));
 
-
-
     redisReply **arr = redis.lrange(records_index, "0", to_string(num - 1));
     //先发最新的消息，所以要倒序遍历
     for (int i = num - 1; i >= 0; i--) {
@@ -155,7 +153,6 @@ void start_chat(int fd, User &user) {
         //对方不在线
         if (!redis.hexists("is_online", UID)) {
             //历史
-            
             string me = message.getUidFrom() + message.getUidTo();
             string her = message.getUidTo() + message.getUidFrom();
             redis.lpush(me, msg);
@@ -169,7 +166,7 @@ void start_chat(int fd, User &user) {
 
 
         //在线
-        // 我屏蔽，我发消息的功能——对于我，都是正常的，所以不用额外检查
+        // 我屏蔽，我发消息的功能————对于我，都是正常的，所以不用额外检查
         bool is_chat = redis.sismember("is_chat", UID);
         if (redis.hexists("unified_receiver", UID)) {
             string receiver_fd_str = redis.hget("unified_receiver", UID);
@@ -725,41 +722,39 @@ void sendFile_Group(int fd, User &user) {
         message.setUidTo(group.getGroupUid());
         redisReply **arr = redis.smembers(group.getMembers());
         string UIDto;
-        for (int i = 0; i < len; i++) {
-            UIDto = string(arr[i]->str);
+    for (int i = 0; i < len; i++) {
+        UIDto = string(arr[i]->str);
+        
+        if (UIDto == user.getUID()) {
+            freeReplyObject(arr[i]);
+            continue;
+        }
+        //不在线
+        if (!redis.hexists("is_online", UIDto)) {
             
-            if (UIDto == user.getUID()) {
-                freeReplyObject(arr[i]);
-                continue;
-            }
-            //不在线
-            if (!redis.hexists("is_online", UIDto)) {
-                
-                redis.sadd(UIDto + "file_notify", group.getGroupName());
-                freeReplyObject(arr[i]);
-                continue;
-            }
-            //不在群聊中，发送通知
-            if (!redis.sismember("group_chat", UIDto)) {
-                // 保存到离线消息队列
-                redis.lpush("off_msg" + UIDto, group.getGroupName());
-                // 使用统一接收连接发送通知
-                if (redis.hexists("unified_receiver", UIDto)) {
-                    string receiver_fd_str = redis.hget("unified_receiver", UIDto);
-                    int receiver_fd = stoi(receiver_fd_str);
-                    sendMsg(receiver_fd, "MESSAGE:" + group.getGroupName());
-                }
-                freeReplyObject(arr[i]);
-                continue;
-            }
-            // 在群聊中，使用统一接收连接发送实时消息
+            redis.sadd(UIDto + "file_notify", group.getGroupName());
+            freeReplyObject(arr[i]);
+            continue;
+        }
+        //在线，不在群聊中，发送通知
+        if (!redis.sismember("group_chat", UIDto)) {
+            // 使用统一接收连接发送通知
             if (redis.hexists("unified_receiver", UIDto)) {
                 string receiver_fd_str = redis.hget("unified_receiver", UIDto);
                 int receiver_fd = stoi(receiver_fd_str);
-                sendMsg(receiver_fd, message.to_json());
+                sendMsg(receiver_fd, "MESSAGE:" + group.getGroupName());
             }
             freeReplyObject(arr[i]);
+            continue;
         }
+        // 在群聊中，使用统一接收连接发送实时消息
+        if (redis.hexists("unified_receiver", UIDto)) {
+            string receiver_fd_str = redis.hget("unified_receiver", UIDto);
+            int receiver_fd = stoi(receiver_fd_str);
+            sendMsg(receiver_fd, message.to_json());
+        }
+        freeReplyObject(arr[i]);
+    }
 
     cout << "[DEBUG] 群聊文件发送完成: " << fileName << endl;
     ofs.close();

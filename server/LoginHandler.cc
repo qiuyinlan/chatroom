@@ -247,8 +247,33 @@ void notify(int fd, const string &UID) {//离线通知
             }
         }
     }
-    //被踢出群聊
+    //被踢出群聊,都带引号吧。。。。
+    num = redis.scard("REMOVE" + UID);
+    if (num != 0) {
+        redisReply **arr = redis.smembers("REMOVE" + UID);
+        if (arr != nullptr) {
+            for (int i = 0; i < num; i++) {
+                sendMsg(fd, "REMOVE:" + string(arr[i]->str));
+                msgnum=true;
+                redis.srem("REMOVE" + UID , arr[i]->str);
+                freeReplyObject(arr[i]);
+            }
+        }
+    }
 
+    //被移出群聊
+    num = redis.scard("DELETE" + UID);
+    if (num != 0) {
+        redisReply **arr = redis.smembers("DELETE" + UID);
+        if (arr != nullptr) {
+            for (int i = 0; i < num; i++) {
+                sendMsg(fd, "DELETE:" + string(arr[i]->str));
+                msgnum=true;
+                redis.srem("DELETE" + UID , arr[i]->str);
+                freeReplyObject(arr[i]);
+            }
+        }
+    }
  
     // 检查离线文件通知,arr[i]->str 是一个 char* 指针  ok
      num = redis.scard(UID+"file_notify");//里面是要存名字！！！
@@ -311,8 +336,6 @@ void notify(int fd, const string &UID) {//离线通知
         }
     }
 
-
-    // 重复的文件消息提醒已删除（上面已经处理过了）
 
     // 发送结束标志
     // sendMsg(fd, "END");
